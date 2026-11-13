@@ -16,6 +16,11 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    lint {
+        // While this project sits inside another Gradle repository, lint finds that
+        // repository's version catalog and asks for it to be used here. It does not apply.
+        disable 'UseTomlInstead'
+    }
     buildTypes {
         release {
             minifyEnabled false
