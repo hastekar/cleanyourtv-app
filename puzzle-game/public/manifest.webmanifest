@@ -1,0 +1,17 @@
+{
+  "name": "Lumo Match",
+  "short_name": "Lumo Match",
+  "description": "A fair match-3 puzzle: every level is proven winnable. No ads, no purchases, no lives.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101433",
+  "theme_color": "#151a3a",
+  "categories": ["games", "puzzle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

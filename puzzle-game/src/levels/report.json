@@ -1,0 +1,782 @@
+[
+ {
+  "id": 1,
+  "moves": 13,
+  "size": "6x6",
+  "colors": 4,
+  "goals": "score",
+  "win": {
+   "novice": 75,
+   "casual": 93,
+   "strategic": 100
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 2,
+  "moves": 13,
+  "size": "6x6",
+  "colors": 4,
+  "goals": "color",
+  "win": {
+   "novice": 50,
+   "casual": 93,
+   "strategic": 98
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 3,
+  "moves": 14,
+  "size": "6x6",
+  "colors": 4,
+  "goals": "color+color",
+  "win": {
+   "novice": 60,
+   "casual": 97,
+   "strategic": 100
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 4,
+  "moves": 15,
+  "size": "7x7",
+  "colors": 4,
+  "goals": "frost",
+  "win": {
+   "novice": 23,
+   "casual": 90,
+   "strategic": 95
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 5,
+  "moves": 12,
+  "size": "7x7",
+  "colors": 4,
+  "goals": "score",
+  "win": {
+   "novice": 40,
+   "casual": 90,
+   "strategic": 98
+  },
+  "proofMoves": 2
+ },
+ {
+  "id": 6,
+  "moves": 13,
+  "size": "7x7",
+  "colors": 4,
+  "goals": "color+color",
+  "win": {
+   "novice": 38,
+   "casual": 95,
+   "strategic": 98
+  },
+  "proofMoves": 5
+ },
+ {
+  "id": 7,
+  "moves": 23,
+  "size": "7x7",
+  "colors": 5,
+  "goals": "crate",
+  "win": {
+   "novice": 40,
+   "casual": 92,
+   "strategic": 100
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 8,
+  "moves": 12,
+  "size": "7x7",
+  "colors": 5,
+  "goals": "crate",
+  "win": {
+   "novice": 45,
+   "casual": 90,
+   "strategic": 95
+  },
+  "proofMoves": 2
+ },
+ {
+  "id": 9,
+  "moves": 30,
+  "size": "7x7",
+  "colors": 5,
+  "goals": "crate+frost",
+  "win": {
+   "novice": 45,
+   "casual": 88,
+   "strategic": 95
+  },
+  "proofMoves": 7
+ },
+ {
+  "id": 10,
+  "moves": 12,
+  "size": "7x8",
+  "colors": 5,
+  "goals": "score",
+  "win": {
+   "novice": 5,
+   "casual": 60,
+   "strategic": 78
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 11,
+  "moves": 14,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "color+color",
+  "win": {
+   "novice": 60,
+   "casual": 92,
+   "strategic": 100
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 12,
+  "moves": 18,
+  "size": "8x9",
+  "colors": 5,
+  "goals": "frost",
+  "win": {
+   "novice": 5,
+   "casual": 85,
+   "strategic": 93
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 13,
+  "moves": 10,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "crate",
+  "win": {
+   "novice": 13,
+   "casual": 85,
+   "strategic": 93
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 14,
+  "moves": 24,
+  "size": "7x8",
+  "colors": 5,
+  "goals": "crate+frost",
+  "win": {
+   "novice": 35,
+   "casual": 83,
+   "strategic": 100
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 15,
+  "moves": 13,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "score",
+  "win": {
+   "novice": 63,
+   "casual": 87,
+   "strategic": 98
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 16,
+  "moves": 14,
+  "size": "8x9",
+  "colors": 5,
+  "goals": "color+color",
+  "win": {
+   "novice": 43,
+   "casual": 83,
+   "strategic": 88
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 17,
+  "moves": 12,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "frost",
+  "win": {
+   "novice": 33,
+   "casual": 82,
+   "strategic": 88
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 18,
+  "moves": 24,
+  "size": "7x8",
+  "colors": 5,
+  "goals": "crate",
+  "win": {
+   "novice": 38,
+   "casual": 87,
+   "strategic": 93
+  },
+  "proofMoves": 5
+ },
+ {
+  "id": 19,
+  "moves": 20,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "crate+frost",
+  "win": {
+   "novice": 15,
+   "casual": 82,
+   "strategic": 98
+  },
+  "proofMoves": 5
+ },
+ {
+  "id": 20,
+  "moves": 12,
+  "size": "8x9",
+  "colors": 5,
+  "goals": "score",
+  "win": {
+   "novice": 10,
+   "casual": 52,
+   "strategic": 78
+  },
+  "proofMoves": 2
+ },
+ {
+  "id": 21,
+  "moves": 17,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "color+color",
+  "win": {
+   "novice": 28,
+   "casual": 82,
+   "strategic": 98
+  },
+  "proofMoves": 5
+ },
+ {
+  "id": 22,
+  "moves": 12,
+  "size": "7x8",
+  "colors": 5,
+  "goals": "frost",
+  "win": {
+   "novice": 10,
+   "casual": 78,
+   "strategic": 100
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 23,
+  "moves": 13,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "crate",
+  "win": {
+   "novice": 10,
+   "casual": 78,
+   "strategic": 95
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 24,
+  "moves": 27,
+  "size": "8x9",
+  "colors": 5,
+  "goals": "crate+frost+color",
+  "win": {
+   "novice": 3,
+   "casual": 77,
+   "strategic": 85
+  },
+  "proofMoves": 10
+ },
+ {
+  "id": 25,
+  "moves": 12,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "score",
+  "win": {
+   "novice": 18,
+   "casual": 80,
+   "strategic": 93
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 26,
+  "moves": 16,
+  "size": "7x8",
+  "colors": 5,
+  "goals": "color+color",
+  "win": {
+   "novice": 28,
+   "casual": 82,
+   "strategic": 85
+  },
+  "proofMoves": 6
+ },
+ {
+  "id": 27,
+  "moves": 22,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "frost",
+  "win": {
+   "novice": 8,
+   "casual": 78,
+   "strategic": 88
+  },
+  "proofMoves": 5
+ },
+ {
+  "id": 28,
+  "moves": 17,
+  "size": "8x9",
+  "colors": 5,
+  "goals": "crate",
+  "win": {
+   "novice": 30,
+   "casual": 78,
+   "strategic": 78
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 29,
+  "moves": 13,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "crate+frost+color",
+  "win": {
+   "novice": 10,
+   "casual": 75,
+   "strategic": 90
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 30,
+  "moves": 13,
+  "size": "7x8",
+  "colors": 5,
+  "goals": "score",
+  "win": {
+   "novice": 18,
+   "casual": 50,
+   "strategic": 83
+  },
+  "proofMoves": 5
+ },
+ {
+  "id": 31,
+  "moves": 25,
+  "size": "8x8",
+  "colors": 5,
+  "goals": "color+color",
+  "win": {
+   "novice": 23,
+   "casual": 80,
+   "strategic": 93
+  },
+  "proofMoves": 12
+ },
+ {
+  "id": 32,
+  "moves": 29,
+  "size": "8x9",
+  "colors": 5,
+  "goals": "frost",
+  "win": {
+   "novice": 3,
+   "casual": 72,
+   "strategic": 85
+  },
+  "proofMoves": 5
+ },
+ {
+  "id": 33,
+  "moves": 41,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "crate",
+  "win": {
+   "novice": 35,
+   "casual": 72,
+   "strategic": 88
+  },
+  "proofMoves": 8
+ },
+ {
+  "id": 34,
+  "moves": 25,
+  "size": "7x8",
+  "colors": 6,
+  "goals": "crate+frost+color",
+  "win": {
+   "novice": 5,
+   "casual": 72,
+   "strategic": 88
+  },
+  "proofMoves": 10
+ },
+ {
+  "id": 35,
+  "moves": 26,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "score",
+  "win": {
+   "novice": 20,
+   "casual": 72,
+   "strategic": 88
+  },
+  "proofMoves": 10
+ },
+ {
+  "id": 36,
+  "moves": 32,
+  "size": "8x9",
+  "colors": 6,
+  "goals": "color+color",
+  "win": {
+   "novice": 23,
+   "casual": 73,
+   "strategic": 98
+  },
+  "proofMoves": 13
+ },
+ {
+  "id": 37,
+  "moves": 23,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "frost",
+  "win": {
+   "novice": 25,
+   "casual": 73,
+   "strategic": 95
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 38,
+  "moves": 25,
+  "size": "7x8",
+  "colors": 6,
+  "goals": "crate",
+  "win": {
+   "novice": 45,
+   "casual": 70,
+   "strategic": 75
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 39,
+  "moves": 30,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "crate+frost+color",
+  "win": {
+   "novice": 8,
+   "casual": 73,
+   "strategic": 95
+  },
+  "proofMoves": 14
+ },
+ {
+  "id": 40,
+  "moves": 27,
+  "size": "8x9",
+  "colors": 6,
+  "goals": "score",
+  "win": {
+   "novice": 20,
+   "casual": 55,
+   "strategic": 75
+  },
+  "proofMoves": 9
+ },
+ {
+  "id": 41,
+  "moves": 28,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "color+color",
+  "win": {
+   "novice": 8,
+   "casual": 68,
+   "strategic": 85
+  },
+  "proofMoves": 16
+ },
+ {
+  "id": 42,
+  "moves": 33,
+  "size": "7x8",
+  "colors": 6,
+  "goals": "frost",
+  "win": {
+   "novice": 33,
+   "casual": 65,
+   "strategic": 80
+  },
+  "proofMoves": 5
+ },
+ {
+  "id": 43,
+  "moves": 14,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "crate",
+  "win": {
+   "novice": 5,
+   "casual": 67,
+   "strategic": 70
+  },
+  "proofMoves": 4
+ },
+ {
+  "id": 44,
+  "moves": 29,
+  "size": "8x9",
+  "colors": 6,
+  "goals": "crate+frost+color",
+  "win": {
+   "novice": 13,
+   "casual": 63,
+   "strategic": 80
+  },
+  "proofMoves": 13
+ },
+ {
+  "id": 45,
+  "moves": 26,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "score",
+  "win": {
+   "novice": 8,
+   "casual": 67,
+   "strategic": 80
+  },
+  "proofMoves": 10
+ },
+ {
+  "id": 46,
+  "moves": 29,
+  "size": "7x8",
+  "colors": 6,
+  "goals": "color+color",
+  "win": {
+   "novice": 23,
+   "casual": 63,
+   "strategic": 73
+  },
+  "proofMoves": 12
+ },
+ {
+  "id": 47,
+  "moves": 26,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "frost",
+  "win": {
+   "novice": 3,
+   "casual": 63,
+   "strategic": 85
+  },
+  "proofMoves": 5
+ },
+ {
+  "id": 48,
+  "moves": 33,
+  "size": "8x9",
+  "colors": 6,
+  "goals": "crate",
+  "win": {
+   "novice": 13,
+   "casual": 63,
+   "strategic": 75
+  },
+  "proofMoves": 7
+ },
+ {
+  "id": 49,
+  "moves": 32,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "crate+frost+color",
+  "win": {
+   "novice": 33,
+   "casual": 65,
+   "strategic": 73
+  },
+  "proofMoves": 9
+ },
+ {
+  "id": 50,
+  "moves": 28,
+  "size": "7x8",
+  "colors": 6,
+  "goals": "score",
+  "win": {
+   "novice": 15,
+   "casual": 50,
+   "strategic": 93
+  },
+  "proofMoves": 12
+ },
+ {
+  "id": 51,
+  "moves": 27,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "color+color",
+  "win": {
+   "novice": 13,
+   "casual": 67,
+   "strategic": 90
+  },
+  "proofMoves": 14
+ },
+ {
+  "id": 52,
+  "moves": 32,
+  "size": "8x9",
+  "colors": 6,
+  "goals": "frost",
+  "win": {
+   "novice": 38,
+   "casual": 63,
+   "strategic": 78
+  },
+  "proofMoves": 3
+ },
+ {
+  "id": 53,
+  "moves": 23,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "crate",
+  "win": {
+   "novice": 20,
+   "casual": 63,
+   "strategic": 63
+  },
+  "proofMoves": 6
+ },
+ {
+  "id": 54,
+  "moves": 30,
+  "size": "7x8",
+  "colors": 6,
+  "goals": "crate+frost+color",
+  "win": {
+   "novice": 8,
+   "casual": 67,
+   "strategic": 85
+  },
+  "proofMoves": 19
+ },
+ {
+  "id": 55,
+  "moves": 27,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "score",
+  "win": {
+   "novice": 33,
+   "casual": 67,
+   "strategic": 85
+  },
+  "proofMoves": 10
+ },
+ {
+  "id": 56,
+  "moves": 31,
+  "size": "8x9",
+  "colors": 6,
+  "goals": "color+color",
+  "win": {
+   "novice": 8,
+   "casual": 63,
+   "strategic": 95
+  },
+  "proofMoves": 12
+ },
+ {
+  "id": 57,
+  "moves": 28,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "frost",
+  "win": {
+   "novice": 15,
+   "casual": 63,
+   "strategic": 70
+  },
+  "proofMoves": 6
+ },
+ {
+  "id": 58,
+  "moves": 15,
+  "size": "7x8",
+  "colors": 6,
+  "goals": "crate",
+  "win": {
+   "novice": 30,
+   "casual": 67,
+   "strategic": 70
+  },
+  "proofMoves": 5
+ },
+ {
+  "id": 59,
+  "moves": 31,
+  "size": "8x8",
+  "colors": 6,
+  "goals": "crate+frost+color",
+  "win": {
+   "novice": 18,
+   "casual": 63,
+   "strategic": 65
+  },
+  "proofMoves": 10
+ },
+ {
+  "id": 60,
+  "moves": 23,
+  "size": "8x9",
+  "colors": 6,
+  "goals": "score",
+  "win": {
+   "novice": 8,
+   "casual": 50,
+   "strategic": 78
+  },
+  "proofMoves": 6
+ }
+]
