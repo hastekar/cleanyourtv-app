@@ -1,10 +1,10 @@
-# Lumo Match (puzzle-game/): tests, level regeneration check, web build, browser end-to-end
+# Lumo Match (puzzle-game/) and Magnificent Match (magnificent-match/): tests, level regeneration check, web build, browser end-to-end
 # test and the Android packages. Runs only when the game changes. Nothing is signed here.
 name: puzzle-game
 
 on:
   push:
-    paths: ["puzzle-game/**", ".github/workflows/puzzle-game.yml"]
+    paths: ["puzzle-game/**", "magnificent-match/**", ".github/workflows/puzzle-game.yml"]
   workflow_dispatch:
 
 permissions:
@@ -14,14 +14,17 @@ concurrency:
   group: puzzle-game-${{ github.ref }}
   cancel-in-progress: true
 
-defaults:
-  run:
-    working-directory: puzzle-game
-
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        game: [puzzle-game, magnificent-match]
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ${{ matrix.game }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -34,7 +37,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Unit tests (engine, all 60 level proofs, save file, run verifier)
+      - name: Unit tests (engine, all 60 level proofs, save file)
         run: npm test
 
       - name: Shipped levels are exactly what the generator produces
@@ -56,14 +59,14 @@ jobs:
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: lumo-match-android
+          name: ${{ matrix.game }}-android
           path: |
-            puzzle-game/android/app/build/outputs/apk/debug/*.apk
-            puzzle-game/android/app/build/outputs/bundle/release/*.aab
+            ${{ matrix.game }}/android/app/build/outputs/apk/debug/*.apk
+            ${{ matrix.game }}/android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: lumo-match-web
-          path: puzzle-game/dist
+          name: ${{ matrix.game }}-web
+          path: ${{ matrix.game }}/dist
           if-no-files-found: error

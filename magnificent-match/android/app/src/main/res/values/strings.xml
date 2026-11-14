@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Magnificent Match</string>
+    <string name="title_activity_main">Magnificent Match</string>
+    <string name="package_name">app.magnificentmatch.game</string>
+    <string name="custom_url_scheme">app.magnificentmatch.game</string>
+</resources>
