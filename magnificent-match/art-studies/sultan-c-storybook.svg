@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -44 400 564">
+<defs>
+<filter id="wob" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="9"/></filter>
+<filter id="wob2" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>
+<filter id="soft"><feGaussianBlur stdDeviation="7"/></filter><filter id="soft3"><feGaussianBlur stdDeviation="3"/></filter>
+<filter id="paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="4" seed="2" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .15  0 0 0 -1.1 .62"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+<filter id="blot" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="40"/><feGaussianBlur stdDeviation="2"/></filter>
+<clipPath id="all"><rect width="400" height="520"/></clipPath>
+</defs>
+<rect y="-44" width="400" height="564" fill="#f6ead2"/>
+<ellipse cx="200" cy="250" rx="165" ry="215" fill="#f3c98b" opacity=".75" filter="url(#blot)"/>
+<ellipse cx="230" cy="200" rx="110" ry="130" fill="#f7dba6" opacity=".7" filter="url(#blot)"/>
+<ellipse cx="200" cy="490" rx="130" ry="16" fill="#6b4a3a" opacity=".35" filter="url(#soft)"/>
+<g filter="url(#wob)">
+  <!-- slippers -->
+  <path d="M124 480c-28-4-50 4-52 18 22 8 58 6 80-2ZM276 480c28-4 50 4 52 18-22 8-58 6-80-2Z" fill="#d9a441"/>
+  <!-- kaftan -->
+  <path d="M126 296C104 356 90 428 86 486H314C310 428 296 356 274 296 250 276 150 276 126 296Z" fill="#b8433f"/>
+  <path d="M250 290c30 56 46 128 50 196h14C310 428 296 356 274 296Z" fill="#7e2a2c" opacity=".75"/>
+  <path d="M112 340c-8 46-14 94-16 140" stroke="#d9736a" stroke-width="18" stroke-linecap="round" opacity=".7" fill="none"/>
+  <path d="M150 400c8 30 6 56 2 84M246 404c-6 28-4 54 0 80" stroke="#8a2f31" stroke-width="6" stroke-linecap="round" opacity=".6" fill="none"/>
+  <path d="M86 462h228v26H86Z" fill="#d9a441"/><path d="M184 290h32l8 196h-48Z" fill="#d9a441"/>
+  <g fill="#3d8a86"><circle cx="200" cy="316" r="6"/><circle cx="200" cy="340" r="6"/><circle cx="200" cy="442" r="6"/></g>
+  <!-- sash -->
+  <path d="M100 402c60 20 140 20 200 0l4 26c-64 22-144 22-208 0Z" fill="#3d8a86"/>
+  <!-- sleeves -->
+  <path d="M134 294C86 314 72 376 106 412c26 20 68 10 98-14l-4-38c-26 12-46 4-50-24Z" fill="#c24e48"/>
+  <path d="M266 294c48 20 62 82 28 118-26 20-68 10-98-14l4-38c26 12 46 4 50-24Z" fill="#a83a39"/>
+  <path d="M102 340c-6 24 0 46 14 62" stroke="#e08a7e" stroke-width="12" stroke-linecap="round" opacity=".7" fill="none"/>
+  <path d="M152 366c18 12 36 14 50 6l4 30c-20 12-42 12-60 2ZM248 366c-18 12-36 14-50 6l-4 30c20 12 42 12 60 2Z" fill="#e3b85a"/>
+  <ellipse cx="186" cy="390" rx="24" ry="19" fill="#f2c39a"/><ellipse cx="214" cy="386" rx="24" ry="19" fill="#eab58a"/>
+  <!-- collar -->
+  <path d="M116 304c8-30 46-44 84-44s76 14 84 44c-6 26-34 38-56 24-10 12-46 12-56 0-22 14-50 2-56-24Z" fill="#fbf4e4"/>
+  <path d="M230 326c20 10 44 2 52-18" stroke="#d8c8a8" stroke-width="10" stroke-linecap="round" opacity=".8" fill="none"/>
+  <g fill="#5a4636"><ellipse cx="142" cy="306" rx="3" ry="5"/><ellipse cx="168" cy="318" rx="3" ry="5"/><ellipse cx="232" cy="318" rx="3" ry="5"/><ellipse cx="258" cy="306" rx="3" ry="5"/></g>
+  <!-- head -->
+  <ellipse cx="122" cy="214" rx="14" ry="18" fill="#eab58a"/><ellipse cx="278" cy="214" rx="14" ry="18" fill="#e0a67a"/>
+  <ellipse cx="200" cy="208" rx="80" ry="78" fill="#f2c39a"/>
+  <path d="M236 140c30 20 46 56 42 96-10 30-30 44-46 48 20-40 22-96 4-144Z" fill="#dc9f74" opacity=".7"/>
+  <!-- beard -->
+  <path d="M120 214c-4 66 28 112 80 112s84-46 80-112c-12 26-30 34-48 30-12-12-52-12-64 0-18 4-36-4-48-30Z" fill="#5e3a22"/>
+  <path d="M232 244c18 4 36-4 48-30 4 66-28 112-80 112 30-14 42-48 32-82Z" fill="#40240f" opacity=".7"/>
+  <path d="M140 262c10 28 30 44 54 50" stroke="#8a5e3c" stroke-width="9" stroke-linecap="round" opacity=".8" fill="none"/>
+  <path d="M200 236c-16-12-46-8-58 12 20 6 42 0 58-8 16 8 38 14 58 8-12-20-42-24-58-12Z" fill="#40240f"/>
+  <path d="M180 254q20 16 40 0Z" fill="#9c3a3a"/>
+  <g transform="translate(0 -40)">  <!-- turban -->
+  <path d="M200 14c26 0 40 26 40 56h-80c0-30 14-56 40-56Z" fill="#b8433f"/>
+  <path d="M88 176C66 96 126 44 200 44s134 52 112 132C282 204 118 204 88 176Z" fill="#fbf4e4"/>
+  <path d="M262 60c44 24 64 68 50 116-14 14-50 20-90 22 44-30 62-84 40-138Z" fill="#d9cdb8" opacity=".85"/>
+  <path d="M96 128c50-44 150-52 216-16M90 158c60-40 160-44 224-10M112 98c50-36 130-40 188-12" stroke="#cdbf9f" stroke-width="7" stroke-linecap="round" opacity=".85" fill="none"/>
+  <path d="M200 96c-22-44-10-82 22-98 2 36 14 56-8 100Z" fill="#3d8a86"/><path d="M206 86c-8-30-4-56 10-74" stroke="#7fc4bc" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M200 82l30 36-30 44-30-44Z" fill="#d9a441"/><path d="M200 96l18 22-18 28-18-28Z" fill="#3d8a86"/>
+</g>
+</g>
+<g filter="url(#wob2)">
+  <ellipse cx="150" cy="228" rx="18" ry="12" fill="#e8776a" opacity=".55"/><ellipse cx="250" cy="228" rx="18" ry="12" fill="#e8776a" opacity=".55"/>
+  <path d="M192 204c-4 14-2 24 10 24s12-12 8-24Z" fill="#e3a87c"/>
+  <ellipse cx="168" cy="194" rx="7" ry="9" fill="#2b1a10"/><ellipse cx="232" cy="194" rx="7" ry="9" fill="#2b1a10"/><circle cx="171" cy="190" r="2.4" fill="#fff"/><circle cx="235" cy="190" r="2.4" fill="#fff"/>
+  <path d="M146 170c12-10 30-10 42-2M254 170c-12-10-30-10-42-2" stroke="#40240f" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <g transform="translate(0 -40)"><path d="M130 96c14-22 36-34 60-38" stroke="#fff" stroke-width="12" stroke-linecap="round" opacity=".9" fill="none"/>
+  <path d="M194 110l6-8" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".8"/></g>
+</g>
+<rect y="-44" width="400" height="564" fill="#000" filter="url(#paper)" opacity=".55"/>
+</svg>
