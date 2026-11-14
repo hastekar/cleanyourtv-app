@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520">
+<defs>
+<pattern id="cinte" width="46" height="46" patternUnits="userSpaceOnUse"><g fill="#f2c94c"><circle cx="12" cy="10" r="4"/><circle cx="22" cy="10" r="4"/><circle cx="17" cy="19" r="4"/></g><g fill="#9c1c1c"><circle cx="12" cy="10" r="1.6"/><circle cx="22" cy="10" r="1.6"/><circle cx="17" cy="19" r="1.6"/></g>
+<path d="M28 34q6-6 12 0M28 40q6-6 12 0" fill="none" stroke="#f2c94c" stroke-width="2.4" stroke-linecap="round"/></pattern>
+<pattern id="flowers" width="56" height="56" patternUnits="userSpaceOnUse"><g fill="none" stroke="#e8c15a" stroke-width="1.4"><path d="M28 28c-10-10-18-6-18 0s8 10 18 0c10 10 18 6 18 0s-8-10-18 0Z"/><path d="M28 28c-10-10-6-18 0-18s10 8 0 18c-10 10-6 18 0 18s10-8 0-18Z"/></g><circle cx="28" cy="28" r="2.6" fill="#e8c15a"/><circle cx="0" cy="0" r="2" fill="#e8c15a"/><circle cx="56" cy="0" r="2" fill="#e8c15a"/><circle cx="0" cy="56" r="2" fill="#e8c15a"/><circle cx="56" cy="56" r="2" fill="#e8c15a"/></pattern>
+<pattern id="carpet" width="30" height="30" patternUnits="userSpaceOnUse"><rect width="30" height="30" fill="#1f6f6b"/><path d="M15 3l12 12-12 12L3 15Z" fill="none" stroke="#e8c15a" stroke-width="1.5"/><circle cx="15" cy="15" r="3" fill="#b3261e"/></pattern>
+</defs>
+<!-- illuminated frame -->
+<rect x="14" y="14" width="372" height="492" rx="6" fill="#e8c15a"/><rect x="22" y="22" width="356" height="476" fill="#7a1a1a"/><rect x="30" y="30" width="340" height="460" fill="#e8c15a"/>
+<path d="M36 496V150C36 70 110 36 200 36s164 34 164 114v346Z" fill="#1d3f8c"/><path d="M36 496V150C36 70 110 36 200 36s164 34 164 114v346Z" fill="url(#flowers)" opacity=".8"/>
+<path d="M36 150C36 70 110 36 200 36s164 34 164 114" fill="none" stroke="#7a1a1a" stroke-width="3"/>
+<g fill="#7a1a1a"><path d="M36 36h70c-40 14-62 44-70 80Z"/><path d="M364 36h-70c40 14 62 44 70 80Z"/></g>
+<g fill="none" stroke="#e8c15a" stroke-width="1.6"><path d="M44 44c14 2 26 10 30 24M44 60c10 2 16 8 18 16"/><path d="M356 44c-14 2-26 10-30 24M356 60c-10 2-16 8-18 16"/></g>
+<!-- carpet & cushion -->
+<path d="M36 420h328v76H36Z" fill="url(#carpet)"/><path d="M36 420h328" stroke="#e8c15a" stroke-width="4"/>
+<g stroke="#3a2412" stroke-width="1.6"><path d="M70 440c40-26 220-26 260 0 14 18 4 40-20 44H90c-24-4-34-26-20-44Z" fill="#5b2a86"/><path d="M92 452c60-16 156-16 216 0" fill="none" stroke="#e8c15a" stroke-width="2.4"/>
+<circle cx="74" cy="462" r="7" fill="#e8c15a"/><circle cx="326" cy="462" r="7" fill="#e8c15a"/></g>
+<g stroke="#3a2412" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+<!-- crossed legs / lower kaftan -->
+<path d="M84 450c-6-40 30-66 116-66s122 26 116 66c-30 18-202 18-232 0Z" fill="#b3261e"/><path d="M84 450c-6-40 30-66 116-66s122 26 116 66c-30 18-202 18-232 0Z" fill="url(#cinte)" stroke="none"/>
+<path d="M200 386c-30 20-70 44-110 60M200 386c30 20 70 44 110 60" fill="none"/>
+<!-- inner robe -->
+<path d="M150 300c-10 40-14 70-12 96l62 34 62-34c2-26-2-56-12-96Z" fill="#1f6f6b"/>
+<path d="M186 300h28l4 122-18 10-18-10Z" fill="#e8c15a"/><g fill="#b3261e"><circle cx="200" cy="322" r="3.6"/><circle cx="200" cy="344" r="3.6"/><circle cx="200" cy="366" r="3.6"/><circle cx="200" cy="388" r="3.6"/></g>
+<!-- outer kaftan with hanging sleeves -->
+<path d="M132 296c-34 14-58 60-62 132l44 14c8-44 24-74 44-92Z" fill="#b3261e"/><path d="M132 296c-34 14-58 60-62 132l44 14c8-44 24-74 44-92Z" fill="url(#cinte)" stroke="none"/>
+<path d="M268 296c34 14 58 60 62 132l-44 14c-8-44-24-74-44-92Z" fill="#b3261e"/><path d="M268 296c34 14 58 60 62 132l-44 14c-8-44-24-74-44-92Z" fill="url(#cinte)" stroke="none"/>
+<path d="M132 296c-34 14-58 60-62 132l44 14c8-44 24-74 44-92ZM268 296c34 14 58 60 62 132l-44 14c-8-44-24-74-44-92Z" fill="none"/>
+<path d="M70 428l44 14-4 16-44-12ZM330 428l-44 14 4 16 44-12Z" fill="#f4ead2"/>
+<!-- fur lapels -->
+<path d="M150 290c-14 20-18 60-10 100l22 4c-4-36 0-70 12-100ZM250 290c14 20 18 60 10 100l-22 4c4-36 0-70-12-100Z" fill="#f4ead2"/>
+<g stroke-width="1"><path d="M148 320l8 3M146 344l9 2M148 368l8 1M252 320l-8 3M254 344l-9 2M252 368l-8 1"/></g>
+<!-- arms: one holds a tulip, one rests -->
+<path d="M150 318c-30 14-40 44-22 70l44-8c-10-14-8-28 6-40Z" fill="#1f6f6b"/><path d="M128 388l44-8 4 14-44 10Z" fill="#e8c15a"/>
+<path d="M176 392c10-4 22-2 26 6s-4 14-16 14-14-12-10-20Z" fill="#f1cda6"/>
+<path d="M250 318c26 4 44 22 42 46l-52 4Z" fill="#1f6f6b"/><path d="M240 368l52-4 2 14-52 6Z" fill="#e8c15a"/>
+<path d="M240 370c-12-6-22-22-20-40 8-2 16 4 18 12l8 22Z" fill="#f1cda6"/>
+<path d="M222 334c-2-30 2-58 10-84" fill="none" stroke="#2f7d32" stroke-width="3"/>
+<path d="M226 300c10-2 18-10 20-20-10 0-18 8-20 20ZM224 286c-10-4-16-12-16-22 10 2 16 10 16 22Z" fill="#2f7d32"/>
+<path d="M232 250c-12-8-14-26-8-40 4 6 8 10 12 12 0-8 2-14 6-20 4 6 6 12 6 20 4-2 8-6 12-12 6 14 4 32-8 40-6 4-14 4-20 0Z" fill="#d93025"/>
+<!-- neck, face (three-quarter) -->
+<path d="M180 262h40v36l-20 10-20-10Z" fill="#f1cda6"/>
+<path d="M150 190c0-40 22-60 52-60s50 22 50 60c0 44-22 76-50 76s-52-32-52-76Z" fill="#f1cda6"/>
+<path d="M152 214c4 34 22 56 50 56s44-22 48-54c-6 12-16 18-26 16-8-6-34-6-42 0-12 2-24-4-30-18Z" fill="#2b1a10"/>
+<path d="M176 226c8-6 18-8 26-4 8-4 18-2 26 4-8 4-18 4-26 0-8 4-18 4-26 0Z" fill="#2b1a10"/>
+<path d="M190 240q12 6 24 0" fill="#b3261e" stroke-width="1.2"/>
+<path d="M204 176c4 14 8 26 6 34-4 4-10 4-14 2" fill="none" stroke-width="1.6"/>
+<path d="M164 184c8-8 20-8 28-2-8 6-20 8-28 2ZM214 182c8-6 20-6 28 2-8 6-20 4-28-2Z" fill="#fff" stroke-width="1.4"/><circle cx="180" cy="183" r="4.4" fill="#2b1a10" stroke="none"/><circle cx="230" cy="183" r="4.4" fill="#2b1a10" stroke="none"/>
+<path d="M160 170c10-8 24-8 34-2M212 168c10-6 24-6 34 2" fill="none" stroke-width="2.6"/>
+<path d="M150 196c-8-2-12 6-10 14s8 12 14 8" fill="#f1cda6"/>
+<!-- great turban -->
+<path d="M200 40c16 0 26 16 26 40h-52c0-24 10-40 26-40Z" fill="#b3261e"/><path d="M190 52v26M200 46v32M210 52v26" fill="none" stroke="#e8c15a" stroke-width="1.6"/>
+<path d="M112 150c-16-46 26-86 88-86s104 40 88 86c-8 20-36 30-88 30s-80-10-88-30Z" fill="#fbf7ea"/>
+<g fill="none" stroke="#8a7a5a" stroke-width="1.3"><path d="M118 148c30-30 134-30 164 0M114 132c36-34 136-34 172 0M120 112c34-28 126-28 160 0M134 94c30-20 102-20 132 0M152 78c24-12 72-12 96 0"/><path d="M200 66c-20 30-30 70-28 112M200 66c20 30 30 70 28 112M200 66v114"/></g>
+<path d="M188 104h24l8 14-20 30-20-30Z" fill="#e8c15a"/><path d="M200 112l8 8-8 14-8-14Z" fill="#1f6f6b"/>
+<path d="M200 104c-10-30-6-58 10-78 6 26 8 50-2 78Z" fill="#2b1a10"/><path d="M204 96c-2-24 0-44 6-62" fill="none" stroke="#e8c15a" stroke-width="1.4"/>
+<circle cx="210" cy="24" r="5" fill="#e8c15a"/>
+</g>
+</svg>
