@@ -232,7 +232,7 @@ const renderer=new THREE.WebGLRenderer({canvas:$('#gl'),antialias:true,alpha:tru
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
 const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(32,1,.1,400);
 scene.add(new THREE.HemisphereLight(0xfff3d6,0x0b2230,.95));
-const sun=new THREE.DirectionalLight(0xffe2a8,.9); sun.position.set(-6,12,8); scene.add(sun);
+const sun=new THREE.DirectionalLight(0xffe2a8,.9); sun.position.set(-6,12,8); scene.add(sun); const rim=new THREE.DirectionalLight(0x8fd8ff,.35); rim.position.set(6,5,-8); scene.add(rim);
 
 const mapCv=document.createElement('canvas'); mapCv.width=GW; mapCv.height=GH;
 const mapCtx=mapCv.getContext('2d'), mapImg=mapCtx.createImageData(GW,GH);
@@ -263,78 +263,136 @@ function paintMap(){
   mapCtx.putImageData(mapImg,0,0); mapTex.needsUpdate=true;
 }
 
-/* ───────── modeller ───────── */
-const GEO={cyl:new THREE.CylinderGeometry(1,1,1,10),box:new THREE.BoxGeometry(1,1,1),sph:new THREE.SphereGeometry(1,10,8),
-  cone:new THREE.ConeGeometry(1,1,10),keep:new THREE.CylinderGeometry(.46,.56,.8,10),dome:new THREE.SphereGeometry(1,16,10,0,Math.PI*2,0,Math.PI/2),
-  moon:new THREE.TorusGeometry(.12,.035,6,12,4.4),ring:new THREE.RingGeometry(.8,1,24)};
-const MATS={}; const mat=hex=>MATS[hex]||(MATS[hex]=new THREE.MeshPhongMaterial({color:hex,flatShading:true,shininess:8}));
-const C={stone:0xcfc3a6,stone2:0xa89b7e,dark:0x1a2a33,skin:0xe8b58a,white:0xf6ecd4,red:0xc8322c,gold:0xf2b632,wood:0x7a4a24,horse:0x8a5632,steel:0xb9c4c9,bronze:0x8c6a2f,neutral:0x7d8a80};
-function part(g,geo,m,sx,sy,sz,x,y,z,rx,ry,rz){const o=new THREE.Mesh(GEO[geo],typeof m==='number'?mat(m):m);o.scale.set(sx,sy,sz);o.position.set(x||0,y||0,z||0);if(rx||ry||rz)o.rotation.set(rx||0,ry||0,rz||0);g.add(o);return o;}
-const clanMat=c=>new THREE.MeshPhongMaterial({color:c,flatShading:true,shininess:12});
+/* ───────── modeller ─────────
+   Her model tek seferde üretilip TEK geometriye birleştirilir (köşe renkleri + klan rengi grubu).
+   Böylece ayrıntı artarken model başına çizim çağrısı 2'ye iner. */
+const C={stone:0xd8ccae,stone2:0xb3a584,mortar:0x9c8f72,dark:0x1c262c,shade:0x0a1a22,skin:0xe8b58a,hair:0x2a1a10,white:0xf6ecd4,red:0xc8322c,
+  gold:0xf2b632,wood:0x7a4a24,wood2:0x5a3418,horse:0x8f5a33,steel:0xc3ced3,bronze:0xa07f3c,copper:0xb8692e,navy:0x23323d,neutral:0x7d8a80};
+const cyl=(a,b,h,s)=>new THREE.CylinderGeometry(a,b,h,s||10), box=(w,h,d)=>new THREE.BoxGeometry(w,h,d), sph=(r,w,h)=>new THREE.SphereGeometry(r,w||12,h||9),
+  cone=(r,h,s)=>new THREE.ConeGeometry(r,h,s||10), tor=(r,t,arc)=>new THREE.TorusGeometry(r,t,6,18,arc||Math.PI*2),
+  lathe=(pts,s)=>new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),s||14);
+function Bld(){ this.pos=[[],[]]; this.nor=[[],[]]; this.col=[[],[]]; this.st=[new THREE.Matrix4()]; }
+Bld.prototype={
+  push(x,y,z,rx,ry,rz,s){ const m=new THREE.Matrix4().compose(new THREE.Vector3(x||0,y||0,z||0),new THREE.Quaternion().setFromEuler(new THREE.Euler(rx||0,ry||0,rz||0)),new THREE.Vector3(s||1,s||1,s||1));
+    this.st.push(this.st[this.st.length-1].clone().multiply(m)); return this; },
+  pop(){ this.st.pop(); return this; },
+  // col: sayı = sabit renk; 'c' = klan rengi; ['c',0.8] = klan renginin koyu tonu
+  add(geo,col,x,y,z,rx,ry,rz,sx,sy,sz){
+    const g=geo.index?geo.toNonIndexed():geo, m=new THREE.Matrix4().compose(new THREE.Vector3(x||0,y||0,z||0),new THREE.Quaternion().setFromEuler(new THREE.Euler(rx||0,ry||0,rz||0)),new THREE.Vector3(sx||1,sy||sx||1,sz||sx||1));
+    g.applyMatrix4(this.st[this.st.length-1].clone().multiply(m));
+    const k=typeof col==='number'?0:1, c=k?new THREE.Color().setScalar(Array.isArray(col)?col[1]:1):new THREE.Color(col), P=g.attributes.position.array, N=g.attributes.normal.array;
+    for(let i=0;i<P.length;i++){this.pos[k].push(P[i]);this.nor[k].push(N[i]);}
+    for(let i=0;i<P.length;i+=3)this.col[k].push(c.r,c.g,c.b);
+    geo.dispose(); return this; },
+  build(){ const g=new THREE.BufferGeometry(), n0=this.pos[0].length/3, n1=this.pos[1].length/3;
+    g.setAttribute('position',new THREE.Float32BufferAttribute(this.pos[0].concat(this.pos[1]),3));
+    g.setAttribute('normal',new THREE.Float32BufferAttribute(this.nor[0].concat(this.nor[1]),3));
+    g.setAttribute('color',new THREE.Float32BufferAttribute(this.col[0].concat(this.col[1]),3));
+    g.addGroup(0,n0,0); g.addGroup(n0,n1,1); g.computeBoundingSphere(); return g; }
+};
+const VC=new THREE.MeshPhongMaterial({vertexColors:true,shininess:22,specular:0x2a2a2a});
+const newClanMat=c=>new THREE.MeshPhongMaterial({vertexColors:true,color:c,shininess:14,specular:0x1a1a1a});
+const CM={}; const clanMatOf=id=>CM[id]||(CM[id]=newClanMat(clanColor(id)));
 
-function mKale(){ // il kalesi: sahibi değişince çatı ve sancak boyanır
-  const g=new THREE.Group(), cm=clanMat(C.neutral);
-  part(g,'keep',C.stone,1,1,1,0,.4,0);
-  for(let i=0;i<8;i++){const a=i/8*Math.PI*2;part(g,'box',C.stone2,.16,.16,.12,Math.cos(a)*.44,.86,Math.sin(a)*.44,0,-a+Math.PI/2,0);}
-  part(g,'box',C.dark,.16,.3,.06,0,.15,.55); part(g,'box',C.dark,.07,.14,.06,.2,.55,.47); part(g,'box',C.dark,.07,.14,.06,-.2,.55,.47);
-  part(g,'cone',cm,.36,.5,.36,0,1.05,0);
-  part(g,'cyl',C.wood,.02,.7,.02,0,1.6,0);
-  const flag=part(g,'box',cm,.34,.2,.02,.18,1.82,0); flag.visible=false;
-  g.userData={cm,flag}; return g;
+/* asker gövdesi: piyade, topçu ve süvari binicisi bunu paylaşır */
+function fig(b,o){
+  o=o||{}; const hi=o.hi, s=hi?12:7;
+  if(!o.mounted){
+    b.add(cyl(.3,.3,.01,12),C.shade,0,.006,0);
+    for(const x of [-.09,.09]){ b.add(box(.11,.1,.2),C.wood2,x,.05,.03); b.add(cyl(.095,.07,.28,hi?8:6),C.navy,x,.24,0); }
+  }
+  b.add(lathe([[.21,.33],[.2,.37],[.16,.52],[.19,.7],[.2,.77],[.1,.84],[.001,.84]],s),'c');
+  b.add(cyl(.168,.168,.05,s),C.gold,0,.52,0);
+  for(const k of [-1,1]){ b.add(cyl(.052,.045,.3,6),['c',.8],k*.23,.63,0,0,0,k*.25); b.add(sph(.05,6,5),C.skin,k*.275,.47,.02); }
+  b.add(sph(.125,s,hi?10:6),C.skin,0,.95,0);
+  if(hi){ for(const x of [-.045,.045]) b.add(sph(.018,5,4),C.hair,x,.975,.112); b.add(box(.12,.028,.03),C.hair,0,.905,.112); b.add(box(.04,.03,.03),C.skin,0,.94,.125); }
+  if(o.helmet){ b.add(new THREE.SphereGeometry(.14,s,6,0,Math.PI*2,0,Math.PI/2),C.steel,0,.97,0); b.add(cone(.03,.16,6),C.gold,0,1.17,0);
+    b.add(cyl(.145,.15,.035,s),C.gold,0,.985,0); b.add(cyl(.14,.17,.14,s,1,true),C.mortar,0,.9,-.03); }
+  else { b.add(cyl(.12,.125,.2,s),C.white,0,1.12,-.01); b.add(box(.2,.3,.03),C.white,0,1.07,-.15,.22); if(hi){ b.add(box(.06,.11,.02),C.gold,0,1.1,.118); b.add(cyl(.127,.127,.035,s),C.red,0,1.035,-.01); } }
+  if(!o.noShield){ b.add(cyl(.2,.2,.035,hi?16:9),['c',.9],-.3,.62,.05,0,0,Math.PI/2); if(hi)b.add(tor(.195,.018),C.gold,-.31,.62,.05,0,Math.PI/2,0); b.add(sph(.05,6,5),C.gold,-.325,.62,.05); }
+  if(!o.noSpear){ b.add(cyl(.016,.016,1.35,5),C.wood,.29,.7,.06); b.add(cone(.045,.16,6),C.steel,.29,1.45,.06); if(hi)b.add(box(.02,.1,.2),'c',.29,1.28,-.06); }
+  if(hi&&!o.mounted) b.add(box(.03,.3,.05),C.dark,-.17,.4,-.1,.5);
 }
-function mPiyade(col,low){ // yaya asker: börk, kalkan, mızrak
-  const g=new THREE.Group(), cm=typeof col==='object'&&col.isMaterial?col:clanMat(col);
-  if(low) part(g,'box',C.dark,.26,.34,.14,0,.17,0);
-  else { g.userData.legs=[part(g,'box',C.dark,.12,.36,.13,-.09,.18,0),part(g,'box',C.dark,.12,.36,.13,.09,.18,0)]; }
-  part(g,'cyl',cm,.2,.46,.2,0,.57,0);
-  if(!low) part(g,'cyl',C.gold,.21,.06,.21,0,.42,0);
-  part(g,'sph',C.skin,.15,.15,.15,0,.93,0);
-  part(g,'cyl',C.white,.13,.24,.13,0,1.14,0);
-  if(!low){ part(g,'cyl',C.red,.135,.05,.135,0,1.04,0); part(g,'box',C.white,.2,.26,.04,0,1.1,-.13,.25); }
-  part(g,'cyl',cm,.2,.04,.2,-.27,.6,.04,0,0,Math.PI/2);
-  if(!low){ part(g,'sph',C.gold,.05,.05,.05,-.3,.6,.04); part(g,'cyl',C.wood,.02,1.3,.02,.27,.66,.05); part(g,'cone',C.steel,.05,.16,.05,.27,1.38,.05); }
-  g.userData.cm=cm; return g;
-}
-function mSipahi(col){ // atlı süvari: mızrak ucunda klan flaması
-  const g=new THREE.Group(), cm=clanMat(col), h=new THREE.Group(); g.add(h);
-  part(h,'box',C.horse,.3,.34,.82,0,.64,0);
-  part(h,'box',C.horse,.18,.44,.2,0,.92,.42,.55); part(h,'box',C.horse,.16,.18,.34,0,1.1,.62,.2);
-  part(h,'box',C.dark,.05,.3,.3,0,1,.3,.55);
-  g.userData.legs=[[-.1,.3],[.1,.3],[-.1,-.3],[.1,-.3]].map(([x,z])=>part(h,'box',C.horse,.09,.5,.09,x,.25,z));
-  part(h,'cyl',C.dark,.04,.4,.04,0,.58,-.5,.6);
-  part(h,'box',cm,.34,.08,.44,0,.83,-.02);
-  part(h,'cyl',cm,.17,.4,.17,0,1.08,-.02); part(h,'sph',C.skin,.13,.13,.13,0,1.38,-.02);
-  part(h,'cone',C.steel,.14,.22,.14,0,1.54,-.02); part(h,'cyl',cm,.17,.035,.17,-.22,1.08,.04,0,0,Math.PI/2);
-  part(h,'cyl',C.wood,.02,1.7,.02,.22,1.25,.3,1.15); part(h,'box',cm,.02,.16,.3,.22,1.5,.86,1.15);
-  g.userData.body=h; g.userData.cm=cm; return g;
-}
-function mTop(col){ // kuşatma topu ve topçusu
-  const g=new THREE.Group(), cm=clanMat(col), t=new THREE.Group(); g.add(t);
-  for(const x of [-.32,.32]){ part(t,'cyl',C.wood,.3,.08,.3,x,.3,0,0,0,Math.PI/2); part(t,'cyl',C.bronze,.08,.1,.08,x,.3,0,0,0,Math.PI/2); }
-  part(t,'box',C.wood,.4,.12,1,0,.3,-.2); part(t,'box',cm,.42,.05,.4,0,.38,-.2);
-  const b=new THREE.Group(); b.position.set(0,.5,.05); b.rotation.x=-.35; t.add(b);
-  part(b,'cyl',C.bronze,.14,1,.14,0,0,.25,Math.PI/2); part(b,'cyl',C.gold,.17,.08,.17,0,0,.74,Math.PI/2); part(b,'cyl',C.gold,.16,.06,.16,0,0,-.2,Math.PI/2);
-  part(b,'sph',C.bronze,.15,.15,.15,0,0,-.26);
-  for(const [x,y,z] of [[.5,.09,-.5],[.66,.09,-.42],[.58,.22,-.46]]) part(g,'sph',C.dark,.09,.09,.09,x,y,z);
-  const p=mPiyade(cm,true); p.position.set(-.6,0,-.45); p.scale.setScalar(.92); g.add(p);
-  g.userData.barrel=b; g.userData.cm=cm; return g;
-}
-function mMehter(col){ // kös davulu ve tuğ sancağı
-  const g=new THREE.Group(), cm=clanMat(col);
-  part(g,'cyl',cm,.24,.9,.3,0,.45,0); part(g,'cyl',C.gold,.25,.07,.31,0,.62,0);
-  part(g,'sph',C.skin,.16,.16,.16,0,1.05,0); part(g,'sph',C.white,.22,.2,.22,0,1.26,0); part(g,'cyl',C.red,.09,.2,.09,0,1.46,0);
-  part(g,'cyl',C.red,.3,.3,.3,0,.6,.38,Math.PI/2); part(g,'cyl',C.gold,.31,.04,.31,0,.6,.53,Math.PI/2); part(g,'cyl',C.gold,.31,.04,.31,0,.6,.23,Math.PI/2);
-  part(g,'cyl',C.white,.27,.02,.27,0,.6,.545,Math.PI/2);
-  g.userData.sticks=[part(g,'cyl',C.wood,.02,.4,.02,-.2,.9,.4,1),part(g,'cyl',C.wood,.02,.4,.02,.2,.9,.4,1)];
-  part(g,'cyl',C.wood,.025,2,.025,-.5,1,-.15); part(g,'sph',C.gold,.07,.07,.07,-.5,2.02,-.15);
-  const moon=new THREE.Mesh(GEO.moon,mat(C.gold)); moon.position.set(-.5,2.2,-.15); moon.rotation.z=2.5; g.add(moon);
-  part(g,'cone',C.red,.09,.4,.09,-.5,1.72,-.15,Math.PI); part(g,'box',cm,.42,.5,.02,-.27,1.3,-.15);
-  g.userData.cm=cm; return g;
-}
-function mKalkan(){ const m=new THREE.Mesh(GEO.dome,new THREE.MeshBasicMaterial({color:0x27c2b3,transparent:true,opacity:.34,depthWrite:false})); m.scale.setScalar(.5); return m; }
+const TPL={
+  kale(){ const b=new Bld();
+    b.add(cyl(.82,.82,.01,18),C.shade,0,.006,0);
+    b.add(lathe([[.66,0],[.66,.1],[.56,.16],[.5,.78],[.56,.86],[.6,.88],[.6,.96],[.52,.96],[.52,.9],[.001,.9]],18),C.stone);
+    for(const [r,y] of [[.545,.3],[.53,.48],[.515,.66]]) b.add(tor(r,.011),C.mortar,0,y,0,Math.PI/2);
+    for(let i=0;i<10;i++){ const a=i/10*Math.PI*2; b.add(box(.17,.16,.1),C.stone2,Math.sin(a)*.555,1.04,Math.cos(a)*.555,0,a,0); }
+    b.add(box(.3,.32,.05),C.stone2,0,.16,.585); b.add(cyl(.15,.15,.05,12),C.stone2,0,.32,.585,Math.PI/2);
+    b.add(box(.2,.3,.05),C.wood2,0,.15,.6); b.add(cyl(.1,.1,.05,12),C.wood2,0,.3,.6,Math.PI/2); b.add(sph(.018,5,4),C.gold,.05,.17,.63);
+    for(const a of [2.2,-2.2,Math.PI]) b.add(box(.05,.17,.05),C.dark,Math.sin(a)*.5,.6,Math.cos(a)*.5,0,a,0);
+    for(const a of [.75,-.75]){ b.push(0,0,0,0,a,0); b.add(box(.17,.3,.02),'c',0,.6,.525,-.1); b.add(box(.17,.035,.025),C.gold,0,.76,.535,-.1); b.add(cone(.085,.1,4),'c',0,.4,.508,Math.PI,Math.PI/4,0); b.pop(); }
+    b.add(cyl(.27,.3,.42,14),C.stone,0,1.11,0); b.add(cyl(.33,.3,.07,14),C.stone2,0,1.33,0);
+    for(const a of [0,2.1,-2.1]) b.add(box(.06,.14,.04),C.dark,Math.sin(a)*.27,1.14,Math.cos(a)*.27,0,a,0);
+    b.push(0,1.36,0); b.add(lathe([[.38,0],[.36,.05],[.21,.3],[.09,.52],[.001,.62]],14),'c'); b.add(cyl(.385,.385,.03,14),['c',.75],0,.015,0); b.pop();
+    b.add(sph(.05,8,6),C.gold,0,2,0); b.add(cyl(.014,.014,.5,5),C.wood,0,2.24,0); b.add(sph(.025,6,4),C.gold,0,2.5,0);
+    return b.build(); },
+  piyade(){ const b=new Bld(); fig(b,{hi:true}); return b.build(); },
+  boluk(){ const b=new Bld(); fig(b,{hi:true}); b.push(.5,0,-.5); fig(b); b.pop(); b.push(-.5,0,-.5); fig(b); b.pop(); return b.build(); },
+  p1(){ const b=new Bld(); fig(b); return b.build(); },
+  p2(){ const b=new Bld(); b.push(.27,0,0); fig(b); b.pop(); b.push(-.27,0,-.2); fig(b); b.pop(); return b.build(); },
+  p3(){ const b=new Bld(); fig(b); b.push(.5,0,-.45); fig(b); b.pop(); b.push(-.5,0,-.45); fig(b); b.pop(); return b.build(); },
+  sipahi(){ const b=new Bld(), H=C.horse;
+    b.add(cyl(.4,.4,.01,14),C.shade,0,.006,0,0,0,0,1,1,1.6);
+    b.add(sph(.2,12,9),H,0,.68,0,0,0,0,1,1,2.1); b.add(sph(.19,10,8),H,0,.72,.3); b.add(sph(.2,10,8),H,0,.7,-.3);
+    b.add(cyl(.09,.14,.46,8),H,0,.98,.47,.6); b.add(cyl(.062,.1,.3,8),H,0,1.19,.7,1.95); b.add(sph(.064,8,6),H,0,1.14,.84);
+    for(const x of [-.05,.05]) b.add(cone(.03,.1,5),H,x,1.35,.6);
+    b.add(box(.04,.42,.1),C.hair,0,1.05,.4,.6); b.add(box(.04,.1,.08),C.hair,0,1.3,.66,.3); b.add(box(.045,.14,.03),C.white,0,1.2,.79,1.95-Math.PI/2);
+    for(const x of [-.11,.11]){
+      b.add(cyl(.06,.048,.3,6),H,x,.46,.37,-.4); b.add(cyl(.04,.036,.28,6),H,x,.2,.47,.1); b.add(cyl(.045,.052,.07,6),C.hair,x,.035,.46);
+      b.add(cyl(.065,.05,.3,6),H,x,.46,-.36,.4); b.add(cyl(.04,.036,.28,6),H,x,.2,-.47,-.12); b.add(cyl(.045,.052,.07,6),C.hair,x,.035,-.45); }
+    b.add(cyl(.05,.02,.42,6),C.hair,0,.6,-.57,.75);
+    for(const x of [-.215,.215]){ b.add(box(.03,.3,.5),'c',x,.63,-.02); b.add(box(.036,.04,.5),C.gold,x,.48,-.02); }
+    b.add(box(.42,.04,.5),['c',.82],0,.87,-.02); b.add(box(.26,.07,.3),C.wood2,0,.92,-.02); b.add(box(.2,.1,.05),C.wood2,0,.97,-.17);
+    b.add(box(.012,.012,.42),C.dark,.09,1.12,.42,-.5); b.add(box(.012,.012,.42),C.dark,-.09,1.12,.42,-.5);
+    for(const x of [-.2,.2]){ b.add(cyl(.07,.06,.32,6),C.navy,x,.78,.06,-.35); b.add(box(.09,.09,.18),C.wood2,x,.62,.14); }
+    b.push(0,.6,-.02); fig(b,{hi:true,mounted:true,helmet:true,noSpear:true}); b.pop();
+    b.add(cyl(.018,.018,1.9,5),C.wood,.3,1.3,.35,1.1); b.add(cone(.045,.18,6),C.steel,.3,1.77,1.27,1.1); b.add(box(.015,.16,.32),'c',.3,1.55,1.02,1.1); b.add(box(.016,.035,.32),C.gold,.3,1.62,.985,1.1);
+    return b.build(); },
+  top(){ const b=new Bld();
+    b.add(cyl(.5,.5,.01,14),C.shade,0,.006,-.2,0,0,0,1,1,1.5);
+    for(const x of [-.34,.34]){ b.push(x,.3,0); b.add(tor(.26,.035),C.wood,0,0,0,0,Math.PI/2,0); b.add(tor(.297,.012),C.dark,0,0,0,0,Math.PI/2,0);
+      for(let i=0;i<4;i++) b.add(box(.03,.5,.035),C.wood,0,0,0,i*Math.PI/4); b.add(cyl(.065,.065,.13,8),C.bronze,0,0,0,0,0,Math.PI/2); b.pop(); }
+    b.add(cyl(.035,.035,.74,6),C.dark,0,.3,0,0,0,Math.PI/2);
+    for(const x of [-.14,.14]) b.add(box(.07,.13,1),C.wood,x,.2,-.42,-.31);
+    b.add(box(.36,.07,.1),C.wood2,0,.06,-.86); b.add(box(.3,.02,.42),'c',0,.3,-.4,-.31); b.add(box(.3,.025,.04),C.gold,0,.37,-.2,-.31);
+    b.push(0,.5,.04,1.27); b.add(lathe([[.001,-.52],[.05,-.5],[.06,-.46],[.04,-.43],[.15,-.4],[.155,-.3],[.135,-.28],[.125,.1],[.14,.11],[.14,.15],[.118,.16],[.105,.5],[.135,.51],[.135,.58],[.08,.58]],14),C.bronze);
+      b.add(cyl(.08,.08,.02,10),C.shade,0,.565,0); for(const y of [-.35,.13,.545]) b.add(tor(y>.5?.135:.145,.016),C.gold,0,y,0,Math.PI/2); b.pop();
+    for(const [x,y,z] of [[.5,.075,-.35],[.65,.075,-.35],[.575,.075,-.22],[.575,.19,-.31]]) b.add(sph(.075,8,6),C.dark,x,y,z);
+    b.add(cyl(.1,.1,.26,10),C.wood,.6,.13,.2); b.add(cyl(.115,.115,.18,10),C.wood,.6,.13,.2); for(const y of [.05,.21]) b.add(cyl(.105,.105,.025,10),C.dark,.6,y,.2);
+    b.push(-.58,0,-.42,0,.4,0); fig(b,{hi:true,noSpear:true,noShield:true}); b.add(cyl(.016,.016,1.1,5),C.wood,.3,.62,.1,.5); b.add(cyl(.045,.045,.12,6),C.white,.3,1.1,.36,.5); b.pop();
+    return b.build(); },
+  mehter(){ const b=new Bld();
+    b.add(cyl(.42,.42,.01,14),C.shade,0,.006,0);
+    b.add(lathe([[.3,0],[.3,.05],[.2,.5],[.17,.62],[.21,.8],[.22,.88],[.1,.96],[.001,.96]],14),'c'); b.add(cyl(.306,.306,.05,14),C.gold,0,.03,0);
+    b.add(box(.05,.6,.02),C.gold,0,.32,.245,-.17); b.add(cyl(.186,.186,.07,12),C.red,0,.62,0);
+    for(const k of [-1,1]){ b.add(cyl(.056,.05,.32,6),['c',.8],k*.22,.74,.13,-1); b.add(sph(.052,6,5),C.skin,k*.22,.66,.27); }
+    b.add(sph(.14,12,10),C.skin,0,1.1,0); for(const x of [-.05,.05]) b.add(sph(.02,5,4),C.hair,x,1.13,.125); b.add(box(.15,.03,.03),C.hair,0,1.05,.128); b.add(box(.045,.035,.03),C.skin,0,1.09,.14);
+    b.add(sph(.21,14,10),C.white,0,1.31,0,0,0,0,1,.82,1); for(let i=0;i<6;i++) b.add(tor(.205,.012,Math.PI),['c',.9],0,1.31,0,0,i*Math.PI/6,0,1,.82,1);
+    b.add(cyl(.07,.1,.15,10),C.red,0,1.5,0); b.add(box(.03,.16,.02),C.gold,0,1.42,.2);
+    b.push(0,.56,.44,.5); b.add(lathe([[.001,-.26],[.12,-.24],[.22,-.14],[.27,0],[.28,.03]],14),C.copper); b.add(cyl(.272,.272,.02,14),C.white,0,.035,0); b.add(tor(.276,.02),C.gold,0,.03,0,Math.PI/2);
+      for(let i=0;i<8;i++){ const a=i/8*Math.PI*2; b.add(sph(.022,5,4),C.gold,Math.sin(a)*.25,-.07,Math.cos(a)*.25); } b.pop();
+    b.push(-.52,0,-.1); b.add(cyl(.022,.022,2.1,6),C.wood,0,1.05,0); b.add(sph(.07,8,6),C.gold,0,2.13,0); b.add(tor(.11,.03,4.4),C.gold,0,2.31,0,0,0,2.5);
+      b.add(cone(.1,.46,8),C.red,0,1.8,0,Math.PI); b.add(cyl(.105,.105,.04,8),C.gold,0,2.03,0);
+      b.add(box(.4,.5,.02),'c',.23,1.38,0); b.add(box(.4,.04,.026),C.gold,.23,1.12,0); b.add(box(.4,.04,.026),C.gold,.23,1.64,0); b.add(tor(.07,.02,4.4),C.gold,.23,1.38,.012,0,0,2.5); b.pop();
+    return b.build(); },
+  kalkan(){ const b=new Bld(); b.add(new THREE.SphereGeometry(1,20,10,0,Math.PI*2,0,Math.PI/2),0xffffff); b.add(tor(1,.035),0xffffff,0,.02,0,Math.PI/2);
+    for(let i=0;i<3;i++) b.add(tor(1.005,.012,Math.PI),0xffffff,0,0,0,0,i*Math.PI/3,0); const g=b.build(); g.clearGroups(); return g; }
+};
+const GEOC={}; const tpl=n=>GEOC[n]||(GEOC[n]=TPL[n]());
+const mk=(n,cm)=>new THREE.Mesh(tpl(n),[VC,cm]);
+const FLAG=(()=>{const b=new Bld(); b.add(box(.32,.18,.015),'c',.17,0,0); b.add(box(.32,.03,.018),['c',.7],.17,-.075,0); const g=b.build(); g.clearGroups(); return g;})();
+const RING=new THREE.RingGeometry(.8,1,24), STICK=cyl(.018,.03,.26,5), WOODM=new THREE.MeshPhongMaterial({color:C.wood});
+
+function mKale(){ const g=new THREE.Group(), cm=newClanMat(C.neutral); g.add(mk('kale',cm));
+  const flag=new THREE.Mesh(FLAG,cm); flag.position.set(.014,2.36,0); flag.visible=false; g.add(flag); g.userData={cm,flag}; return g; }
+function mMehter(cm){ const g=new THREE.Group(); g.add(mk('mehter',cm));
+  g.userData.sticks=[-.2,.2].map(x=>{const s=new THREE.Mesh(STICK,WOODM); s.position.set(x,.8,.36); s.rotation.x=1; g.add(s); return s;}); return g; }
+function mKalkan(){ const m=new THREE.Mesh(tpl('kalkan'),new THREE.MeshBasicMaterial({color:0x27c2b3,transparent:true,opacity:.34,depthWrite:false,side:THREE.DoubleSide})); m.scale.setScalar(.42); return m; }
 
 /* kaleler */
-const TS=.36;
+const TS=.3;
 provs.forEach(p=>{ const t=mKale(); t.position.set(p.x,0,p.z); t.scale.setScalar(TS); scene.add(t); p.tower=t;
   const el=document.createElement('div'); el.className='pl'; el.innerHTML='<b>'+p.id+'</b><i></i>'; labelsEl.appendChild(el); p.el=el; p.gi=el.lastChild; });
 function refreshProv(p){
@@ -358,22 +416,20 @@ function resetRound(){
 
 function killSquad(s){ scene.remove(s.mesh); if(s.tag)s.tag.remove(); }
 function setOwner(p,id){ if(p.owner===id)return; p.owner=id; refreshProv(p); }
-function ringFx(p,color){ const m=new THREE.Mesh(GEO.ring,new THREE.MeshBasicMaterial({color,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
+function ringFx(p,color){ const m=new THREE.Mesh(RING,new THREE.MeshBasicMaterial({color,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
   m.rotation.x=-Math.PI/2; m.position.set(p.x,.03,p.z); scene.add(m); fx.push({m,t:0,d:.8}); }
 function floatText(p,txt){ const el=document.createElement('div'); el.className='fl'; el.textContent=txt; floatsEl.appendChild(el); fx.push({el,p,t:0,d:1.3}); }
 
 /* asker gönder: from yoksa birlik şehrin üstüne iner */
 function send(from,to,n,type,o){
   o=o||{}; if(n<=0)return;
-  const clan=o.clan!=null?o.clan:from.owner, col=clanColor(clan), g=new THREE.Group();
-  let model, sc=.3;
-  if(type==='sipahi'){model=mSipahi(col);sc=.42;}
-  else if(type==='top'){model=mTop(col);sc=.5;}
-  else if(o.user){model=mPiyade(col,false);sc=.38;}
-  else {model=mPiyade(col,true);sc=.24+Math.min(.1,n*.004);}
+  const clan=o.clan!=null?o.clan:from.owner, cm=clanMatOf(clan), g=new THREE.Group();
+  let model, sc;
+  if(type==='sipahi'){model=mk('sipahi',cm);sc=.4;}
+  else if(type==='top'){model=mk('top',cm);sc=.46;}
+  else if(o.user){model=mk('boluk',cm);sc=.36;}
+  else {model=mk(n>=25?'p3':n>=10?'p2':'p1',cm);sc=.25+Math.min(.09,n*.004);}
   g.add(model);
-  if(type==='piyade'){ const extra=o.user?2:(n>=25?2:n>=10?1:0);
-    for(let i=0;i<extra;i++){const e=mPiyade(model.userData.cm,true);e.position.set(i?-.5:.5,0,-.45);g.add(e);} }
   g.scale.setScalar(sc); scene.add(g);
   const fx0=from?from.x:to.x, fz0=from?from.z:to.z, dist=Math.hypot(to.x-fx0,to.z-fz0);
   const speed=(type==='sipahi'?3:type==='top'?1.2:1.6)*(o.fast?2:1);
@@ -470,7 +526,7 @@ function onEvent(e){
 }
 let lastHello=0;
 function mehter(u,c,n){
-  const home=P[c.id], m=mMehter(clanColor(c.id)); m.scale.setScalar(.75); m.position.set(home.x+.35,0,home.z+.3); scene.add(m);
+  const home=P[c.id], m=mMehter(clanMatOf(c.id)); m.scale.setScalar(.6); m.position.set(home.x+.35,0,home.z+.3); scene.add(m);
   fx.push({m,t:0,d:14,mehter:true});
   if(home.owner!==c.id) send(null,home,n,'piyade',{clan:c.id,user:u});
   provs.forEach(p=>{ if(p.owner===c.id){p.g+=8;ringFx(p,0xf2b632);} });
@@ -564,16 +620,16 @@ function place(el,x,y,z,ax){ V.set(x,y,z).project(camera); const w=stage.clientW
 
 /* ───────── galeri ───────── */
 const GAL=[
- ['İl Kalesi','81 ilin her birinde','Tarafsızken gri durur. Bir klan fethedince çatısı ve sancağı klan rengine boyanır, garnizon büyüdükçe kale yükselir.',()=>{const k=mKale();k.userData.cm.color.copy(clanColor(34));k.userData.flag.visible=true;return k;},1.5],
- ['Piyade','Beğeni, yorum ve 1–9 elmas','Börklü, kalkanlı, mızraklı yaya asker. Oyunun ana birimi; her beğeni şehrine bir piyade ekler.',()=>mPiyade(clanColor(6),false),1.6],
- ['Sipahi','10–99 elmas','Atlı süvari. Piyadeden iki kat hızlı koşar, gönderenin adı ve profil fotoğrafı üstünde taşınır.',()=>mSipahi(clanColor(35)),1.25],
- ['Topçu','100–999 elmas','Bronz kuşatma topu ve topçusu. Düşman kalesine çift hasar verir, ateş anında kamera şehre yaklaşır.',()=>mTop(clanColor(1)),1.35],
- ['Mehter','1000+ elmas','Kös davulu ve tuğ sancağıyla mehter. Klanın tüm illerine asker ekler, 10 saniye boyunca herkesi hücuma kaldırır.',()=>mMehter(clanColor(61)),1.05],
- ['Kalkan','Takip','Çini turkuazı kubbe. Takip eden izleyicinin şehrini 20 saniye saldırıya kapatır.',()=>{const g=new THREE.Group(),k=mKale();k.userData.cm.color.copy(clanColor(16));k.userData.flag.visible=true;g.add(k);const d=mKalkan();d.scale.setScalar(1.25);g.add(d);return g;},1.3]
+ ['İl Kalesi','81 ilin her birinde','Tarafsızken gri durur. Bir klan fethedince çatısı ve sancağı klan rengine boyanır, garnizon büyüdükçe kale yükselir.',()=>{const k=mKale();k.userData.cm.color.copy(clanColor(34));k.userData.flag.visible=true;return k;},.95],
+ ['Piyade','Beğeni, yorum ve 1–9 elmas','Börklü, kalkanlı, mızraklı yaya asker. Oyunun ana birimi; her beğeni şehrine bir piyade ekler.',()=>mk('piyade',clanMatOf(6)),1.55],
+ ['Sipahi','10–99 elmas','Atlı süvari. Piyadeden iki kat hızlı koşar, gönderenin adı ve profil fotoğrafı üstünde taşınır.',()=>mk('sipahi',clanMatOf(35)),1.2],
+ ['Topçu','100–999 elmas','Bronz kuşatma topu ve topçusu. Düşman kalesine çift hasar verir, ateş anında kamera şehre yaklaşır.',()=>mk('top',clanMatOf(1)),1.3],
+ ['Mehter','1000+ elmas','Kös davulu ve tuğ sancağıyla mehter. Klanın tüm illerine asker ekler, 10 saniye boyunca herkesi hücuma kaldırır.',()=>mMehter(clanMatOf(61)),.95],
+ ['Kalkan','Takip','Çini turkuazı kubbe. Takip eden izleyicinin şehrini 20 saniye saldırıya kapatır.',()=>{const g=new THREE.Group(),k=mKale();k.userData.cm.color.copy(clanColor(16));k.userData.flag.visible=true;g.add(k);const d=mKalkan();d.scale.setScalar(1.15);g.add(d);return g;},.95]
 ];
 const galScene=new THREE.Scene(), galCam=new THREE.PerspectiveCamera(30,1,.1,50); let galI=0, galObj=null;
-galScene.add(new THREE.HemisphereLight(0xfff3d6,0x0b2230,1)); const gl2=new THREE.DirectionalLight(0xffe2a8,.9); gl2.position.set(-3,5,4); galScene.add(gl2);
-const ped=new THREE.Mesh(GEO.cyl,mat(0x123748)); ped.scale.set(1.1,.12,1.1); ped.position.y=-.06; galScene.add(ped);
+galScene.add(new THREE.HemisphereLight(0xfff3d6,0x0b2230,1)); const gl2=new THREE.DirectionalLight(0xffe2a8,.9); gl2.position.set(-3,5,4); galScene.add(gl2); const gl3=new THREE.DirectionalLight(0x27c2b3,.45); gl3.position.set(4,2,-4); galScene.add(gl3);
+const ped=new THREE.Mesh(cyl(1.15,1.25,.12,32),new THREE.MeshPhongMaterial({color:0x123748})); ped.position.y=-.06; galScene.add(ped);
 function galShow(i){ galI=(i+GAL.length)%GAL.length; if(galObj)galScene.remove(galObj); const it=GAL[galI]; galObj=it[3](); galObj.scale.setScalar(it[4]); galScene.add(galObj);
   $('#gal-name').textContent=it[0]; $('#gal-trig').textContent='Tetikleyici: '+it[1]; $('#gal-desc').textContent=it[2]; }
 function galToggle(on){ galOn=on; $('#gal').hidden=!on; $('#top').hidden=on; $('#bottom').hidden=on; feedEl.hidden=on; bannerEl.hidden=on; labelsEl.hidden=on; floatsEl.hidden=on; if(on)galShow(galI); }
@@ -595,29 +651,28 @@ function step(dt){
   for(let i=squads.length-1;i>=0;i--){ const s=squads[i]; s.t+=dt/s.dur; const k=Math.min(1,s.t), g=s.mesh;
     if(s.from){ g.position.set(s.fx0+(s.to.x-s.fx0)*k, Math.abs(Math.sin(time*9+s.ph))*.05, s.fz0+(s.to.z-s.fz0)*k); }
     else { g.position.set(s.to.x,(1-k)*(1-k)*3,s.to.z); g.rotation.y=time*3; }
-    const ud=s.model.userData;
-    if(ud.legs){ const sw=Math.sin(time*(s.type==='sipahi'?16:11)+s.ph)*.5; ud.legs.forEach((l,j)=>l.rotation.x=(j%2?-sw:sw)*(s.type==='sipahi'&&j>1?-1:1)); }
-    if(ud.body) ud.body.rotation.x=Math.sin(time*16+s.ph)*.07;
-    if(s.tag) place(s.tag,g.position.x,g.position.y+.75,g.position.z);
+    if(s.type==='sipahi'){ const q=time*14+s.ph; s.model.rotation.x=Math.sin(q)*.1; s.model.position.y=Math.abs(Math.sin(q))*.14; }
+    else if(s.type==='piyade') s.model.rotation.z=Math.sin(time*10+s.ph)*.07;
+    if(s.tag) place(s.tag,g.position.x,g.position.y+.85,g.position.z);
     if(k>=1){ if(phase==='play')arrive(s); killSquad(s); squads.splice(i,1); } }
   for(let i=fx.length-1;i>=0;i--){ const f=fx[i]; f.t+=dt; const k=f.t/f.d;
-    if(f.mehter){ f.m.userData.sticks.forEach((s,j)=>s.rotation.x=1+Math.max(0,Math.sin(time*10+j*Math.PI))*.7); f.m.position.y=Math.abs(Math.sin(time*5))*.03; if(k>.9)f.m.scale.setScalar(.75*(1-k)*10); }
+    if(f.mehter){ f.m.userData.sticks.forEach((s,j)=>s.rotation.x=1+Math.max(0,Math.sin(time*10+j*Math.PI))*.7); f.m.position.y=Math.abs(Math.sin(time*5))*.03; if(k>.9)f.m.scale.setScalar(.6*(1-k)*10); }
     else if(f.m){ f.m.scale.setScalar(.2+k*1.1); f.m.material.opacity=1-k; }
     else { place(f.el,f.p.x,.7+k*.8,f.p.z); f.el.style.opacity=String(1-k*k); }
     if(k>=1){ if(f.m)scene.remove(f.m); if(f.el)f.el.remove(); fx.splice(i,1); } }
-  provs.forEach(p=>{ const u=p.tower.userData, target=TS*(1+Math.min(p.g,60)/60*.9); p.tower.scale.y+=(target-p.tower.scale.y)*Math.min(1,dt*5);
+  provs.forEach(p=>{ const u=p.tower.userData, target=TS*(.82+Math.min(p.g,60)/60*.6); p.tower.scale.setScalar(p.tower.scale.y+(target-p.tower.scale.y)*Math.min(1,dt*5));
     if(u.flag.visible)u.flag.rotation.y=Math.sin(time*4+p.id)*.35; if(p.dome&&p.dome.visible)p.dome.material.opacity=.26+Math.sin(time*5)*.08; });
 }
 function frame(now){
   const dt=Math.min(.1,(now-last)/1000); last=now;
   if(galOn){ if(galObj)galObj.rotation.y+=dt*.8; const a=stage.clientWidth/stage.clientHeight; galCam.aspect=a; galCam.updateProjectionMatrix();
-    const d=a<1?9.5:6.5; galCam.position.set(0,2.2,d); galCam.lookAt(0,a<1?.2:.75,0); step(dt); renderer.render(galScene,galCam); requestAnimationFrame(frame); return; }
+    const d=a<1?12:9.2; galCam.position.set(0,2.6,d); galCam.lookAt(0,a<1?.5:.3,0); step(dt); renderer.render(galScene,galCam); requestAnimationFrame(frame); return; }
   step(dt);
   if(focusT>0)focusT-=dt; zoom+=(((focusT>0)?1:0)-zoom)*Math.min(1,dt*2.5);
   const tx=focusP?focusP.x*zoom*.8:0, tz=focusP?focusP.z*zoom*.8:0, sway=REDUCED?0:Math.sin(time*.25)*.25;
   camera.position.copy(CAMDIR).multiplyScalar(camD*(1-zoom*.42)).add(LOOK); camera.position.x+=tx+sway; camera.position.z+=tz;
   camera.lookAt(LOOK.x+tx,0,LOOK.z+tz); camera.updateMatrixWorld();
-  provs.forEach(p=>place(p.el,p.x,p.tower.scale.y*1.5,p.z));
+  provs.forEach(p=>place(p.el,p.x,p.tower.scale.y*2.6,p.z));
   if(mapDirty)paintMap();
   accHud+=dt; if(accHud>.3){accHud=0; if(phase==='play')hud();}
   renderer.render(scene,camera);
@@ -640,7 +695,7 @@ document.querySelectorAll('#bar [data-t]').forEach(b=>b.onclick=()=>{
 });
 addEventListener('keydown',e=>{ if(e.key==='h'&&e.target.tagName!=='INPUT')stage.classList.toggle('obs'); });
 addEventListener('resize',fit);
-window.MemleketFethi={onEvent}; // köprü dışında kendi entegrasyonunu yazanlar için
+window.MemleketFethi={onEvent,info:()=>renderer.info.render}; // köprü dışında kendi entegrasyonunu yazanlar için
 
 resetRound(); fit(); hud(); connect();
 if(!simOn&&!CFG.ws)$('#status').textContent='Demo kapalı, test düğmelerini kullan';
