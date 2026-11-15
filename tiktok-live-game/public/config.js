@@ -4,12 +4,13 @@ window.GAME_CONFIG = {
   // Katılım şekli: 'gift' = yalnızca hediye gönderen meydana girer, 'comment' = yorum yazan da girer
   joinMode: 'gift',
   lapsPerTawaf: 7,          // bir tavaf = 7 şavt
-  lapSeconds: 38,           // orta halkada bir turun süresi (sn)
+  lapSeconds: 46,           // orta halkada bir turun süresi (sn)
   joinKeyword: '',          // yalnızca joinMode 'comment' iken: boş = her yorum katılır, 'katıl' = o kelimeyi içerenler
   idleMinutes: 15,          // bu kadar süre etkileşim yoksa oyuncu meydandan ayrılır
-  maxPlayers: 300,
-  backgroundCrowd: 90,      // meydan boş görünmesin diye isimsiz kalabalık
+  maxPlayers: 200,
+  backgroundCrowd: 70,      // meydan boş görünmesin diye isimsiz kalabalık
   shadows: true,            // yavaş bilgisayarda false yap
+  renderScale: 1,           // 3B çözünürlük çarpanı; kasarsa 0.75 yap
   closeShotEvery: 22,       // kaç saniyede bir yakın çekim (0 = hep geniş açı)
 
   // Hediye kademeleri: gönderilen toplam jeton (coin) değerine göre en yüksek uyan kademe çalışır.

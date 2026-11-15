@@ -1,0 +1,3 @@
+3D character models and walk animation by Quaternius (https://quaternius.com)
+Packs: Universal Base Characters [Standard], Universal Animation Library [Standard]
+License: CC0 1.0 Universal (Public Domain Dedication) - https://creativecommons.org/publicdomain/zero/1.0/

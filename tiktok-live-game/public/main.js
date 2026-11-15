@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { loadCharacters } from './characters.js';
 
 const CFG = window.GAME_CONFIG;
 const W = 1080, H = 1920, TAU = Math.PI * 2;
@@ -7,6 +8,10 @@ const START_A = Math.PI * 0.25;                    // şavt başlangıç çizgis
 const KAABA = { w: 4.6, h: 5.8 };
 const params = new URLSearchParams(location.search);
 const DEMO = params.has('demo');
+// Adres çubuğundan geçici ayar: ?crowd=20&shadows=0 (yavaş bilgisayarda denemek için)
+if (params.has('crowd')) CFG.backgroundCrowd = +params.get('crowd');
+if (params.has('shadows')) CFG.shadows = params.get('shadows') !== '0';
+const DEMO_COUNT = params.has('players') ? +params.get('players') : 25;
 const COMMENT_JOIN = CFG.joinMode === 'comment';
 const FONT = '"Segoe UI", system-ui, -apple-system, Roboto, "Noto Sans", sans-serif';
 
@@ -17,7 +22,8 @@ const tiers = [...CFG.giftTiers].sort((a, b) => a.min - b.min);
 
 // ====================== 3B SAHNE ======================
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true });
-renderer.setSize(W, H, false);
+const RS = +(new URLSearchParams(location.search).get('scale') || window.GAME_CONFIG.renderScale || 1);
+renderer.setSize(W * RS, H * RS, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.15;
@@ -162,42 +168,27 @@ const nurPts = pointsCloud(900, (p, i) => {
 }, new THREE.PointsMaterial({ color: 0xffe08a, size: 0.32, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
 nurPts.visible = false; scene.add(nurPts);
 
-// --- figürler ---
+// --- figürler (erkek/kadın 3B modeller: characters.js) ---
+const chars = await loadCharacters(scene);
 const GEO = {
-  robe: new THREE.CylinderGeometry(0.2, 0.43, 1.3, 10),
-  head: new THREE.SphereGeometry(0.19, 12, 10),
-  cover: new THREE.SphereGeometry(0.225, 14, 10, 0, TAU, 0, Math.PI * 0.5),
-  arm: new THREE.CapsuleGeometry(0.07, 0.46, 3, 6),
   ring: new THREE.RingGeometry(0.5, 0.66, 24),
   beam: new THREE.CylinderGeometry(0.5, 0.5, 7, 14, 1, true),
 };
 const MAT = {
-  white: new THREE.MeshStandardMaterial({ color: 0xf7f5ee, roughness: 0.85 }),
-  dark: new THREE.MeshStandardMaterial({ color: 0x202228, roughness: 0.85 }),
-  skin: new THREE.MeshStandardMaterial({ color: 0xc99b78, roughness: 0.8 }),
   beam: new THREE.MeshBasicMaterial({ color: 0xffd45e, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
   gold: new THREE.MeshBasicMaterial({ color: 0xffcc44, side: THREE.DoubleSide }),
 };
-function buildFigure(dark, color) {
-  const g = new THREE.Group(), cloth = dark ? MAT.dark : MAT.white;
-  const robe = new THREE.Mesh(GEO.robe, cloth); robe.position.y = 0.66; robe.castShadow = true;
-  const head = new THREE.Mesh(GEO.head, MAT.skin); head.position.set(0, 1.5, 0);
-  const cover = new THREE.Mesh(GEO.cover, cloth); cover.position.set(0, 1.5, 0); cover.rotation.x = -0.7;
-  const arms = [-1, 1].map(s => {
-    const piv = new THREE.Group(); piv.position.set(s * 0.27, 1.22, 0);
-    const arm = new THREE.Mesh(GEO.arm, cloth); arm.position.y = -0.3; arm.rotation.z = s * 0.12;
-    piv.add(arm); g.add(piv); return piv;
-  });
-  g.add(robe, head, cover);
-  g.userData = { arms, robe };
-  if (color) {
-    const ring = new THREE.Mesh(GEO.ring, new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide }));
+function buildFigure(w) {
+  const ch = chars.create({ female: w.female, pace: w.pace });
+  const g = ch.group;
+  g.userData = { ch };
+  if (w.color) {
+    const ring = new THREE.Mesh(GEO.ring, new THREE.MeshBasicMaterial({ color: w.color, side: THREE.DoubleSide }));
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.04;
     const beam = new THREE.Mesh(GEO.beam, MAT.beam); beam.position.y = 3.5; beam.visible = false;
     g.add(ring, beam);
-    g.userData.ring = ring; g.userData.beam = beam; g.userData.ringMat = ring.material; g.userData.baseColor = new THREE.Color(color);
+    Object.assign(g.userData, { ring, beam, ringMat: ring.material, baseColor: new THREE.Color(w.color) });
   }
-  g.scale.setScalar(rand(0.93, 1.08));
   scene.add(g);
   return g;
 }
@@ -212,9 +203,9 @@ const RING_COLORS = ['#3fb6a8', '#e0a03a', '#d86a8c', '#6f9ae0', '#9a7fe0', '#62
 const hashStr = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); };
 
 function makeWalker(extra) {
-  const w = Object.assign({ a: rand(0, TAU), r: rand(R_IN + 1, R_OUT + 2.5), travel: 0, phase: rand(0, TAU), pace: rand(0.85, 1.15), dark: Math.random() < 0.3, npc: true }, extra);
+  const w = Object.assign({ a: rand(0, TAU), r: rand(R_IN + 1, R_OUT + 2.5), travel: 0, phase: rand(0, TAU), pace: rand(0.85, 1.15), female: Math.random() < 0.45, npc: true }, extra);
   if (w.lane === undefined) w.lane = w.r;
-  w.fig = buildFigure(w.dark, w.color);
+  w.fig = buildFigure(w);
   return w;
 }
 for (let i = 0; i < CFG.backgroundCrowd; i++) crowd.push(makeWalker({}));
@@ -239,7 +230,8 @@ function ensure(user, t, canJoin) {
   p = makeWalker({
     id: user.id, name: user.name || user.id, npc: false,
     a: START_A + rand(0.05, 0.4), lane: rand(R_IN + 3, R_OUT - 0.5), r: R_OUT + 4,
-    color: RING_COLORS[h % RING_COLORS.length], dark: h % 10 < 3,
+    color: RING_COLORS[h % RING_COLORS.length], female: (h >> 3) % 100 < 45,   // TikTok cinsiyet bilgisi vermez: kullanıcıya göre sabit, rastgele
+
     laps: 0, tawafs: 0, lastActive: t, goldUntil: 0, speedUntil: 0, innerUntil: 0, groupUntil: 0, innerLane: 0, group: [], img: null,
   });
   if (user.avatar) { const im = new Image(); im.onload = () => { p.img = im; }; im.src = user.avatar; }
@@ -256,7 +248,7 @@ function screenOf(x, y, z) {
   return { x: (_v.x * 0.5 + 0.5) * W, y: (-_v.y * 0.5 + 0.5) * H, ok: _v.z < 1 && _v.z > -1 };
 }
 function burst(p, n, color) {
-  const s = screenOf(p.fig.position.x, 1.8, p.fig.position.z);
+  const s = screenOf(p.fig.position.x, 1.9, p.fig.position.z);
   if (!s.ok) return;
   for (let i = 0; i < n; i++) sparks.push({ x: s.x, y: s.y, vx: rand(-110, 110), vy: rand(-230, -50), t: now(), life: rand(0.7, 1.5), color });
 }
@@ -298,7 +290,7 @@ function applyTier(p, tier, t) {
   if (tier.effect === 'group' || tier.effect === 'nur') {
     add('groupUntil');
     for (let i = p.group.length; i < 8; i++) {
-      p.group.push(makeWalker({ dA: (Math.floor(i / 2) + 1) * 0.085 * (i % 2 ? 1 : -1) + rand(-0.02, 0.02), dR: rand(-0.9, 0.9), dark: i % 3 === 0, r: p.r, a: p.a }));
+      p.group.push(makeWalker({ dA: (Math.floor(i / 2) + 1) * 0.085 * (i % 2 ? 1 : -1) + rand(-0.02, 0.02), dR: rand(-0.9, 0.9), r: p.r, a: p.a }));
     }
   }
   if (tier.effect === 'nur') {
@@ -318,15 +310,14 @@ function stepWalker(w, dt, mul) {
   w.r += (w.lane - w.r) * Math.min(1, dt * 0.9);
 }
 function poseFigure(w) {
-  const f = w.fig, s = Math.sin(w.phase);
-  f.position.set(Math.cos(w.a) * w.r, Math.abs(s) * 0.05, Math.sin(w.a) * w.r);
+  const f = w.fig;
+  f.position.set(Math.cos(w.a) * w.r, 0, Math.sin(w.a) * w.r);
   f.rotation.y = Math.atan2(Math.sin(w.a), -Math.cos(w.a));
-  f.rotation.z = s * 0.045;
-  f.userData.arms[0].rotation.x = s * 0.55; f.userData.arms[1].rotation.x = -s * 0.55;
 }
 
 function update(dt, t) {
   const nur = t < nurUntil, nm = nur ? 1.35 : 1;
+  chars.update(dt);
   for (const w of crowd) { stepWalker(w, dt, nm); poseFigure(w); }
   for (const p of [...players.values()]) {
     if (t - p.lastActive > CFG.idleMinutes * 60) { removePlayer(p); continue; }
@@ -348,6 +339,7 @@ function update(dt, t) {
     }
     poseFigure(p);
     const u = p.fig.userData;
+    u.ch.setFast(t < p.speedUntil);
     u.beam.visible = gold;
     u.ringMat.color.copy(gold ? MAT.gold.color : u.baseColor);
     u.ring.scale.setScalar(gold ? 1.25 + Math.sin(t * 5) * 0.12 : 1);
@@ -372,8 +364,8 @@ function update(dt, t) {
 const shot = { id: null, until: 0, next: now() + (CFG.closeShotEvery || 1e9) };
 const camPos = new THREE.Vector3(0, 46, 62), camLook = new THREE.Vector3(0, 0, 0);
 const wantPos = new THREE.Vector3(), wantLook = new THREE.Vector3();
-let orbit = 0;
-function focusOn(p, t, secs) { shot.id = p.id; shot.until = t + secs; shot.next = shot.until + (CFG.closeShotEvery || 1e9); }
+let orbit = 0, snapCam = false;
+function focusOn(p, t, secs) { shot.near = 1; shot.id = p.id; shot.until = t + secs; shot.next = shot.until + (CFG.closeShotEvery || 1e9); }
 
 function updateCamera(dt, t) {
   orbit += dt * 0.07;
@@ -385,14 +377,15 @@ function updateCamera(dt, t) {
   if (target) {
     const ca = Math.cos(target.a), sa = Math.sin(target.a), r = target.r;
     // oyuncunun önünde ve dışında: arkada Kâbe görünsün
-    wantPos.set(ca * (r + 6.5) + sa * 8, 4.6, sa * (r + 6.5) - ca * 8);
+    const n = shot.near || 1;                         // (test için yakınlık çarpanı)
+    wantPos.set(ca * (r + 6.5 * n) + sa * 8 * n, 1.2 + 3.4 * n, sa * (r + 6.5 * n) - ca * 8 * n);
     wantLook.set(ca * (r - 1.5), 1.3, sa * (r - 1.5));
   } else {
     const o = Math.sin(orbit) * 0.75;                 // açık ön taraftan sağa sola süzül
     wantPos.set(Math.sin(o) * 62, 46, Math.cos(o) * 62);
     wantLook.set(0, 0.5, 0);
   }
-  const k = 1 - Math.exp(-dt * 1.6);
+  const k = snapCam ? 1 : 1 - Math.exp(-dt * 1.6); snapCam = false;
   camPos.lerp(wantPos, k); camLook.lerp(wantLook, k);
   camera.position.copy(camPos); camera.lookAt(camLook);
   camera.updateMatrixWorld();
@@ -406,7 +399,7 @@ const ray = new THREE.Ray(), _hit = new THREE.Vector3(), _head = new THREE.Vecto
 function drawTags(t) {
   const tags = [];
   for (const p of players.values()) {
-    _head.set(p.fig.position.x, 2.3, p.fig.position.z);
+    _head.set(p.fig.position.x, 2.15, p.fig.position.z);
     const dist = _head.distanceTo(camera.position);
     const s = screenOf(_head.x, _head.y, _head.z);
     if (!s.ok || s.x < -40 || s.x > W + 40 || s.y < 560 || s.y > 1380) continue;
@@ -545,7 +538,7 @@ function randomExisting() { const a = [...players.values()]; return a.length ? {
 function fakeGift(coins, fresh) { onEvent({ type: 'gift', user: fresh ? fakeUser() : randomExisting(), coins }); }
 
 if (DEMO) {
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < DEMO_COUNT; i++) {
     const p = ensure(fakeUser(), now(), true);
     p.travel = rand(0, TAU * 6); p.laps = Math.floor(p.travel / TAU); p.a = START_A - p.travel; p.r = p.lane;
   }
@@ -570,4 +563,4 @@ addEventListener('keydown', (e) => {
   const i = '12345'.indexOf(e.key);
   if (i >= 0 && tiers[i]) fakeGift(tiers[i].min);
 });
-window.__game = { onEvent, players };
+window.__game = { onEvent, players, closeUp(i = 0, secs = 600, near = 1) { const p = [...players.values()][i]; if (p) { focusOn(p, now(), secs); snapCam = true; shot.near = near; } return p && p.female; } };

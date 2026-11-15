@@ -10,15 +10,16 @@ const { WebSocketServer } = require('ws');
 const PORT = process.env.PORT || 3000;
 const USERNAME = (process.argv[2] || process.env.TIKTOK_USERNAME || '').replace(/^@/, '');
 const PUBLIC = path.join(__dirname, 'public');
-const VENDOR = path.join(__dirname, 'node_modules', 'three', 'build');
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg' };
+const THREE_DIR = path.join(__dirname, 'node_modules', 'three');
+const MOUNTS = { '/vendor/': path.join(THREE_DIR, 'build'), '/addons/': path.join(THREE_DIR, 'examples', 'jsm') };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json', '.gltf': 'model/gltf+json', '.bin': 'application/octet-stream', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg' };
 
 const server = http.createServer((req, res) => {
   const urlPath = decodeURIComponent(req.url.split('?')[0]);
   // three.js yerel olarak sunulur (internet gerekmez)
-  const isVendor = urlPath.startsWith('/vendor/');
-  const root = isVendor ? VENDOR : PUBLIC;
-  const rel = isVendor ? urlPath.slice('/vendor/'.length) : (urlPath === '/' ? 'index.html' : urlPath);
+  const mount = Object.keys(MOUNTS).find(m => urlPath.startsWith(m));
+  const root = mount ? MOUNTS[mount] : PUBLIC;
+  const rel = mount ? urlPath.slice(mount.length) : (urlPath === '/' ? 'index.html' : urlPath);
   const file = path.normalize(path.join(root, rel));
   if (!file.startsWith(root + path.sep)) { res.writeHead(403); return res.end(); }
   fs.readFile(file, (err, data) => {

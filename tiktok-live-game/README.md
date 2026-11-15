@@ -4,7 +4,9 @@ Three.js ile çizilen 3 boyutlu bir meydan: izleyiciler **hediye göndererek** t
 yürür ve şavtları (0/7) sayılır. Hediyenin jeton değeri büyüdükçe daha büyük efekt tetiklenir.
 9:16 dikey (1080×1920) yayın için tasarlandı.
 
-![Geniş açı](onizleme-genis.png)
+| Geniş açı | Yakın çekim |
+|---|---|
+| ![Geniş açı](onizleme-genis.png) | ![Yakın çekim](onizleme-yakin.png) |
 
 | Etkileşim | Sonuç |
 |---|---|
@@ -19,11 +21,26 @@ yürür ve şavtları (0/7) sayılır. Hediyenin jeton değeri büyüdükçe dah
 7 şavt tamamlanınca "tavafını tamamladı" duyurusu çıkar; "En çok şavt" sıralaması canlı güncellenir.
 Kamera geniş açıda süzülür, belirli aralıklarla ve büyük hediyelerde oyuncuya yakın çekim yapar.
 
+## Karakterler
+
+Erkek ve kadın hacılar gerçek 3B insan modelleridir ve iskelet animasyonuyla yürür:
+
+- **Erkek:** ihram (sol omuzdan çapraz rida + izar), saç/sakal çeşitleri
+- **Kadın:** uzun pardösü ve başörtüsü (Türk hacı kafilelerindeki açık renkler ve siyah)
+- Hepsinde **Türk bayraklı boyun çantası**
+- TikTok izleyicinin cinsiyetini vermediği için model kullanıcıya göre rastgele (ama her seferinde aynı) seçilir.
+
+Gövde modelleri ve yürüme animasyonu [Quaternius](https://quaternius.com) tarafından CC0 (kamu malı) lisansıyla
+yayımlanmıştır (`public/models/LICENSE.txt`); kıyafetler `public/characters.js` içinde kodla giydirilir.
+`tools/prepare_models.py`, özgün paketlerden `public/models` klasörünü yeniden üretir.
+
 ## Ayarlar – `public/config.js`
 
 - `joinMode`: `'gift'` (yalnızca hediye gönderen katılır – varsayılan) veya `'comment'` (yorum yazan da katılır)
 - `giftTiers`: kademelerin jeton eşikleri, süreleri ve adları
-- `lapSeconds`, `lapsPerTawaf`, `idleMinutes`, `maxPlayers`, `backgroundCrowd`, `closeShotEvery`, `shadows`
+- `lapSeconds`, `lapsPerTawaf`, `idleMinutes`, `maxPlayers`, `closeShotEvery`
+- Performans: `backgroundCrowd` (isimsiz kalabalık), `shadows`, `renderScale` – yayın bilgisayarı zorlanırsa önce bunları düşür.
+  Hızlı deneme için adrese eklenebilir: `?crowd=20&shadows=0&scale=0.75`
 
 ## Kurulum
 
