@@ -7,7 +7,7 @@ const R_IN = 6.4, R_MID = 11.5, R_OUT = 17;       // yürüyüş halkaları (bir
 const START_A = Math.PI * 0.25;                    // şavt başlangıç çizgisi
 const KAABA = { w: 4.6, h: 5.8 };
 const params = new URLSearchParams(location.search);
-const DEMO = params.has('demo');
+const DEMO = params.has('demo') || !!window.GAME_DEMO;
 // Adres çubuğundan geçici ayar: ?crowd=20&shadows=0 (yavaş bilgisayarda denemek için)
 if (params.has('crowd')) CFG.backgroundCrowd = +params.get('crowd');
 if (params.has('shadows')) CFG.shadows = params.get('shadows') !== '0';
