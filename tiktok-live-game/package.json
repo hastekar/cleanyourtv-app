@@ -1,0 +1,13 @@
+{
+  "name": "memleket-fethi",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TikTok LIVE için 81 il fetih oyunu ve köprü sunucusu",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "tiktok-live-connector": "^2.5.0",
+    "ws": "^8.18.0"
+  }
+}
