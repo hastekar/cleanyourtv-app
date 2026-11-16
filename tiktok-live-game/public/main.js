@@ -390,7 +390,7 @@ function update(dt, t) {
     poseFigure(p);
     const u = p.fig.userData;
     u.ch.setFast(t < p.speedUntil);
-    u.beam.visible = gold;
+    u.beam.visible = gold && !(p.id === shot.id && t < shot.until);   // yakın çekimde ışık sütunu yüzü beyazlatmasın
     u.ringMat.color.copy(gold ? MAT.gold.color : u.baseColor);
     u.ring.scale.setScalar(gold ? 1.25 + Math.sin(t * 5) * 0.12 : 1);
     if (t > p.groupUntil && p.group.length) { for (const g of p.group) scene.remove(g.fig); p.group.length = 0; }
@@ -417,7 +417,7 @@ const shot = { id: null, until: 0, next: now() + (CFG.closeShotEvery || 1e9), ne
 const camPos = new THREE.Vector3(0, CAM_H, CAM_R), camLook = new THREE.Vector3(0, 1.6, 0);
 const wantPos = new THREE.Vector3(), wantLook = new THREE.Vector3();
 let orbitHold = false, orbit = Math.PI / 2 - 0.5, snapCam = true, shotKey = 'orbit', cutAt = -9;
-function focusOn(p, t, secs) { shot.near = 1; shot.id = p.id; shot.until = t + secs; shot.next = shot.until + (CFG.closeShotEvery || 1e9); }
+function focusOn(p, t, secs) { if (orbitHold) return; shot.near = 1; shot.id = p.id; shot.until = t + secs; shot.next = shot.until + (CFG.closeShotEvery || 1e9); }
 
 function updateCamera(dt, t) {
   if (!orbitHold) orbit += dt * 0.04;                                 // yürüyüşün tersine: yüzler kameraya doğru gelir
@@ -439,7 +439,7 @@ function updateCamera(dt, t) {
     wantPos.set(Math.cos(orbit) * CAM_R, CAM_H, Math.sin(orbit) * CAM_R);
     wantLook.set(0, LOOK_Y, 0);
   }
-  const k = snapCam ? 1 : 1 - Math.exp(-dt * 2.2); snapCam = false;
+  const k = snapCam ? 1 : 1 - Math.exp(-dt * (target ? 6 : 2.2)); snapCam = false;
   camPos.lerp(wantPos, k); camLook.lerp(wantLook, k);
   camera.position.copy(camPos); camera.lookAt(camLook);
   camera.updateMatrixWorld();
@@ -650,4 +650,4 @@ addEventListener('keydown', (e) => {
   const i = '12345'.indexOf(e.key);
   if (i >= 0 && tiers[i]) fakeGift(tiers[i].min);
 });
-window.__game = { onEvent, players, setOrbit(a, hold = true) { orbit = a; orbitHold = hold; snapCam = true; shot.until = 0; cutAt = -9; }, setCfg(k, v) { CFG[k] = v; }, closeUp(i = 0, secs = 600, near = 1) { const p = [...players.values()][i]; if (p) { focusOn(p, now(), secs); snapCam = true; shot.near = near; } return p && p.female; } };
+window.__game = { onEvent, players, setOrbit(a, hold = true) { orbit = a; orbitHold = hold; snapCam = true; shot.until = 0; cutAt = -9; }, setCfg(k, v) { CFG[k] = v; }, closeUp(i = 0, secs = 600, near = 1) { orbitHold = false; const p = [...players.values()][i]; if (p) { focusOn(p, now(), secs); snapCam = true; shot.near = near; } return p && p.female; } };

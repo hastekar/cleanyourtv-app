@@ -4,7 +4,7 @@ window.GAME_CONFIG = {
   // Katılım şekli: 'gift' = yalnızca hediye gönderen meydana girer, 'comment' = yorum yazan da girer
   joinMode: 'gift',
   lapsPerTawaf: 7,          // bir tavaf = 7 şavt
-  lapSeconds: 58,           // orta halkada bir turun süresi (sn)
+  lapSeconds: 62,           // orta halkada (r≈14.8 m) bir turun süresi (sn): ≈1,5 m/sn yürüyüş hızı, yürüme animasyonuyla uyumlu
   joinKeyword: '',          // yalnızca joinMode 'comment' iken: boş = her yorum katılır, 'katıl' = o kelimeyi içerenler
   idleMinutes: 15,          // bu kadar süre etkileşim yoksa oyuncu meydandan ayrılır
   maxPlayers: 200,
