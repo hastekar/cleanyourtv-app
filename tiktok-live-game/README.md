@@ -1,44 +1,81 @@
-# Memleket Fethi
+# Memleket Fethi v2: Kuşatma Düellosu
 
-TikTok LIVE için izleyici etkileşimli 81 il fetih oyunu.
+TikTok LIVE için tarayıcı oyunu. Ekranda her an yalnızca iki şehir var: uzaktaki kale **şampiyon**, yakındaki kale **meydan okuyan**. İzleyicilerin kendi adını taşıyan askerleri aradaki yolda çarpışır, kimin kazandığı üstteki can barlarından okunur. 81 ilin fetih haritası köşede durur, her maçın sonucu oraya işlenir. Tasarım ayrıntıları için `PLAN.md`.
 
-- `memleket-fethi.html` — oyunun kendisi (three.js, tek dosya). Demo izleyicilerle kendi başına çalışır.
-- `server.js` — TikTok LIVE olaylarını oyuna aktaran köprü sunucusu.
+## İzleyici nasıl oynar
 
-## Canlı yayında kullanım
+| İzleyici ne yapar | Ne olur |
+| --- | --- |
+| Yoruma plaka ya da il adı yaz (`34`, `izmir`) | Memleketi kaydedilir; ili savaşıyorsa o tarafta oynar. Değilse sıradaki rakibe 1 oy verir ve gönüllü olarak az oyunculu tarafa geçer |
+| Beğeni | Her beğeni 1 güç; 6 güçte kendi adını taşıyan piyade bölüğü kapıdan çıkar |
+| 1-9 elmas | Hemen piyade bölüğü |
+| 10-99 elmas | Şövalye süvarisi (iki kat hızlı, güçlü) |
+| 100-999 elmas | Mancınık: sura menzilden taş atar |
+| 1000+ elmas | Mehter: 12 sn tüm hasar +%50, 5 dalga piyade, sura onarım |
+| Takip | Kendi surlarına 8 sn kalkan ve onarım |
+| Paylaşım | +10 güç |
+| Serbest yorum | Askerinin üstünde konuşma balonu, +1 güç |
+| Yoruma `ben` | Rütbe kartı |
+
+Geride kalan taraf "İNTİKAM ×1.5" alır, son 30 saniyede tüm hasar ×2 olur. Maç 180 sn sürer, kazanan şampiyon olur; tören ekranında en çok katkı veren izleyici "Fatih" ilan edilir.
+
+## Çalıştırma
 
 ```
 npm install
-node server.js <tiktok_kullanici_adi>
+node server.js <tiktok_kullanici_adi> [port]     # varsayılan port 8787
 ```
 
-OBS'te tarayıcı kaynağı ekle: `http://localhost:8787/?obs=1` (1080×1920). `h` tuşu araç çubuğunu açıp kapatır.
-Tur süresi için `&tur=300` (saniye).
+**A) Bilgisayar + TikTok LIVE Studio / OBS (önerilen).** Tarayıcı kaynağı ekle, boyut **1080×1920**, adres `http://localhost:8787/?obs=1`. Köprü TikTok olaylarını WebSocket ile sayfaya yollar; bağlanınca demo kapanır.
 
-## Kamera ve derbi
+**B) Yalnızca telefon.** Köprü sunucusunu bir bilgisayarda ya da bulutta çalıştır, telefondaki tarayıcıda (Android Chrome, iPhone Safari) `https://sayfa-adresi/?ws=wss://sunucu-adresi` aç ve ekranı TikTok uygulamasıyla yayınla. Ses iOS'ta yalnızca "Ses" düğmesine dokunduktan sonra açılır.
 
-Kamera haritanın tamamını göstermez: alçak açıdan, o an en çok çatışma olan cepheye yakın çekim yapar ve birkaç saniyede bir en sıcak noktaya geçer. Büyük hediyede hediyeyi gönderenin karakterine, derbide iki klanın sınırına döner. Haritanın tamamı köşedeki küçük haritada görünür.
+Köprü olmadan denemek için `memleket-fethi.html` dosyasını `server.js` olmadan sunan herhangi bir statik sunucuyla açabilirsin (`js/` klasörü yanında olmalı); sayfa demo izleyicilerle çalışır.
 
-Her 45 saniyede bir en büyük klan ile sınır komşusu en güçlü rakibi 25 saniyelik derbiye girer. Bu sürede klan üyelerinin beğeni, yorum ve hediyeleri sayılır; kazanan klan rakibin sınırdaki en zayıf ilini alır ve 10 saniye hücuma geçer. En çok katkı veren izleyici derbinin yıldızı ilan edilir.
+## Adres parametreleri
 
-## Kişisel karakter
-
-Her izleyicinin haritada adı ve profil fotoğrafıyla yaşayan bir karakteri vardır. Beğeni ve hediyeler o karakterin askerine dönüşür, saldırıyı karakter kendisi yapar ve fethettiği ilin üstünde izleyicinin adı yazar.
-
-| Olay | Oyundaki etkisi |
+| Parametre | Anlamı |
 | --- | --- |
-| Yorum: plaka ya da il adı | Karakter o ilin kalesinde doğar, klan yoksa kurulur |
-| Yorum: serbest metin | Karakterin üstünde konuşma balonu |
-| Yorum: `ben` | İzleyicinin rütbe kartı ekrana gelir |
-| Beğeni | Karakter askerle saldırır, 100 beğenide klan Hücum'a geçer |
-| 1–9 elmas | Piyade bölüğüyle saldırı |
-| 10–99 elmas | Karakter sipahi olur (iki kat hızlı) |
-| 100–999 elmas | Karakter top çeker (kaleye çift hasar) |
-| 1000+ elmas | Mehter (tüm klan hücuma kalkar) |
-| Takip | Karakterin bulunduğu ile 20 sn kalkan |
-| Paylaşım | +10 asker |
+| `ws=ws://...` | Köprü adresi; üstel geri çekilmeyle yeniden bağlanır |
+| `sim=0` | Demo izleyicileri kapat (WebSocket bağlıyken zaten kapalı) |
+| `obs=1` (ya da `#obs`) | Yayıncı araç çubuğunu gizle; `h` tuşu aç/kapa |
+| `tur=60` | Maç süresi (sn), varsayılan 180 |
+| `kalite=dusuk` | Piksel oranı 1, daha az süs ve daha düşük çizim bütçesi (zayıf telefonlar) |
 
-Rütbeler toplam puana göre: Er, Onbaşı (50), Çavuş (200), Bey (600), Paşa (2000), Vezir (6000), Sultan (20000). Bey ve üstü ata biner.
-Puan, fetih sayısı ve klan tarayıcıda saklanır; izleyici sonraki yayında rütbesiyle geri döner.
+Araç çubuğunda demo aç/kapa, plaka kutusu, test düğmeleri (beğeni ×20, 1/30/199/1000 elmas, takip), 3B model galerisi ("Modeller") ve ses düğmesi var.
 
-Hediye gücü `4 × elmas^0.75` ile hesaplanır; küçük hediyeler de işe yarar, büyük hediye turu tek başına bitirmez.
+## TikTok güvenli alanları
+
+Sayfa 1080×1920 dikey yayına göre yerleşir; TikTok arayüzünün bindiği bölgelerde önemli hiçbir şey durmaz. Değerler `memleket-fethi.html` içindeki `:root` değişkenleridir:
+
+| Değişken | Varsayılan | Bölge |
+| --- | --- | --- |
+| `--safe-top` | `11%` | Üstte boş bırakılır (yayıncı bilgisi, izleyici sayısı) |
+| `--safe-bottom` | `36%` | Altta sohbet akışı ve yorum çubuğu; sahne bu çizginin üstünde biter |
+| `--safe-right` | `12%` | Sağ kenar, %45-78 yükseklik: hediye animasyonları; kart ve harita bu şeridin soluna konur |
+
+Yerleşim: %11-19 can/sayaç/çekişme çubuğu, %19-24 ipucu ve sıradaki rakip, %24-64 sahne (iki kale bu bantta tam görünür; kamera `fit()` ile hesaplar). Yazı boyları `--u` (ekran genişliğinin %1'i) ile verilir; 1080 px'te en küçük yazı 26 px'in üstündedir. Yatay ekranda (16:9) güvenli değerler otomatik küçülür ve kamera yandan bakar.
+
+## Denge ayarı
+
+Tüm sayılar `js/game.js` başındaki `TUNE` nesnesindedir: süreler, can (`hpBase`, `hpPerViewer`), hız, hasar (`dps`, `wallDps`), kademe eşikleri (`tierCav`, `tierCat`, `tierMehter`), intikam, kalkan, mehter. Kod içinde değiştirmeden denemek için `MF.game.create({tune:{...}})`.
+
+## Test
+
+```
+node test/sim.js
+```
+
+Başsız olarak 20 maç koşturur: her maç biter, iki taraf da kazanabilir, yoğun hediye alan taraf kazanır, intikam/son 30 sn kuralları çalışır, kayıt yazılıp geri okunur, birlik sayısı 120'yi aşmaz. Görünüm için sayfayı açıp `MemleketFethi.info()` ile çizim çağrısı ve üçgen sayısına bakabilirsin (hedef ≤150 çağrı, ≤120 bin üçgen).
+
+## Dosyalar
+
+```
+memleket-fethi.html   sayfa parçası (server.js tam HTML belgesine sarar)
+js/data.js            il verisi, renkler, plaka çözümleme, harita ızgarası
+js/models.js          3B modeller (three.js r128)
+js/game.js            oyun mantığı (DOM/THREE yok)
+js/view.js            sahne, kamera, HUD, köprü bağlantısı
+server.js             TikTok köprüsü + statik dosya sunucusu (/js/)
+test/sim.js           başsız oyun testi
+```

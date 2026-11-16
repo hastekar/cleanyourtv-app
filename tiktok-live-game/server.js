@@ -23,8 +23,26 @@ const page = () =>
   fs.readFileSync(path.join(__dirname, 'memleket-fethi.html'), 'utf8') +
   '</body></html>';
 
+// /js/ altındaki oyun dosyaları statik sunulur (yol atlatma korumalı).
+const JS_DIR = path.join(__dirname, 'js');
+const TYPES = { '.js': 'application/javascript; charset=utf-8', '.map': 'application/json; charset=utf-8' };
+function serveJs(pathname, res) {
+  let rel;
+  try { rel = decodeURIComponent(pathname.slice('/js/'.length)); } catch (_) { res.writeHead(400); res.end(); return; }
+  const file = path.resolve(JS_DIR, rel);
+  if (rel.includes('\0') || (file !== JS_DIR && !file.startsWith(JS_DIR + path.sep))) { res.writeHead(403); res.end(); return; }
+  const type = TYPES[path.extname(file).toLowerCase()];
+  if (!type) { res.writeHead(404); res.end(); return; }
+  fs.readFile(file, (err, buf) => {
+    if (err) { res.writeHead(404); res.end(); return; }
+    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store' });
+    res.end(buf);
+  });
+}
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
+  if (url.pathname.startsWith('/js/')) { serveJs(url.pathname, res); return; }
   if (url.pathname !== '/') { res.writeHead(404); res.end(); return; }
   if (!url.searchParams.has('ws')) {
     url.searchParams.set('ws', `ws://localhost:${port}`);
