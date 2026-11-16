@@ -3,9 +3,9 @@ import { loadCharacters } from './characters.js';
 
 const CFG = window.GAME_CONFIG;
 const W = 1080, H = 1920, TAU = Math.PI * 2;
-const R_IN = 6.4, R_MID = 11.5, R_OUT = 17;       // yürüyüş halkaları (birim ≈ metre)
+const R_IN = 9.8, R_MID = 14.5, R_OUT = 20;       // yürüyüş halkaları (birim ≈ metre)
 const START_A = Math.PI * 0.25;                    // şavt başlangıç çizgisi
-const KAABA = { w: 4.6, h: 5.8 };
+const KAABA = { w: 9, h: 11 };                    // insanlara göre gerçek oranında
 const params = new URLSearchParams(location.search);
 const DEMO = params.has('demo') || !!window.GAME_DEMO;
 // Adres çubuğundan geçici ayar: ?crowd=20&shadows=0 (yavaş bilgisayarda denemek için)
@@ -33,15 +33,15 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x060a14);
 scene.fog = new THREE.Fog(0x060a14, 90, 210);
-const camera = new THREE.PerspectiveCamera(50, W / H, 0.5, 400);
+const camera = new THREE.PerspectiveCamera(88, W / H, 0.3, 400);   // geniş açı: ekranın orta bandı (TikTok arayüzünün dışında kalan kısım) dolsun
 
 scene.add(new THREE.HemisphereLight(0xcfdcff, 0x4a3c28, 1.0));
 scene.add(new THREE.AmbientLight(0xffffff, 0.25));
 const sun = new THREE.DirectionalLight(0xfff1d6, 2.0);
-sun.position.set(18, 42, 14);
+sun.position.set(20, 46, 16);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -24, right: 24, top: 24, bottom: -24, near: 5, far: 90 });
+Object.assign(sun.shadow.camera, { left: -29, right: 29, top: 29, bottom: -29, near: 5, far: 100 });
 sun.shadow.bias = -0.0004;
 scene.add(sun);
 const nurLight = new THREE.PointLight(0xffdf90, 0, 60, 1.4);
@@ -61,93 +61,132 @@ const floorTex = canvasTex(1024, 1024, (g, w) => {
   grd.addColorStop(0, '#fbf8f0'); grd.addColorStop(1, '#e6dfd0');
   g.fillStyle = grd; g.fillRect(0, 0, w, w);
   g.strokeStyle = 'rgba(140,125,95,0.35)'; g.lineWidth = 2;
-  for (let r = 70; r < c; r += 34) { g.beginPath(); g.arc(c, c, r, 0, TAU); g.stroke(); }
+  for (let r = 70; r < c; r += 30) { g.beginPath(); g.arc(c, c, r, 0, TAU); g.stroke(); }
   g.strokeStyle = 'rgba(140,125,95,0.16)';
-  for (let i = 0; i < 48; i++) { const a = i / 48 * TAU; g.beginPath(); g.moveTo(c + Math.cos(a) * 70, c + Math.sin(a) * 70); g.lineTo(c + Math.cos(a) * c, c + Math.sin(a) * c); g.stroke(); }
+  for (let i = 0; i < 64; i++) { const a = i / 64 * TAU; g.beginPath(); g.moveTo(c + Math.cos(a) * 70, c + Math.sin(a) * 70); g.lineTo(c + Math.cos(a) * c, c + Math.sin(a) * c); g.stroke(); }
 });
-const floor = new THREE.Mesh(new THREE.CircleGeometry(22.5, 96), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.55, metalness: 0.05 }));
+const floor = new THREE.Mesh(new THREE.CircleGeometry(26.5, 96), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.5, metalness: 0.05 }));
 floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 const outer = new THREE.Mesh(new THREE.CircleGeometry(160, 64), new THREE.MeshStandardMaterial({ color: 0x1a2028, roughness: 1 }));
 outer.rotation.x = -Math.PI / 2; outer.position.y = -0.05; scene.add(outer);
 
-// başlangıç çizgisi
-const startLine = new THREE.Mesh(new THREE.PlaneGeometry(18.6, 0.28), new THREE.MeshBasicMaterial({ color: 0x25b877, transparent: true, opacity: 0.85 }));
+// başlangıç çizgisi (Hacerülesved köşesinden dışarı)
+const startLine = new THREE.Mesh(new THREE.PlaneGeometry(19.5, 0.3), new THREE.MeshBasicMaterial({ color: 0x25b877, transparent: true, opacity: 0.85 }));
 startLine.rotation.x = -Math.PI / 2; startLine.rotation.z = -START_A;
-startLine.position.set(Math.cos(START_A) * 12.8, 0.02, Math.sin(START_A) * 12.8);
+startLine.position.set(Math.cos(START_A) * 16.6, 0.02, Math.sin(START_A) * 16.6);
 scene.add(startLine);
 
 // --- Kâbe ---
-function kaabaSide(door) {
-  return canvasTex(512, 640, (g, w, h) => {
-    g.fillStyle = '#0b0b0e'; g.fillRect(0, 0, w, h);
-    for (let x = 0; x < w; x += 6) { g.fillStyle = `rgba(255,255,255,${0.012 + (x % 18 === 0 ? 0.02 : 0)})`; g.fillRect(x, 0, 2, h); }
-    const by = h * 0.2, bh = h * 0.12;
-    g.fillStyle = '#c9a441'; g.fillRect(0, by, w, bh);
-    g.fillStyle = '#7d611c'; g.fillRect(0, by + 6, w, 4); g.fillRect(0, by + bh - 10, w, 4);
-    g.strokeStyle = '#5a4410'; g.lineWidth = 5; g.lineCap = 'round';
-    for (let x = 22; x < w - 20; x += 46) {                // kuşak üstü soyut hat motifi
-      g.beginPath(); g.moveTo(x, by + bh * 0.68); g.quadraticCurveTo(x + 14, by + bh * 0.2, x + 30, by + bh * 0.62); g.stroke();
-      g.beginPath(); g.arc(x + 16, by + bh * 0.33, 2.5, 0, TAU); g.stroke();
+const GOLD = '#d9b24c', GOLD_D = '#8a6a1c', GOLD_L = '#f3d98a';
+function kiswah(door) {
+  return canvasTex(1024, 1280, (g, w, h) => {
+    g.fillStyle = '#08080a'; g.fillRect(0, 0, w, h);
+    // jakarlı dokuma: zikzak şeritler
+    g.strokeStyle = 'rgba(255,255,255,0.045)'; g.lineWidth = 5;
+    for (let y = -40; y < h; y += 46) { g.beginPath(); for (let x = 0; x <= w; x += 64) g.lineTo(x, y + ((x / 64) % 2 ? 40 : 0)); g.stroke(); }
+    // hizam (altın kuşak)
+    const by = h * 0.24, bh = h * 0.115;
+    g.fillStyle = GOLD_D; g.fillRect(0, by - 10, w, bh + 20);
+    g.fillStyle = '#0b0b0d'; g.fillRect(0, by, w, bh);
+    g.fillStyle = GOLD; g.fillRect(0, by - 16, w, 8); g.fillRect(0, by + bh + 8, w, 8);
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    for (let x = 30; x < w - 40; x += 118) {             // kuşak içi: hat sanatını andıran akıcı altın motifler
+      g.strokeStyle = GOLD; g.lineWidth = 11;
+      g.beginPath(); g.moveTo(x, by + bh * 0.72); g.bezierCurveTo(x + 18, by + bh * 0.1, x + 44, by + bh * 0.95, x + 62, by + bh * 0.3); g.stroke();
+      g.beginPath(); g.moveTo(x + 50, by + bh * 0.8); g.quadraticCurveTo(x + 86, by + bh * 0.95, x + 100, by + bh * 0.42); g.stroke();
+      g.lineWidth = 8; g.beginPath(); g.moveTo(x + 78, by + bh * 0.16); g.lineTo(x + 78, by + bh * 0.62); g.stroke();
+      g.fillStyle = GOLD_L; g.beginPath(); g.arc(x + 30, by + bh * 0.2, 6, 0, TAU); g.arc(x + 96, by + bh * 0.2, 5, 0, TAU); g.fill();
     }
-    g.fillStyle = '#b8922f';
-    for (let i = 0; i < 4; i++) { const x = w * (0.14 + i * 0.24); g.beginPath(); g.roundRect(x - 34, by + bh + 26, 68, 34, 10); g.fill(); }
-    if (door) {
-      g.fillStyle = '#d8b24a'; g.fillRect(w * 0.56, h * 0.52, w * 0.27, h * 0.4);
-      g.fillStyle = '#a9832a'; g.fillRect(w * 0.585, h * 0.545, w * 0.22, h * 0.35);
-      g.strokeStyle = '#e8cd78'; g.lineWidth = 4; g.strokeRect(w * 0.6, h * 0.56, w * 0.19, h * 0.32);
-      g.beginPath(); g.moveTo(w * 0.695, h * 0.56); g.lineTo(w * 0.695, h * 0.88); g.stroke();
+    // kuşak altı: kandil biçimli ve dikdörtgen altın işlemeler
+    for (let i = 0; i < 5; i++) {
+      const x = w * (0.1 + i * 0.2), y = by + bh + 70;
+      g.fillStyle = GOLD_D; g.beginPath(); g.roundRect(x - 78, y - 6, 156, 76, 18); g.fill();
+      g.fillStyle = '#0b0b0d'; g.beginPath(); g.roundRect(x - 68, y + 4, 136, 56, 12); g.fill();
+      g.strokeStyle = GOLD; g.lineWidth = 7; g.beginPath(); g.moveTo(x - 50, y + 42); g.bezierCurveTo(x - 20, y + 4, x + 14, y + 62, x + 50, y + 20); g.stroke();
+      if (i % 2) { g.fillStyle = GOLD; g.beginPath(); g.ellipse(x, y + 150, 30, 44, 0, 0, TAU); g.fill(); g.fillStyle = '#0b0b0d'; g.beginPath(); g.ellipse(x, y + 150, 19, 32, 0, 0, TAU); g.fill(); }
+    }
+    g.fillStyle = GOLD_D; g.fillRect(0, h - 26, w, 10);
+    if (door) {                                          // kapı örtüsü (sitare)
+      const dx = w * 0.56, dw = w * 0.3, dy = h * 0.46, dh = h * 0.5;
+      g.fillStyle = GOLD; g.fillRect(dx, dy, dw, dh);
+      g.fillStyle = '#0b0b0d'; g.fillRect(dx + 14, dy + 14, dw - 28, dh - 28);
+      g.strokeStyle = GOLD; g.lineWidth = 8;
+      for (let k = 0; k < 4; k++) { const yy = dy + 50 + k * 60; g.beginPath(); g.roundRect(dx + 36, yy, dw - 72, 40, 12); g.stroke(); }
+      g.beginPath(); g.arc(dx + dw / 2, dy + dh * 0.62, dw * 0.3, Math.PI, 0); g.stroke();
     }
   });
 }
-const sideMat = (door) => new THREE.MeshStandardMaterial({ map: kaabaSide(door), roughness: 0.85 });
-const topMat = new THREE.MeshStandardMaterial({ color: 0x1a1b20, roughness: 0.9 });
-const sidePlain = sideMat(false);
-const kaaba = new THREE.Mesh(new THREE.BoxGeometry(KAABA.w, KAABA.h, KAABA.w), [sideMat(true), sidePlain, topMat, topMat, sidePlain, sidePlain]);
-kaaba.position.y = KAABA.h / 2 + 0.35; kaaba.castShadow = true; scene.add(kaaba);
-const marble = new THREE.MeshStandardMaterial({ color: 0xe9e2d2, roughness: 0.5 });
-const plinth = new THREE.Mesh(new THREE.BoxGeometry(KAABA.w + 0.5, 0.35, KAABA.w + 0.5), marble);
-plinth.position.y = 0.175; plinth.receiveShadow = true; scene.add(plinth);
-const hatim = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.22, 8, 28, Math.PI), marble);
-hatim.rotation.x = Math.PI / 2; hatim.rotation.z = Math.PI; hatim.scale.z = 3.2; hatim.position.set(0, 0.6, -KAABA.w / 2 - 0.2);
-hatim.castShadow = true; scene.add(hatim);
-const kaabaBox = new THREE.Box3(new THREE.Vector3(-KAABA.w / 2, 0, -KAABA.w / 2), new THREE.Vector3(KAABA.w / 2, KAABA.h + 0.35, KAABA.w / 2));
-
-// --- revaklar (çevre kemerler) ---
+const kMat = (door) => { const t = kiswah(door); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.9, emissive: 0x6b5520, emissiveMap: t, emissiveIntensity: 0.55 }); };
+const kTop = new THREE.MeshStandardMaterial({ color: 0x15161a, roughness: 0.95 });
+const kPlain = kMat(false);
+const marble = new THREE.MeshStandardMaterial({ color: 0xece5d6, roughness: 0.45 });
+const goldMat = new THREE.MeshStandardMaterial({ color: 0xd9b24c, roughness: 0.3, metalness: 0.85, emissive: 0x7a5a14, emissiveIntensity: 0.6 });
+const BASE = 0.8, HW = KAABA.w / 2;
+const kaaba = new THREE.Mesh(new THREE.BoxGeometry(KAABA.w, KAABA.h, KAABA.w), [kPlain, kPlain, kTop, kTop, kMat(true), kPlain]);
+kaaba.position.y = KAABA.h / 2 + BASE; kaaba.castShadow = true; scene.add(kaaba);
+// şazervan: eğimli mermer kaide
+const shadh = new THREE.Mesh(new THREE.CylinderGeometry((HW + 0.08) * Math.SQRT2, (HW + 0.75) * Math.SQRT2, BASE, 4), marble);
+shadh.rotation.y = Math.PI / 4; shadh.position.y = BASE / 2; shadh.receiveShadow = true; scene.add(shadh);
+// altın kapı (yerden yüksekte, Hacerülesved köşesine yakın)
+const door = new THREE.Mesh(new THREE.BoxGeometry(2.0, 3.3, 0.16), goldMat);
+door.position.set(HW * 0.42, BASE + 2.2 + 1.65, HW + 0.05); scene.add(door);
+const doorIn = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.9, 0.2), new THREE.MeshStandardMaterial({ color: 0xb8902e, roughness: 0.35, metalness: 0.8, emissive: 0x5a4210, emissiveIntensity: 0.5 }));
+doorIn.position.copy(door.position); scene.add(doorIn);
+// Hacerülesved: köşede gümüş çerçeve
+const stone = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 12), new THREE.MeshStandardMaterial({ color: 0xdfe3e8, roughness: 0.25, metalness: 0.9 }));
+stone.scale.set(1, 1.25, 1); stone.position.set(HW, BASE + 1.5, HW); scene.add(stone);
+const stoneIn = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 8), new THREE.MeshStandardMaterial({ color: 0x120c0a, roughness: 0.6 }));
+stoneIn.position.set(HW + 0.24, BASE + 1.5, HW + 0.24); scene.add(stoneIn);
+// altın oluk (mizab) ve Hatim (yarım daire duvar)
+const mizab = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.3, 1.5), goldMat);
+mizab.position.set(0, BASE + KAABA.h - 0.1, -HW - 0.6); scene.add(mizab);
+const hatim = new THREE.Mesh(new THREE.TorusGeometry(4.3, 0.42, 10, 40, Math.PI), marble);
+hatim.rotation.x = Math.PI / 2; hatim.scale.z = 1.7; hatim.position.set(0, 0.7, -HW - 0.3);
+hatim.castShadow = true; hatim.receiveShadow = true; scene.add(hatim);
+// Makam-ı İbrahim
 {
-  const stone = new THREE.MeshStandardMaterial({ color: 0xe2d6bd, roughness: 0.7 });
-  const GAP = 0.9;   // öndeki açıklığın yarı açısı (radyan)
-  const N = 60, colGeo = new THREE.BoxGeometry(0.7, 3.4, 0.7);
-  const cols = new THREE.InstancedMesh(colGeo, stone, N * 2);
-  const lamps = new THREE.InstancedMesh(new THREE.SphereGeometry(0.22, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffe2a0 }), N);
+  const m = new THREE.Group();
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.9, 0.5, 8), marble); base.position.y = 0.25;
+  const cage = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.5, 8), goldMat); cage.position.y = 1.25;
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.58, 12, 8, 0, TAU, 0, Math.PI / 2), goldMat); dome.position.y = 2.0;
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.5, 6), goldMat); tip.position.y = 2.8;
+  m.add(base, cage, dome, tip); m.position.set(HW * 0.3, 0, HW + 3.6); scene.add(m);
+}
+const kaabaBox = new THREE.Box3(new THREE.Vector3(-HW, 0, -HW), new THREE.Vector3(HW, KAABA.h + BASE, HW));
+
+// --- revaklar (çevre kemerler) ve minareler ---
+{
+  const stoneM = new THREE.MeshStandardMaterial({ color: 0xe2d6bd, roughness: 0.7 });
+  const N = 72, RC = 27.6;
+  const cols = new THREE.InstancedMesh(new THREE.BoxGeometry(0.8, 4.2, 0.8), stoneM, N * 2);
+  const lamps = new THREE.InstancedMesh(new THREE.SphereGeometry(0.26, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffe2a0 }), N);
   const m = new THREE.Matrix4();
   for (let i = 0; i < N; i++) {
-    const a = i / N * TAU, x = Math.cos(a) * 23.2, z = Math.sin(a) * 23.2;
-    if (Math.sin(a) > 0.62) { m.makeScale(0, 0, 0); cols.setMatrixAt(i, m); cols.setMatrixAt(N + i, m); lamps.setMatrixAt(i, m); continue; }   // ön taraf açık
-    m.makeRotationY(-a).setPosition(x, 1.7, z); cols.setMatrixAt(i, m);
-    m.makeRotationY(-a).setPosition(x, 6.0, z); cols.setMatrixAt(N + i, m);
-    m.makeTranslation(Math.cos(a) * 22.7, 3.1, Math.sin(a) * 22.7); lamps.setMatrixAt(i, m);
+    const a = i / N * TAU, x = Math.cos(a) * RC, z = Math.sin(a) * RC;
+    m.makeRotationY(-a).setPosition(x, 2.1, z); cols.setMatrixAt(i, m);
+    m.makeRotationY(-a).setPosition(x, 7.2, z); cols.setMatrixAt(N + i, m);
+    m.makeTranslation(Math.cos(a) * (RC - 0.55), 3.8, Math.sin(a) * (RC - 0.55)); lamps.setMatrixAt(i, m);
   }
   scene.add(cols, lamps);
-  for (const y of [3.85, 8.1]) {
-    const beam = new THREE.Mesh(new THREE.CylinderGeometry(23.6, 23.6, 0.9, 96, 1, true, GAP, TAU - 2 * GAP), new THREE.MeshStandardMaterial({ color: 0xd6c8a8, roughness: 0.7, side: THREE.DoubleSide }));
+  for (const y of [4.7, 9.8]) {
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(RC + 0.4, RC + 0.4, 1.0, 96, 1, true), new THREE.MeshStandardMaterial({ color: 0xd6c8a8, roughness: 0.7, side: THREE.DoubleSide }));
     beam.position.y = y; scene.add(beam);
   }
-  const wall = new THREE.Mesh(new THREE.CylinderGeometry(26.5, 26.5, 8.5, 96, 1, true, GAP, TAU - 2 * GAP), new THREE.MeshStandardMaterial({ color: 0xb59f74, roughness: 0.9, side: THREE.BackSide, emissive: 0x3a2a10, emissiveIntensity: 0.6 }));
-  wall.position.y = 4.25; scene.add(wall);
-  const roof = new THREE.Mesh(new THREE.RingGeometry(23.2, 27.5, 96, 1, -Math.PI / 2 + GAP, TAU - 2 * GAP), new THREE.MeshStandardMaterial({ color: 0xcdbf9f, roughness: 0.8, side: THREE.DoubleSide }));
-  roof.rotation.x = -Math.PI / 2; roof.position.y = 8.55; scene.add(roof);
-  // minareler
+  const wall = new THREE.Mesh(new THREE.CylinderGeometry(RC + 3.4, RC + 3.4, 10.3, 96, 1, true), new THREE.MeshStandardMaterial({ color: 0xb59f74, roughness: 0.9, side: THREE.BackSide, emissive: 0x4a3614, emissiveIntensity: 0.7 }));
+  wall.position.y = 5.15; scene.add(wall);
+  const roof = new THREE.Mesh(new THREE.RingGeometry(RC, RC + 4.4, 96), new THREE.MeshStandardMaterial({ color: 0xcdbf9f, roughness: 0.8, side: THREE.DoubleSide }));
+  roof.rotation.x = -Math.PI / 2; roof.position.y = 10.3; scene.add(roof);
   const tipMat = new THREE.MeshBasicMaterial({ color: 0xfff0c0 });
-  for (const a of [-0.35, -1.15, -1.99, -2.79]) {   // minareler arkada
-    const g = new THREE.Group();
-    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 1.0, 24, 12), stone); shaft.position.y = 12;
-    const balc = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.0, 0.8, 12), stone); balc.position.y = 17;
-    const balc2 = balc.clone(); balc2.position.y = 22.5;
-    const cap = new THREE.Mesh(new THREE.ConeGeometry(0.85, 3.2, 12), new THREE.MeshStandardMaterial({ color: 0xc9a441, roughness: 0.4, metalness: 0.6 })); cap.position.y = 25.6;
-    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 6), tipMat); tip.position.y = 27.4;
-    const glow = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.0, 0.5, 12), tipMat); glow.position.y = 21.8;
+  for (let i = 0; i < 6; i++) {
+    const a = i / 6 * TAU + 0.52, g = new THREE.Group();
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.2, 30, 12), stoneM); shaft.position.y = 15;
+    const balc = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.2, 0.9, 12), stoneM); balc.position.y = 21;
+    const balc2 = balc.clone(); balc2.position.y = 28;
+    const cap = new THREE.Mesh(new THREE.ConeGeometry(1.0, 4, 12), new THREE.MeshStandardMaterial({ color: 0xc9a441, roughness: 0.4, metalness: 0.6 })); cap.position.y = 32;
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 6), tipMat); tip.position.y = 34.3;
+    const glow = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.6, 12), tipMat); glow.position.y = 27.2;
     g.add(shaft, balc, balc2, cap, tip, glow);
-    g.position.set(Math.cos(a) * 29, 0, Math.sin(a) * 29); scene.add(g);
+    g.position.set(Math.cos(a) * 33.5, 0, Math.sin(a) * 33.5); scene.add(g);
   }
 }
 
@@ -163,7 +202,7 @@ scene.add(pointsCloud(700, (p, i) => {
   p[i] = Math.cos(a) * Math.cos(e) * 190; p[i + 1] = Math.sin(e) * 190; p[i + 2] = Math.sin(a) * Math.cos(e) * 190;
 }, new THREE.PointsMaterial({ color: 0xffffff, size: 1.3, sizeAttenuation: false, fog: false, transparent: true, opacity: 0.8 })));
 const nurPts = pointsCloud(900, (p, i) => {
-  const a = rand(0, TAU), r = Math.sqrt(Math.random()) * 21;
+  const a = rand(0, TAU), r = Math.sqrt(Math.random()) * 26;
   p[i] = Math.cos(a) * r; p[i + 1] = rand(0, 26); p[i + 2] = Math.sin(a) * r;
 }, new THREE.PointsMaterial({ color: 0xffe08a, size: 0.32, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
 nurPts.visible = false; scene.add(nurPts);
@@ -203,7 +242,7 @@ const RING_COLORS = ['#3fb6a8', '#e0a03a', '#d86a8c', '#6f9ae0', '#9a7fe0', '#62
 const hashStr = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); };
 
 function makeWalker(extra) {
-  const w = Object.assign({ a: rand(0, TAU), r: rand(R_IN + 1, R_OUT + 2.5), travel: 0, phase: rand(0, TAU), pace: rand(0.85, 1.15), female: Math.random() < 0.45, npc: true }, extra);
+  const w = Object.assign({ a: rand(0, TAU), r: rand(R_IN + 0.6, R_OUT), travel: 0, phase: rand(0, TAU), pace: rand(0.85, 1.15), female: Math.random() < 0.45, npc: true }, extra);
   if (w.lane === undefined) w.lane = w.r;
   w.fig = buildFigure(w);
   return w;
@@ -240,7 +279,7 @@ function ensure(user, t, canJoin) {
   return p;
 }
 
-function toast(text, color) { toasts.push({ text, color: color || '#fff', t: now() }); if (toasts.length > 4) toasts.shift(); }
+function toast(text, color) { toasts.push({ text, color: color || '#fff', t: now() }); if (toasts.length > 3) toasts.shift(); }
 
 const _v = new THREE.Vector3();
 function screenOf(x, y, z) {
@@ -361,31 +400,33 @@ function update(dt, t) {
 }
 
 // ---------- kamera ----------
-const shot = { id: null, until: 0, next: now() + (CFG.closeShotEvery || 1e9) };
-const camPos = new THREE.Vector3(0, 46, 62), camLook = new THREE.Vector3(0, 0, 0);
+// Kamera kalabalığın hemen dışında, baş hizasının biraz üstünde döner; aralıklarla bir oyuncuyu yakından takip eder.
+const CAM_R = 22.5, CAM_H = 4.6;
+const shot = { id: null, until: 0, next: now() + (CFG.closeShotEvery || 1e9), near: 1 };
+const camPos = new THREE.Vector3(0, CAM_H, CAM_R), camLook = new THREE.Vector3(0, 1.6, 0);
 const wantPos = new THREE.Vector3(), wantLook = new THREE.Vector3();
-let orbit = 0, snapCam = false;
+let orbit = Math.PI / 2 - 0.5, snapCam = true, shotKey = 'orbit', cutAt = -9;
 function focusOn(p, t, secs) { shot.near = 1; shot.id = p.id; shot.until = t + secs; shot.next = shot.until + (CFG.closeShotEvery || 1e9); }
 
 function updateCamera(dt, t) {
-  orbit += dt * 0.07;
+  orbit += dt * 0.05;                                 // yürüyüşün tersine: yüzler kameraya doğru gelir
   if (CFG.closeShotEvery && t > shot.next && players.size && t > nurUntil) {
     const list = [...players.values()].sort((a, b) => b.lastActive - a.lastActive).slice(0, 8);
     focusOn(list[Math.floor(Math.random() * list.length)], t, 9);
   }
   const target = t < shot.until ? players.get(shot.id) : null;
+  const key = target ? target.id : 'orbit';
+  if (key !== shotKey) { shotKey = key; snapCam = true; cutAt = t; }   // çekim değişince kes (Kâbe'nin içinden geçmesin)
   if (target) {
-    const ca = Math.cos(target.a), sa = Math.sin(target.a), r = target.r;
-    // oyuncunun önünde ve dışında: arkada Kâbe görünsün
-    const n = shot.near || 1;                         // (test için yakınlık çarpanı)
-    wantPos.set(ca * (r + 6.5 * n) + sa * 8 * n, 1.2 + 3.4 * n, sa * (r + 6.5 * n) - ca * 8 * n);
-    wantLook.set(ca * (r - 1.5), 1.3, sa * (r - 1.5));
+    const ca = Math.cos(target.a), sa = Math.sin(target.a), r = target.r, n = shot.near || 1;
+    // oyuncunun önünde ve dışında: yüzü kameraya dönük, arkada Kâbe
+    wantPos.set(ca * (r + 2.4 * n) + sa * 3.6 * n, 1.7 + 0.9 * n, sa * (r + 2.4 * n) - ca * 3.6 * n);
+    wantLook.set(ca * (r - 0.5), 1.35, sa * (r - 0.5));
   } else {
-    const o = Math.sin(orbit) * 0.75;                 // açık ön taraftan sağa sola süzül
-    wantPos.set(Math.sin(o) * 62, 46, Math.cos(o) * 62);
-    wantLook.set(0, 0.5, 0);
+    wantPos.set(Math.cos(orbit) * CAM_R, CAM_H, Math.sin(orbit) * CAM_R);
+    wantLook.set(0, 1.6, 0);
   }
-  const k = snapCam ? 1 : 1 - Math.exp(-dt * 1.6); snapCam = false;
+  const k = snapCam ? 1 : 1 - Math.exp(-dt * 2.2); snapCam = false;
   camPos.lerp(wantPos, k); camLook.lerp(wantLook, k);
   camera.position.copy(camPos); camera.lookAt(camLook);
   camera.updateMatrixWorld();
@@ -399,21 +440,21 @@ const ray = new THREE.Ray(), _hit = new THREE.Vector3(), _head = new THREE.Vecto
 function drawTags(t) {
   const tags = [];
   for (const p of players.values()) {
-    _head.set(p.fig.position.x, 2.15, p.fig.position.z);
+    _head.set(p.fig.position.x, 2.1, p.fig.position.z);
     const dist = _head.distanceTo(camera.position);
     const s = screenOf(_head.x, _head.y, _head.z);
-    if (!s.ok || s.x < -40 || s.x > W + 40 || s.y < 560 || s.y > 1380) continue;
+    if (dist < 1.5 || !s.ok || s.x < 30 || s.x > W - 30 || s.y < 640 || s.y > 1400) continue;
     ray.origin.copy(camera.position); ray.direction.copy(_head).sub(camera.position).normalize();
     if (ray.intersectBox(kaabaBox, _hit) && _hit.distanceTo(camera.position) < dist) continue;   // Kâbe'nin arkasında
     tags.push({ p, s, dist, gold: t < p.goldUntil });
   }
-  // kalabalıkta okunaklı kalsın: altın isimliler + yakındakiler + son etkileşenler
-  tags.sort((a, b) => (b.gold - a.gold) || (a.dist - b.dist) * 0.02 + (b.p.lastActive - a.p.lastActive));
-  const shown = tags.slice(0, 34).sort((a, b) => b.dist - a.dist);
+  // telefonda okunaklı kalsın: en yakın birkaç kişi büyük etiketle, altın isimliler öncelikli
+  tags.sort((a, b) => (b.gold - a.gold) * 6 + (a.dist - b.dist));
+  const shown = tags.slice(0, 10).sort((a, b) => b.dist - a.dist);
   hud.textAlign = 'center'; hud.lineJoin = 'round';
   for (const { p, s, dist, gold } of shown) {
-    const hr = clamp(560 / dist, 15, 46), y = s.y - hr;
-    if (gold) { hud.beginPath(); hud.arc(s.x, y, hr + 7 + Math.sin(t * 5) * 2, 0, TAU); hud.fillStyle = 'rgba(255,205,80,0.4)'; hud.fill(); }
+    const hr = clamp(640 / dist, 26, 62), y = s.y - hr;
+    if (gold) { hud.beginPath(); hud.arc(s.x, y, hr + 8 + Math.sin(t * 5) * 2, 0, TAU); hud.fillStyle = 'rgba(255,205,80,0.45)'; hud.fill(); }
     hud.save(); hud.beginPath(); hud.arc(s.x, y, hr, 0, TAU); hud.clip();
     if (p.img) hud.drawImage(p.img, s.x - hr, y - hr, hr * 2, hr * 2);
     else {
@@ -422,13 +463,16 @@ function drawTags(t) {
       hud.fillText((p.name[0] || '?').toLocaleUpperCase('tr'), s.x, y + 1);
     }
     hud.restore();
-    hud.beginPath(); hud.arc(s.x, y, hr, 0, TAU); hud.strokeStyle = gold ? '#ffcf4d' : '#fff'; hud.lineWidth = 3; hud.stroke();
-    const name = p.name.length > 14 ? p.name.slice(0, 13) + '…' : p.name;
+    hud.beginPath(); hud.arc(s.x, y, hr, 0, TAU); hud.strokeStyle = gold ? '#ffcf4d' : '#fff'; hud.lineWidth = 4; hud.stroke();
+    const name = p.name.length > 12 ? p.name.slice(0, 11) + '…' : p.name;
     const txt = `${name} · ${p.laps % CFG.lapsPerTawaf}/${CFG.lapsPerTawaf}`;
-    hud.font = `700 ${Math.round(clamp(hr * 1.2, 19, 34) + (gold ? 3 : 0))}px ${FONT}`; hud.textBaseline = 'bottom';
-    hud.lineWidth = 5; hud.strokeStyle = 'rgba(8,12,16,0.85)'; hud.strokeText(txt, s.x, y - hr - 5);
-    hud.fillStyle = gold ? '#ffd766' : '#fff'; hud.fillText(txt, s.x, y - hr - 5);
+    hud.font = `800 ${Math.round(clamp(hr * 0.9, 30, 46))}px ${FONT}`; hud.textBaseline = 'bottom';
+    hud.lineWidth = 7; hud.strokeStyle = 'rgba(8,12,16,0.9)'; hud.strokeText(txt, s.x, y - hr - 6);
+    hud.fillStyle = gold ? '#ffd766' : '#fff'; hud.fillText(txt, s.x, y - hr - 6);
   }
+  // çekim değişiminde kısa kararma
+  const fade = 1 - (t - cutAt) / 0.45;
+  if (fade > 0) { hud.fillStyle = `rgba(5,8,13,${fade})`; hud.fillRect(0, 0, W, H); }
 }
 
 function panel(x, y, w, h) {
@@ -455,47 +499,47 @@ function drawHud(t) {
   hud.fillStyle = bot; hud.fillRect(0, 1330, W, 590);
 
   hud.textBaseline = 'middle'; hud.textAlign = 'center';
-  hud.font = `800 46px ${FONT}`; hud.fillStyle = '#e9c96a'; hud.fillText(`🕋 ${CFG.title}`, 540, 215);
-  hud.font = `600 26px ${FONT}`; hud.fillStyle = '#cfd8dc';
+  hud.font = `800 56px ${FONT}`; hud.fillStyle = '#e9c96a'; hud.fillText(`🕋 ${CFG.title}`, 540, 208);
+  hud.font = `600 30px ${FONT}`; hud.fillStyle = '#cfd8dc';
   hud.fillText(`${players.size} kişi tavafta · ${totalTawaf} tavaf tamamlandı`, 540, 262);
 
-  const best = [...players.values()].sort((a, b) => b.laps - a.laps).slice(0, 5);
-  panel(24, 300, 440, 262);
-  hud.textAlign = 'left'; hud.font = `800 24px ${FONT}`; hud.fillStyle = '#e9c96a'; hud.fillText('EN ÇOK ŞAVT', 46, 330);
-  hud.font = `600 25px ${FONT}`;
+  const best = [...players.values()].sort((a, b) => b.laps - a.laps).slice(0, 4);
+  panel(20, 296, 462, 304);
+  hud.textAlign = 'left'; hud.font = `800 28px ${FONT}`; hud.fillStyle = '#e9c96a'; hud.fillText('EN ÇOK ŞAVT', 44, 334);
+  hud.font = `700 32px ${FONT}`;
   best.forEach((p, i) => {
-    const y = 372 + i * 40;
+    const y = 394 + i * 52;
     hud.fillStyle = i === 0 ? '#ffd766' : '#eef2f3'; hud.textAlign = 'left';
-    hud.fillText(`${i + 1}.  ${p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name}`, 46, y);
-    hud.textAlign = 'right'; hud.fillText(String(p.laps), 440, y);
+    hud.fillText(`${i + 1}. ${p.name.length > 13 ? p.name.slice(0, 12) + '…' : p.name}`, 44, y);
+    hud.textAlign = 'right'; hud.fillText(String(p.laps), 458, y);
   });
-  if (!best.length) { hud.fillStyle = '#8a979d'; hud.fillText('İlk katılan sen ol!', 46, 372); }
+  if (!best.length) { hud.fillStyle = '#8a979d'; hud.fillText('İlk katılan sen ol!', 44, 394); }
 
-  panel(484, 300, 572, 262);
-  hud.textAlign = 'left'; hud.font = `800 24px ${FONT}`; hud.fillStyle = '#e9c96a'; hud.fillText('HEDİYE ETKİLERİ', 506, 330);
-  hud.font = `600 24px ${FONT}`;
+  panel(498, 296, 562, 304);
+  hud.textAlign = 'left'; hud.font = `800 28px ${FONT}`; hud.fillStyle = '#e9c96a'; hud.fillText('HEDİYE · JETON', 522, 334);
+  hud.font = `700 30px ${FONT}`;
   tiers.slice(0, 5).forEach((g, i) => {
-    const y = 372 + i * 40;
-    hud.textAlign = 'left'; hud.fillStyle = '#eef2f3'; hud.fillText(`${g.icon}  ${g.label}`, 506, y);
-    hud.textAlign = 'right'; hud.fillStyle = '#ffd766'; hud.fillText(`${g.min}+ jeton`, 1034, y);
+    const y = 386 + i * 44;
+    hud.textAlign = 'left'; hud.fillStyle = '#eef2f3'; hud.fillText(`${g.icon} ${g.label}`, 522, y);
+    hud.textAlign = 'right'; hud.fillStyle = '#ffd766'; hud.fillText(`${g.min}+`, 1036, y);
   });
 
   const hy = 1410;
-  rrect(540 - 300, hy - 34, 600, 68, 34); hud.fillStyle = 'rgba(10,18,24,0.9)'; hud.fill();
+  rrect(540 - 350, hy - 40, 700, 80, 40); hud.fillStyle = 'rgba(10,18,24,0.9)'; hud.fill();
   hud.strokeStyle = '#2aa870'; hud.lineWidth = 3; hud.stroke();
-  hud.textAlign = 'center'; hud.font = `700 32px ${FONT}`; hud.fillStyle = '#fff';
+  hud.textAlign = 'center'; hud.font = `800 38px ${FONT}`; hud.fillStyle = '#fff';
   hud.fillText(COMMENT_JOIN ? '💬 Yorum yaz, tavafa katıl' : '🎁 Hediye gönder, tavafa katıl', 540, hy + 2);
-  hud.font = `600 22px ${FONT}`; hud.fillStyle = '#9fb0b6';
-  hud.fillText('Tavaftakiler için  ❤️ Beğen: hızlan  ·  ➕ Takip et / paylaş: altın isim', 540, hy + 66);
+  hud.font = `600 27px ${FONT}`; hud.fillStyle = '#b9c6cb';
+  hud.fillText('❤️ Beğen: hızlan  ·  ➕ Takip et: altın isim', 540, hy + 76);
 
-  let ty = 612;
+  let ty = 644;
   for (const m of toasts) {
     const age = t - m.t; if (age > 6) continue;
-    hud.globalAlpha = Math.min(1, age * 4) * Math.min(1, (6 - age) * 2); hud.font = `700 26px ${FONT}`;
+    hud.globalAlpha = Math.min(1, age * 4) * Math.min(1, (6 - age) * 2); hud.font = `700 31px ${FONT}`;
     const tw = hud.measureText(m.text).width + 44;
-    rrect(540 - tw / 2, ty - 22, tw, 44, 22); hud.fillStyle = 'rgba(10,18,24,0.85)'; hud.fill();
+    rrect(540 - tw / 2, ty - 26, tw, 52, 26); hud.fillStyle = 'rgba(10,18,24,0.85)'; hud.fill();
     hud.fillStyle = m.color; hud.fillText(m.text, 540, ty + 1);
-    hud.globalAlpha = 1; ty += 52;
+    hud.globalAlpha = 1; ty += 60;
   }
 
   if (banner && t - banner.t < banner.life) {
