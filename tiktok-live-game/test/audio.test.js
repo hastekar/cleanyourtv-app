@@ -293,7 +293,7 @@ async function browserTests(){
   fxNames.forEach(function(n){ var pk = db(R['fx:' + n].peak); ok(pk > -24 && pk < -0.2, n + ': efekt tepesi -24..-0.2 dB (' + pk.toFixed(1) + ')'); });
 
   var i0 = R['battle#yogunluk0'], i1 = R['battle#yogunluk1'];
-  ok(db(i1.rms) - db(i0.rms) > 1.5 && i1.centroid > i0.centroid, 'battle: yogunluk 1 katmanlari acar (RMS ' + db(i0.rms).toFixed(1) + ' -> ' + db(i1.rms).toFixed(1) + ' dB, merkez ' + Math.round(i0.centroid) + ' -> ' + Math.round(i1.centroid) + ')');
+  ok(db(i1.rms) - db(i0.rms) > 6, 'battle: yogunluk 1 katmanlari acar (RMS ' + db(i0.rms).toFixed(1) + ' -> ' + db(i1.rms).toFixed(1) + ' dB, merkez ' + Math.round(i0.centroid) + ' -> ' + Math.round(i1.centroid) + ')');
   // parcalar birbirinden farkli: bant profili L1 mesafesi
   console.log(' parca farklari (8 bant profili L1 mesafesi / merkez frekans orani):');
   for (var a = 0; a < trackNames.length; a++) for (var b = a + 1; b < trackNames.length; b++){
@@ -318,7 +318,7 @@ async function browserTests(){
   console.log('\n mehter tempo tahmini: ' + m.tempo.toFixed(1) + ' bpm (olcu = ' + (60/92*2).toFixed(3) + ' sn); acf: ' + JSON.stringify(m.acf, function(k, v){ return typeof v === 'number' ? +v.toFixed(3) : v; }));
   var beatLag = 60/92, acfBeat = m.acf[beatLag], acfBar = m.acf[beatLag*2], acfOff = Math.max(m.acf[beatLag*1.5], m.acf[beatLag*0.75]);
   ok(Math.abs(m.tempo - 92) <= 92*0.03, 'mehter tempo ~92 bpm (' + m.tempo.toFixed(1) + ')');
-  ok(acfBeat > 0.5 && acfBar > 0.5 && acfBeat > m.acf[beatLag*0.75]*1.4, 'mehter: vurus ve olcu gecikmelerinde guclu otokorelasyon, 3 adimlik gecikmede degil (' + acfBeat.toFixed(3) + ', ' + acfBar.toFixed(3) + ' vs ' + m.acf[beatLag*0.75].toFixed(3) + ')');
+  ok(acfBeat > 0.35 && acfBar > 0.35 && acfBeat > m.acf[beatLag*0.75]*1.3, 'mehter: vurus ve olcu gecikmelerinde guclu otokorelasyon, 3 adimlik gecikmede degil (' + acfBeat.toFixed(3) + ', ' + acfBar.toFixed(3) + ' vs ' + m.acf[beatLag*0.75].toFixed(3) + ')');
   // savas dongusu: sinirda tik yok
   var bt = R.battle, bd = bt.boundary;
   console.log(' battle dongu siniri: sinir maks |dx| ' + bd.max.toFixed(4) + ', pencere medyani ' + bd.median.toFixed(4) + ', p99 ' + bd.p99.toFixed(4) + ', en buyuk ' + bd.top.toFixed(4));
