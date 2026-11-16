@@ -79,7 +79,7 @@ h1{font-family:var(--display);font-weight:400;font-size:2.5em;line-height:1;marg
 @keyframes pop{0%{transform:scale(.4);opacity:0}10%{transform:scale(1.12);opacity:1}18%{transform:scale(1)}85%{opacity:1}100%{opacity:0}}
 
 /* il etiketleri */
-.pl{position:absolute;left:0;top:0;font:800 clamp(7px,1.55vw,12px)/1 var(--body);color:var(--kağıt);
+.pl{position:absolute;left:0;top:0;font:800 clamp(10px,2.5vw,15px)/1.05 var(--body);color:var(--kağıt);
   text-shadow:0 1px 2px #000,0 0 3px #000;white-space:nowrap;will-change:transform;text-align:center}
 .pl i{font-style:normal;font-weight:500;color:var(--altın);margin-left:.2em;font-variant-numeric:tabular-nums}
 .pl.mine b{background:var(--kağıt);color:var(--mürekkep);text-shadow:none;border-radius:.3em;padding:0 .2em}
@@ -100,7 +100,7 @@ h1{font-family:var(--display);font-weight:400;font-size:2.5em;line-height:1;marg
   padding:.25em .6em;border-radius:.8em .8em .8em .15em;max-width:15em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 6px rgba(0,0,0,.5);z-index:2}
 .pl u{display:block;text-decoration:none;font-weight:500;font-size:.82em;color:var(--kağıt);opacity:.9;margin-top:.1em}
 #lead q{quotes:none;color:var(--çini);font-weight:700}
-#card{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(1em + env(safe-area-inset-top,0px));width:min(42%,15em);
+#card{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(10.2em + env(safe-area-inset-top,0px));width:min(42%,15em);
   background:var(--panel);border:1px solid var(--çizgi);border-top:.3em solid var(--c,var(--altın));border-radius:.7em;padding:.6em .7em;
   display:grid;grid-template-columns:auto 1fr;column-gap:.6em;align-items:center}
 #card.show{animation:card .35s ease-out}
@@ -112,6 +112,18 @@ h1{font-family:var(--display);font-weight:400;font-size:2.5em;line-height:1;marg
 #card .r{color:var(--altın);font-weight:800}
 #card .w{grid-column:1/-1;margin-top:.35em;font-weight:800;color:var(--çini)}
 #card .st{grid-column:1/-1;color:var(--soluk)}
+#mini{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(1em + env(safe-area-inset-top,0px));width:min(40%,18em);
+  background:var(--panel);border:1px solid var(--çizgi);border-radius:.6em;padding:.3em}
+#mini-in{position:relative;line-height:0}
+#mini canvas{width:100%;height:auto;display:block}
+#mini-dot{position:absolute;width:1.5em;height:1.5em;border:.2em solid var(--kağıt);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 2px rgba(0,0,0,.6)}
+#derby{width:min(100%,30em);display:grid;gap:.25em;background:var(--panel);border:1px solid var(--çizgi);border-radius:.7em;padding:.45em .7em}
+#derby .vs{display:flex;justify-content:space-between;align-items:center;gap:.5em;font-family:var(--display);font-size:1.45em;line-height:1}
+#derby .vs b{font-weight:400;text-shadow:0 .06em 0 var(--mürekkep)}
+#d-t{font-size:.75em;background:var(--al);color:var(--kağıt);border-radius:.3em;padding:.1em .4em;font-variant-numeric:tabular-nums;white-space:nowrap}
+#derby .bar{display:flex;height:1em;border-radius:.5em;overflow:hidden;border:2px solid var(--kağıt);background:var(--mürekkep)}
+#derby .bar i{flex:1 1 0;transition:flex-grow .3s}
+#derby p{margin:0;font-weight:800;font-size:.92em;text-align:center}
 /* son ekran */
 #end{position:absolute;inset:0;display:grid;place-items:center;background:rgba(6,20,28,.8);text-align:center;padding:1em}
 #end .box{max-width:26em}
@@ -140,7 +152,7 @@ button[aria-pressed="true"]{background:var(--çini);color:var(--mürekkep);borde
 #test-plate{width:3.6em;font:700 1em var(--body);color:var(--kağıt);background:var(--mürekkep);border:1px solid var(--çizgi);border-radius:.45em;padding:.38em .4em}
 #status{color:var(--soluk);font-weight:500}
 .obs #bar{display:none}
-@media (max-aspect-ratio:1/1){ #how{flex-basis:54%} #lead{flex-basis:44%} #feed{top:73%;transform:translateY(-100%);max-width:52%} .pl i,.pl u{display:none} #card{top:auto;bottom:30%} #banner{top:21%} }
+@media (max-aspect-ratio:1/1){ #how{flex-basis:54%} #lead{flex-basis:44%} #feed{top:73%;transform:translateY(-100%);max-width:52%} #card{top:auto;bottom:30%} #banner{top:33%} #mini{top:20%;width:36%} }
 @media (min-aspect-ratio:1/1){ #hud{font-size:clamp(10px,1.25vw,16px)} .top{align-items:flex-start;text-align:left} .brand{justify-content:flex-start} #clans{justify-content:flex-start;max-width:30em}
   #banner{top:17%} #feed{top:auto;bottom:38%} }
 @media (prefers-reduced-motion:reduce){ .fi,#banner div,#card.show{animation-duration:.01s} #banner div{animation:none} }
@@ -153,13 +165,19 @@ button[aria-pressed="true"]{background:var(--çini);color:var(--mürekkep);borde
   <div id="hud">
     <div class="top" id="top">
       <div class="brand"><h1>MEMLEKET FETHİ</h1><span id="timer">5:00</span></div>
-      <p class="cta">Yoruma <b>plakanı</b> yaz, kendi karakterin haritada doğsun!</p>
+      <p class="cta" id="cta">Yoruma <b>plakanı</b> yaz, kendi karakterin haritada doğsun!</p>
+      <div id="derby" hidden>
+        <div class="vs"><b id="d-a"></b><span id="d-t"></span><b id="d-b"></b></div>
+        <div class="bar"><i id="d-fa"></i><i id="d-fb"></i></div>
+        <p>Beğen, yorum yaz, hediye gönder: derbiyi klanın kazansın!</p>
+      </div>
       <div id="clans"></div>
     </div>
     <div class="spacer"></div>
     <div id="feed"></div>
     <div id="banner"></div>
     <aside id="card" hidden></aside>
+    <div id="mini"><div id="mini-in"><i id="mini-dot"></i></div></div>
     <div class="bottom" id="bottom">
       <section class="card" id="how">
         <h2>Nasıl oynanır</h2>
@@ -415,9 +433,9 @@ function mMehter(cm){ const g=new THREE.Group(); g.add(mk('mehter',cm));
 function mKalkan(){ const m=new THREE.Mesh(tpl('kalkan'),new THREE.MeshBasicMaterial({color:0x27c2b3,transparent:true,opacity:.34,depthWrite:false,side:THREE.DoubleSide})); m.scale.setScalar(.42); return m; }
 
 /* kaleler */
-const TS=.3;
+const TS=.32;
 provs.forEach(p=>{ const t=mKale(); t.position.set(p.x,0,p.z); t.scale.setScalar(TS); scene.add(t); p.tower=t;
-  const el=document.createElement('div'); el.className='pl'; el.innerHTML='<b>'+p.id+'</b><i></i><u></u>'; labelsEl.appendChild(el); p.el=el; p.gi=el.children[1]; p.ub=el.lastChild; });
+  const el=document.createElement('div'); el.className='pl'; el.innerHTML='<b>'+p.id+' '+p.name+'</b><i></i><u></u>'; labelsEl.appendChild(el); p.el=el; p.gi=el.children[1]; p.ub=el.lastChild; });
 function refreshProv(p){
   const u=p.tower.userData;
   u.cm.color.copy(p.owner==null?new THREE.Color(C.neutral):clanColor(p.owner)); u.flag.visible=p.owner!=null;
@@ -431,7 +449,8 @@ const MAXSQ=130;
 function getClan(id){ return clans[id]||(clans[id]={id,name:P[id].name,bar:0,n:0,members:0,rush:0}); }
 function resetRound(){
   squads.splice(0).forEach(killSquad);
-  provs.forEach(p=>{p.owner=null;p.by=null;p.g=10+((p.id*7)%13);p.shield=0;if(p.dome)p.dome.visible=false;});
+  derby.on=false; derby.next=35; $('#derby').hidden=true; $('#cta').hidden=false; shotP=null;
+  provs.forEach(p=>{p.owner=null;p.by=null;p.heat=0;p.g=10+((p.id*7)%13);p.shield=0;if(p.dome)p.dome.visible=false;});
   Object.values(clans).forEach(c=>{c.bar=0;c.rush=0;if(c.members>0){const p=P[c.id];p.owner=c.id;p.g=20;}});
   Object.values(users).forEach(u=>{u.pts=0;u.won=[];});
   heroes.forEach(h=>{h.at=P[h.u.clan];h.state='idle';h.pend=0;h.type=null;h.cool=1;h.mesh.visible=true;});
@@ -475,7 +494,7 @@ function heroMarch(h){
   const type=h.type||(h.u.rank>=3?'sipahi':'piyade');
   h.sq=send(drop?null:from,to,h.pend,type,{clan:c,user:h.u,hero:h}); h.pend=0; h.state='march'; h.mesh.visible=false;
 }
-function addPts(u,k){ u.pts+=k; u.life+=k; const r=rankOf(u.life); if(r<=u.rank)return; u.rank=r;
+function addPts(u,k){ u.pts+=k; u.life+=k; if(derby.on){ const d=derby; if(u.clan===d.a.id)d.sa+=k; else if(u.clan===d.b.id)d.sb+=k; if(u.clan===d.a.id||u.clan===d.b.id)d.mvp[u.id]=(d.mvp[u.id]||0)+k; } const r=rankOf(u.life); if(r<=u.rank)return; u.rank=r;
   if(u.hero){ heroModel(u.hero); u.hero.tag.lastChild.textContent=RANKS[r]; }
   feed(u.name+' rütbe atladı: <b>'+RANKS[r]+'</b>',u.clan);
   if(r>=2){ banner(u.name+' artık '+RANKS[r]+'!',r>=3?'Bey ve üstü rütbeler ata biner':'Rütbe atladı',u.clan); showCard(u,'Yeni rütbe: '+RANKS[r]); thump(120,.15); if(r>=3)say(u.name+' artık '+RANKS[r]); } }
@@ -509,14 +528,16 @@ function send(from,to,n,type,o){
   squads.push(s); return s;
 }
 function arrive(s){
-  const p=s.to; let took=false;
+  const p=s.to; let took=false; p.heat+=s.user?3:1;
   if(p.owner===s.clan){ p.g+=s.n; took=true; }
   else if(p.shield>0){ ringFx(p,0x27c2b3); }
   else { const mul=s.type==='top'?2:1, dmg=s.n*mul;
     if(dmg>p.g){ const old=p.owner; p.g=Math.max(2,Math.round((dmg-p.g)/mul)); setOwner(p,s.clan); p.by=s.user||null; took=true;
       ringFx(p,clanColor(s.clan)); if(s.user||old===p.id)floatText(p,s.user?p.name+' artık '+s.user.name+' adına':'FETİH '+p.name);
       if(s.user){ const u=s.user; u.cq++; u.won.push(p.name); addPts(u,15); feed(u.name+' <b>'+p.name+'</b> ilini fethetti',s.clan); if(u.won.length%3===0)showCard(u,u.won.length+'. ilini fethetti'); }
-      if(old!=null&&old===p.id) feed('<b>'+p.name+'</b> düştü, '+P[s.clan].name+' klanının oldu',s.clan);
+      p.heat+=3;
+      if(old!=null&&old===p.id){ feed('<b>'+p.name+'</b> düştü, '+P[s.clan].name+' klanının oldu',s.clan);
+        if(clans[old]&&clans[old].members>0){ banner(p.name.toLocaleUpperCase('tr')+' BAŞKENTİ DÜŞTÜ',P[s.clan].name+' aldı. Geri almak için beğen, '+String(old).padStart(2,'0')+' yaz',s.clan); focus(p,4); } }
       thump(90,.12);
     } else { p.g-=dmg; if(s.type==='top')ringFx(p,0xf2b632); } }
   if(s.hero){ const h=s.hero; if(took)h.at=p; h.state='idle'; h.type=null; h.cool=.5; h.mesh.visible=true; }
@@ -635,7 +656,7 @@ function hud(){
   return list;
 }
 function endRound(){
-  phase='end'; phaseT=11; const list=hud(), w=list[0];
+  phase='end'; phaseT=11; derby.on=false; $('#derby').hidden=true; $('#cta').hidden=false; const list=hud(), w=list[0];
   const top=Object.values(users).filter(u=>u.pts>0).sort((a,b)=>b.pts-a.pts).slice(0,3);
   $('#end-w').textContent=w?w.name:'Berabere'; $('#end-w').style.color=w?cssColor(w.id):'';
   $('#end-s').textContent=w?(w.n+' il ile turu kazandı'):'Bu tur kimse klan kurmadı';
@@ -683,20 +704,70 @@ function connect(){
 }
 function retry(){ wsTry++; const wait=Math.min(30,Math.pow(2,Math.min(wsTry,5)))+Math.random(); $('#status').textContent='Bağlantı koptu, '+Math.round(wait)+' sn sonra yeniden denenecek'; setTimeout(connect,wait*1000); }
 
-/* ───────── kamera ───────── */
-let camD=40, focusP=null, focusT=0, zoom=0;
-let CAMDIR=new THREE.Vector3(0,.82,.62).normalize(); const LOOK=new THREE.Vector3(0,0,.15);
+/* ───────── kamera: alçak açılı yakın çekim, sıcak cepheyi takip eden yönetmen ───────── */
+let camDist=14, viewW=5, focusP=null, focusT=0, shotT=0, shotP=null, portrait=true;
+const camT=new THREE.Vector3(toX(29),0,toZ(40.6)), camWant=camT.clone();
+scene.fog=new THREE.Fog(0x113444,20,40);
 function fit(){
   const w=stage.clientWidth, h=stage.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
-  const portrait=h>w; CAMDIR.set(0,portrait?.93:.82,portrait?.37:.62).normalize(); LOOK.z=portrait?2.2:.15; const yTop=portrait?.5:.62, yBot=portrait?-.3:-.72, v=new THREE.Vector3();
-  for(camD=12;camD<160;camD+=1){ camera.position.copy(CAMDIR).multiplyScalar(camD).add(LOOK); camera.lookAt(LOOK); camera.updateMatrixWorld();
-    let ok=true; for(const [x,z] of [[-PW/2,-PH/2],[PW/2,-PH/2],[-PW/2,PH/2],[PW/2,PH/2]]){ v.set(x,.5,z).project(camera); if(Math.abs(v.x)>.99||v.y>yTop||v.y<yBot){ok=false;break;} }
-    if(ok)break; }
+  portrait=h>w; viewW=portrait?4.6:9; camDist=Math.max(7,viewW/2/(Math.tan(camera.fov*Math.PI/360)*camera.aspect));
+  scene.fog.near=camDist*1.2; scene.fog.far=camDist*2.6;
 }
-function focus(p,sec){ if(REDUCED||galOn)return; focusP=p; focusT=sec; }
+function focus(p,sec){ if(galOn||!p)return; focusP=p; focusT=sec; }
+function direct(dt){
+  if(focusT>0){ focusT-=dt; camWant.set(focusP.x,0,focusP.z); }
+  else { shotT-=dt;
+    if(shotT<=0||!shotP){ let b=null,bs=.6; for(const q of provs){ const sc=q.heat+(q===shotP?.4:0); if(sc>bs){bs=sc;b=q;} }
+      if(!b) b=heroes.length?heroes[(Math.random()*heroes.length)|0].at:(shotP||P[34]);
+      shotP=b; shotT=5; }
+    camWant.set(shotP.x,0,shotP.z); }
+  if(camT.distanceTo(camWant)>7||REDUCED) camT.copy(camWant); else camT.lerp(camWant,Math.min(1,dt*1.7));
+  const yaw=REDUCED?0:Math.sin(time*.13)*.32, el=portrait?.5:.54, ce=Math.cos(el);
+  camera.position.set(camT.x+Math.sin(yaw)*ce*camDist, Math.sin(el)*camDist, camT.z+Math.cos(yaw)*ce*camDist);
+  const near=portrait?.7:.4; camera.lookAt(camT.x+Math.sin(yaw)*near,.3,camT.z+Math.cos(yaw)*near); camera.updateMatrixWorld();
+  miniDot.style.left=((camT.x+PW/2)/PW*100).toFixed(1)+'%'; miniDot.style.top=((camT.z+PH/2)/PH*100).toFixed(1)+'%';
+}
 const V=new THREE.Vector3();
-function place(el,x,y,z,ax){ V.set(x,y,z).project(camera); const w=stage.clientWidth,h=stage.clientHeight;
-  el.style.transform='translate('+((V.x*.5+.5)*w).toFixed(1)+'px,'+((-V.y*.5+.5)*h).toFixed(1)+'px) translate(-50%,'+(ax||'-100%')+')'; }
+function place(el,x,y,z,far){ V.set(x,y,z).project(camera);
+  const off=V.z>1||Math.abs(V.x)>1.12||Math.abs(V.y)>1.12||(far&&(x-camT.x)*(x-camT.x)+(z-camT.z)*(z-camT.z)>far*far);
+  if(off){ if(!el._off){el._off=1;el.style.visibility='hidden';} return; } if(el._off){el._off=0;el.style.visibility='';}
+  const w=stage.clientWidth,h=stage.clientHeight;
+  el.style.transform='translate('+((V.x*.5+.5)*w).toFixed(1)+'px,'+((-V.y*.5+.5)*h).toFixed(1)+'px) translate(-50%,-100%)'; }
+const miniDot=$('#mini-dot'); $('#mini-in').insertBefore(mapCv,miniDot);
+
+/* ───────── derbi: iki rakip klan arasında 25 saniyelik etkileşim yarışı ───────── */
+const derby={on:false,t:0,next:35,a:null,b:null,sa:0,sb:0,mvp:{}};
+function derbyStart(){
+  const cnt={}; provs.forEach(q=>{if(q.owner!=null)cnt[q.owner]=(cnt[q.owner]||0)+1;});
+  const list=Object.values(clans).filter(c=>c.members>0&&cnt[c.id]).sort((x,y)=>cnt[y.id]-cnt[x.id]);
+  if(list.length<2){ derby.next=10; return; }
+  const A=list[0]; let B=null;
+  for(const c of list.slice(1)) if(provs.some(q=>q.owner===A.id&&q.adj.some(x=>x.owner===c.id))){ B=c; break; }
+  B=B||list[1]; Object.assign(derby,{on:true,t:25,a:A,b:B,sa:0,sb:0,mvp:{}});
+  const front=provs.find(q=>q.owner===A.id&&q.adj.some(x=>x.owner===B.id))||P[A.id];
+  $('#d-a').textContent=String(A.id).padStart(2,'0')+' '+A.name; $('#d-b').textContent=B.name+' '+String(B.id).padStart(2,'0');
+  $('#d-a').style.color=$('#d-fa').style.background=cssColor(A.id); $('#d-b').style.color=$('#d-fb').style.background=cssColor(B.id);
+  $('#derby').hidden=false; $('#cta').hidden=true;
+  banner('DERBİ: '+A.name+' - '+B.name,'25 saniye. En çok beğeni ve hediye toplayan klan kazanır',A.id); focus(front,25); thump(65,.3);
+  say('Derbi başladı. '+A.name+', '+B.name+' karşısında');
+}
+function derbyEnd(){
+  const {a,b,sa,sb}=derby; derby.on=false; derby.next=45; $('#derby').hidden=true; $('#cta').hidden=false;
+  if(sa===sb){ banner('DERBİ BERABERE',a.name+' - '+b.name); return; }
+  const W=sa>sb?a:b, L=sa>sb?b:a; let star=null, t=null;
+  for(const id in derby.mvp){ const u=users[id]; if(u&&u.clan===W.id&&(!star||derby.mvp[id]>derby.mvp[star.id]))star=u; }
+  for(const q of provs) if(q.owner===L.id&&q.shield<=0&&q.adj.some(x=>x.owner===W.id)&&(!t||q.g<t.g))t=q;
+  if(t){ t.g=15; setOwner(t,W.id); t.by=star; ringFx(t,clanColor(W.id)); t.heat+=5; focus(t,4); }
+  provs.forEach(q=>{ if(q.owner===W.id)q.g+=6; }); W.rush=10;
+  banner('DERBİYİ '+W.name.toLocaleUpperCase('tr')+' KAZANDI',(star?'Derbinin yıldızı '+star.name:'')+(star&&t?' · ':'')+(t?t.name+' artık onların':''),W.id);
+  if(star){ showCard(star,'Derbinin yıldızı'); addPts(star,50); }
+  thump(60,.4); say('Derbiyi '+W.name+' kazandı'+(star?'. Derbinin yıldızı '+star.name:''));
+}
+function derbyTick(dt){
+  if(derby.on){ derby.t-=dt; $('#d-t').textContent=Math.max(0,Math.ceil(derby.t))+' sn';
+    $('#d-fa').style.flexGrow=derby.sa+1; $('#d-fb').style.flexGrow=derby.sb+1; if(derby.t<=0)derbyEnd(); }
+  else { derby.next-=dt; if(derby.next<=0)derbyStart(); }
+}
 
 /* ───────── galeri ───────── */
 const GAL=[
@@ -712,7 +783,7 @@ galScene.add(new THREE.HemisphereLight(0xfff3d6,0x0b2230,1)); const gl2=new THRE
 const ped=new THREE.Mesh(cyl(1.15,1.25,.12,32),new THREE.MeshPhongMaterial({color:0x123748})); ped.position.y=-.06; galScene.add(ped);
 function galShow(i){ galI=(i+GAL.length)%GAL.length; if(galObj)galScene.remove(galObj); const it=GAL[galI]; galObj=it[3](); galObj.scale.setScalar(it[4]); galScene.add(galObj);
   $('#gal-name').textContent=it[0]; $('#gal-trig').textContent='Tetikleyici: '+it[1]; $('#gal-desc').textContent=it[2]; }
-function galToggle(on){ galOn=on; $('#gal').hidden=!on; $('#top').hidden=on; $('#bottom').hidden=on; feedEl.hidden=on; bannerEl.hidden=on; labelsEl.hidden=on; floatsEl.hidden=on; if(on)$('#card').hidden=true; if(on)galShow(galI); }
+function galToggle(on){ galOn=on; $('#gal').hidden=!on; $('#top').hidden=on; $('#bottom').hidden=on; feedEl.hidden=on; bannerEl.hidden=on; $('#mini').hidden=on; labelsEl.hidden=on; floatsEl.hidden=on; if(on)$('#card').hidden=true; if(on)galShow(galI); }
 
 /* ───────── döngü ───────── */
 let saveT=0, last=performance.now(), acc1=0, accAI=0, accHud=0, time=0;
@@ -721,9 +792,10 @@ function step(dt){
   if(phase==='play'){
     timeLeft-=dt; acc1+=dt; accAI+=dt;
     if(simOn){ botT-=dt; while(botT<=0){ botTick(); botT+=.16+Math.random()*.22; } }
-    if(acc1>=1){ acc1-=1; provs.forEach(p=>{ if(p.owner!=null&&p.g<40)p.g+=1; if(p.shield>0){p.shield-=1;if(p.shield<=0&&p.dome)p.dome.visible=false;} });
+    if(acc1>=1){ acc1-=1; provs.forEach(p=>{ p.heat*=.78; if(p.owner!=null&&p.g<30)p.g+=1; if(p.shield>0){p.shield-=1;if(p.shield<=0&&p.dome)p.dome.visible=false;} });
       Object.values(clans).forEach(c=>{if(c.rush>0)c.rush-=1;}); }
-    if(accAI>=1.4){ accAI=0; aiTick(); }
+    if(accAI>=2){ accAI=0; aiTick(); }
+    derbyTick(dt);
     const lead=provs.reduce((m,p)=>{if(p.owner!=null)m[p.owner]=(m[p.owner]||0)+1;return m;},{});
     if(timeLeft<=0||Object.values(lead).some(n=>n>=61)) endRound();
   } else { phaseT-=dt; if(phaseT<=0){ resetRound(); Object.values(users).forEach(u=>{ if(u.wish){const w=u.wish;u.wish=0;joinClan(u,w);} }); } }
@@ -744,7 +816,7 @@ function step(dt){
   for(let i=fx.length-1;i>=0;i--){ const f=fx[i]; f.t+=dt; const k=f.t/f.d;
     if(f.mehter){ f.m.userData.sticks.forEach((s,j)=>s.rotation.x=1+Math.max(0,Math.sin(time*10+j*Math.PI))*.7); f.m.position.y=Math.abs(Math.sin(time*5))*.03; if(k>.9)f.m.scale.setScalar(.6*(1-k)*10); }
     else if(f.m){ f.m.scale.setScalar(.2+k*1.1); f.m.material.opacity=1-k; }
-    else { place(f.el,f.p.x,.7+k*.8,f.p.z); f.el.style.opacity=String(1-k*k); }
+    else { place(f.el,f.p.x,1+k*.8,f.p.z,viewW*1.4); f.el.style.opacity=String(1-k*k); }
     if(k>=1){ if(f.m)scene.remove(f.m); if(f.el)f.el.remove(); fx.splice(i,1); } }
   provs.forEach(p=>{ const u=p.tower.userData, target=TS*(.82+Math.min(p.g,60)/60*.6); p.tower.scale.setScalar(p.tower.scale.y+(target-p.tower.scale.y)*Math.min(1,dt*5));
     if(u.flag.visible)u.flag.rotation.y=Math.sin(time*4+p.id)*.35; if(p.dome&&p.dome.visible)p.dome.material.opacity=.26+Math.sin(time*5)*.08; });
@@ -754,12 +826,9 @@ function frame(now){
   if(galOn){ if(galObj)galObj.rotation.y+=dt*.8; const a=stage.clientWidth/stage.clientHeight; galCam.aspect=a; galCam.updateProjectionMatrix();
     const d=a<1?12:9.2; galCam.position.set(0,2.6,d); galCam.lookAt(0,a<1?.5:.3,0); step(dt); renderer.render(galScene,galCam); requestAnimationFrame(frame); return; }
   step(dt);
-  if(focusT>0)focusT-=dt; zoom+=(((focusT>0)?1:0)-zoom)*Math.min(1,dt*2.5);
-  const tx=focusP?focusP.x*zoom*.8:0, tz=focusP?focusP.z*zoom*.8:0, sway=REDUCED?0:Math.sin(time*.25)*.25;
-  camera.position.copy(CAMDIR).multiplyScalar(camD*(1-zoom*.42)).add(LOOK); camera.position.x+=tx+sway; camera.position.z+=tz;
-  camera.lookAt(LOOK.x+tx,0,LOOK.z+tz); camera.updateMatrixWorld();
-  provs.forEach(p=>place(p.el,p.x,p.tower.scale.y*2.6,p.z));
-  for(const h of heroes){ const top=h.state==='march'||h.u.rank>=3?.85:.6; place(h.tag,h.px,h.py+top,h.pz); if(h.bub)place(h.bub,h.px,h.py+top,h.pz); }
+  direct(dt);
+  provs.forEach(q=>place(q.el,q.x,q.tower.scale.y*2.6,q.z,viewW*.72));
+  for(const h of heroes){ const top=h.state==='march'||h.u.rank>=3?.85:.6; place(h.tag,h.px,h.py+top,h.pz,viewW); if(h.bub)place(h.bub,h.px,h.py+top,h.pz,viewW); }
   if(mapDirty)paintMap();
   accHud+=dt; if(accHud>.3){accHud=0; if(phase==='play')hud();}
   renderer.render(scene,camera);

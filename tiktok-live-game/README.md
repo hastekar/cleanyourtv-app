@@ -15,6 +15,12 @@ node server.js <tiktok_kullanici_adi>
 OBS'te tarayıcı kaynağı ekle: `http://localhost:8787/?obs=1` (1080×1920). `h` tuşu araç çubuğunu açıp kapatır.
 Tur süresi için `&tur=300` (saniye).
 
+## Kamera ve derbi
+
+Kamera haritanın tamamını göstermez: alçak açıdan, o an en çok çatışma olan cepheye yakın çekim yapar ve birkaç saniyede bir en sıcak noktaya geçer. Büyük hediyede hediyeyi gönderenin karakterine, derbide iki klanın sınırına döner. Haritanın tamamı köşedeki küçük haritada görünür.
+
+Her 45 saniyede bir en büyük klan ile sınır komşusu en güçlü rakibi 25 saniyelik derbiye girer. Bu sürede klan üyelerinin beğeni, yorum ve hediyeleri sayılır; kazanan klan rakibin sınırdaki en zayıf ilini alır ve 10 saniye hücuma geçer. En çok katkı veren izleyici derbinin yıldızı ilan edilir.
+
 ## Kişisel karakter
 
 Her izleyicinin haritada adı ve profil fotoğrafıyla yaşayan bir karakteri vardır. Beğeni ve hediyeler o karakterin askerine dönüşür, saldırıyı karakter kendisi yapar ve fethettiği ilin üstünde izleyicinin adı yazar.
