@@ -57,7 +57,7 @@ h1{font-family:var(--display);font-weight:400;font-size:2.5em;line-height:1;marg
 #how li{display:flex;gap:.45em;align-items:baseline}
 #how li span{flex:none;min-width:5.2em;font-weight:800;color:var(--altın)}
 #lead{flex:0 1 15em}
-#lead ol{list-style:none;margin:0;padding:0;display:grid;gap:.18em;font-size:.9em;min-height:6.6em}
+#lead ol{list-style:none;margin:0;padding:0;display:grid;gap:.18em;font-size:.9em;min-height:6.6em;align-content:start}
 #lead li{display:grid;grid-template-columns:1.3em 1fr auto;gap:.35em;align-items:center}
 #lead li b{font-family:var(--display);font-weight:400;color:var(--altın)}
 #lead li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -91,6 +91,27 @@ h1{font-family:var(--display);font-weight:400;font-size:2.5em;line-height:1;marg
 .fl{position:absolute;left:0;top:0;font:400 clamp(10px,2.3vw,16px)/1 var(--display);color:var(--altın);
   text-shadow:0 2px 0 var(--mürekkep);white-space:nowrap}
 
+/* kişisel karakter: etiket, konuşma balonu, rütbe kartı */
+.tag span{max-width:8em;overflow:hidden;text-overflow:ellipsis}
+.tag small{font-weight:500;font-size:.78em;opacity:.65}
+.tag.mini{padding:.12em;font-size:clamp(8px,1.6vw,11px)}
+.tag.mini span,.tag.mini small{display:none}
+.bub{position:absolute;left:0;top:0;margin-top:-2.3em;background:var(--kağıt);color:var(--mürekkep);font:500 clamp(9px,1.9vw,13px)/1.2 var(--body);
+  padding:.25em .6em;border-radius:.8em .8em .8em .15em;max-width:15em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 6px rgba(0,0,0,.5);z-index:2}
+.pl u{display:block;text-decoration:none;font-weight:500;font-size:.82em;color:var(--kağıt);opacity:.9;margin-top:.1em}
+#lead q{quotes:none;color:var(--çini);font-weight:700}
+#card{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(1em + env(safe-area-inset-top,0px));width:min(42%,15em);
+  background:var(--panel);border:1px solid var(--çizgi);border-top:.3em solid var(--c,var(--altın));border-radius:.7em;padding:.6em .7em;
+  display:grid;grid-template-columns:auto 1fr;column-gap:.6em;align-items:center}
+#card.show{animation:card .35s ease-out}
+@keyframes card{from{transform:translateX(1.5em);opacity:0}to{transform:none;opacity:1}}
+#card s{grid-row:span 2;text-decoration:none;width:2.9em;height:2.9em;border-radius:50%;display:grid;place-items:center;
+  font:400 1.5em var(--display);color:var(--kağıt);background:var(--c,var(--al)) center/cover;border:.12em solid var(--kağıt)}
+#card h3{margin:0;font:400 1.3em/1.1 var(--display);color:var(--kağıt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#card p{margin:0;font-size:.86em}
+#card .r{color:var(--altın);font-weight:800}
+#card .w{grid-column:1/-1;margin-top:.35em;font-weight:800;color:var(--çini)}
+#card .st{grid-column:1/-1;color:var(--soluk)}
 /* son ekran */
 #end{position:absolute;inset:0;display:grid;place-items:center;background:rgba(6,20,28,.8);text-align:center;padding:1em}
 #end .box{max-width:26em}
@@ -119,10 +140,10 @@ button[aria-pressed="true"]{background:var(--çini);color:var(--mürekkep);borde
 #test-plate{width:3.6em;font:700 1em var(--body);color:var(--kağıt);background:var(--mürekkep);border:1px solid var(--çizgi);border-radius:.45em;padding:.38em .4em}
 #status{color:var(--soluk);font-weight:500}
 .obs #bar{display:none}
-@media (max-aspect-ratio:1/1){ #how{flex-basis:54%} #lead{flex-basis:44%} #feed{top:70%;transform:translateY(-100%)} .pl i{display:none} #banner{top:27%} }
+@media (max-aspect-ratio:1/1){ #how{flex-basis:54%} #lead{flex-basis:44%} #feed{top:73%;transform:translateY(-100%);max-width:52%} .pl i,.pl u{display:none} #card{top:auto;bottom:30%} #banner{top:21%} }
 @media (min-aspect-ratio:1/1){ #hud{font-size:clamp(10px,1.25vw,16px)} .top{align-items:flex-start;text-align:left} .brand{justify-content:flex-start} #clans{justify-content:flex-start;max-width:30em}
   #banner{top:17%} #feed{top:auto;bottom:38%} }
-@media (prefers-reduced-motion:reduce){ .fi,#banner div{animation-duration:.01s} #banner div{animation:none} }
+@media (prefers-reduced-motion:reduce){ .fi,#banner div,#card.show{animation-duration:.01s} #banner div{animation:none} }
 </style>
 
 <div id="stage">
@@ -132,24 +153,26 @@ button[aria-pressed="true"]{background:var(--çini);color:var(--mürekkep);borde
   <div id="hud">
     <div class="top" id="top">
       <div class="brand"><h1>MEMLEKET FETHİ</h1><span id="timer">5:00</span></div>
-      <p class="cta">Yoruma <b>plakanı</b> yaz, şehrini kur, 81 ili fethet!</p>
+      <p class="cta">Yoruma <b>plakanı</b> yaz, kendi karakterin haritada doğsun!</p>
       <div id="clans"></div>
     </div>
     <div class="spacer"></div>
     <div id="feed"></div>
     <div id="banner"></div>
+    <aside id="card" hidden></aside>
     <div class="bottom" id="bottom">
       <section class="card" id="how">
         <h2>Nasıl oynanır</h2>
         <ul>
-          <li><span>Yorum 34</span>İstanbul klanına katıl</li>
-          <li><span>Beğeni</span>Asker + Hücum barı</li>
-          <li><span>1+ elmas</span>Piyade bölüğü</li>
-          <li><span>10+ elmas</span>Sipahi, iki kat hızlı</li>
-          <li><span>100+ elmas</span>Topçu, surlara çift hasar</li>
+          <li><span>Yorum 34</span>Karakterin İstanbul'da doğar</li>
+          <li><span>Yorum yaz</span>Karakterin konuşur</li>
+          <li><span>Yorum ben</span>Rütbe kartın ekrana gelir</li>
+          <li><span>Beğeni</span>Karakterin askerle saldırır</li>
+          <li><span>10+ elmas</span>Karakterin sipahi olur</li>
+          <li><span>100+ elmas</span>Karakterin top çeker</li>
           <li><span>1000+ elmas</span>Mehter, tüm klan hücuma</li>
-          <li><span>Takip</span>Şehrine 20 sn kalkan</li>
-          <li><span>Paylaş</span>+10 asker</li>
+          <li><span>Takip</span>Bulunduğun ile kalkan</li>
+          <li><span>Puan topla</span>Er, Çavuş, Bey, Paşa, Sultan</li>
         </ul>
       </section>
       <section class="card" id="lead">
@@ -394,7 +417,7 @@ function mKalkan(){ const m=new THREE.Mesh(tpl('kalkan'),new THREE.MeshBasicMate
 /* kaleler */
 const TS=.3;
 provs.forEach(p=>{ const t=mKale(); t.position.set(p.x,0,p.z); t.scale.setScalar(TS); scene.add(t); p.tower=t;
-  const el=document.createElement('div'); el.className='pl'; el.innerHTML='<b>'+p.id+'</b><i></i>'; labelsEl.appendChild(el); p.el=el; p.gi=el.lastChild; });
+  const el=document.createElement('div'); el.className='pl'; el.innerHTML='<b>'+p.id+'</b><i></i><u></u>'; labelsEl.appendChild(el); p.el=el; p.gi=el.children[1]; p.ub=el.lastChild; });
 function refreshProv(p){
   const u=p.tower.userData;
   u.cm.color.copy(p.owner==null?new THREE.Color(C.neutral):clanColor(p.owner)); u.flag.visible=p.owner!=null;
@@ -408,49 +431,95 @@ const MAXSQ=130;
 function getClan(id){ return clans[id]||(clans[id]={id,name:P[id].name,bar:0,n:0,members:0,rush:0}); }
 function resetRound(){
   squads.splice(0).forEach(killSquad);
-  provs.forEach(p=>{p.owner=null;p.g=10+((p.id*7)%13);p.shield=0;});
+  provs.forEach(p=>{p.owner=null;p.by=null;p.g=10+((p.id*7)%13);p.shield=0;if(p.dome)p.dome.visible=false;});
   Object.values(clans).forEach(c=>{c.bar=0;c.rush=0;if(c.members>0){const p=P[c.id];p.owner=c.id;p.g=20;}});
-  Object.values(users).forEach(u=>u.pts=0);
+  Object.values(users).forEach(u=>{u.pts=0;u.won=[];});
+  heroes.forEach(h=>{h.at=P[h.u.clan];h.state='idle';h.pend=0;h.type=null;h.cool=1;h.mesh.visible=true;});
   provs.forEach(refreshProv); timeLeft=CFG.round; phase='play'; $('#end').hidden=true;
 }
 
-function killSquad(s){ scene.remove(s.mesh); if(s.tag)s.tag.remove(); }
+function killSquad(s){ scene.remove(s.mesh); }
 function setOwner(p,id){ if(p.owner===id)return; p.owner=id; refreshProv(p); }
 function ringFx(p,color){ const m=new THREE.Mesh(RING,new THREE.MeshBasicMaterial({color,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
   m.rotation.x=-Math.PI/2; m.position.set(p.x,.03,p.z); scene.add(m); fx.push({m,t:0,d:.8}); }
 function floatText(p,txt){ const el=document.createElement('div'); el.className='fl'; el.textContent=txt; floatsEl.appendChild(el); fx.push({el,p,t:0,d:1.3}); }
 
+/* ───────── kişisel karakterler ─────────
+   Her izleyicinin haritada adı ve profil fotoğrafıyla yaşayan bir karakteri vardır.
+   Beğeni ve hediyeler bu karakterin emrindeki askerlere dönüşür; saldırıyı karakter kendisi yapar. */
+const RANKS=['Er','Onbaşı','Çavuş','Bey','Paşa','Vezir','Sultan'], RANKAT=[0,50,200,600,2000,6000,20000];
+const rankOf=l=>{let r=0;while(r<6&&l>=RANKAT[r+1])r++;return r;};
+const heroes=[], MAXHERO=36, TIER={piyade:0,sipahi:1,top:2};
+let STORE={}; try{STORE=JSON.parse(localStorage.getItem('mf-users')||'{}')||{};}catch(_){ }
+function saveUsers(){ try{ for(const u of Object.values(users)) if(u.id.indexOf('bot')!==0&&u.life>0)STORE[u.id]={l:u.life,q:u.cq,c:u.clan||u.saved||0};
+  const ks=Object.keys(STORE); for(const k of ks.slice(0,Math.max(0,ks.length-3000)))delete STORE[k]; localStorage.setItem('mf-users',JSON.stringify(STORE)); }catch(_){ } }
+function hash(s){let k=7;for(let i=0;i<s.length;i++)k=(k*31+s.charCodeAt(i))>>>0;return k;}
+function avatar(u){ const a=document.createElement('s'); a.style.setProperty('--c',cssColor(u.clan||34));
+  if(u.pic)a.style.backgroundImage='url("'+u.pic.replace(/["\\)]/g,'')+'")'; else a.textContent=(u.name||'?').slice(0,1).toLocaleUpperCase('tr'); return a; }
+function makeTag(u){ const t=document.createElement('div'); t.className='tag'; t.appendChild(avatar(u));
+  const n=document.createElement('span'); n.textContent=u.name; t.appendChild(n); const r=document.createElement('small'); r.textContent=RANKS[u.rank]; t.appendChild(r); labelsEl.appendChild(t); return t; }
+function heroModel(h){ if(h.model)h.mesh.remove(h.model); const r=h.u.rank; h.model=mk(r>=3?'sipahi':'piyade',clanMatOf(h.u.clan)); h.mesh.add(h.model);
+  h.mesh.scale.setScalar(r>=3?.34+(r-3)*.035:.33+r*.025); }
+function ensureHero(u){ u.act=time; if(u.hero)return u.hero;
+  if(heroes.length>=MAXHERO){ let o=null; for(const x of heroes) if(x.state==='idle'&&(!o||x.u.act<o.u.act))o=x; if(o)dropHero(o); }
+  const h={u,at:P[u.clan],mesh:new THREE.Group(),model:null,tag:makeTag(u),bub:null,bubT:0,state:'idle',pend:0,type:null,cool:0,sq:null,slot:(hash(u.id)%628)/100,px:0,py:0,pz:0};
+  heroModel(h); scene.add(h.mesh); heroes.push(h); u.hero=h; return h; }
+function dropHero(h){ scene.remove(h.mesh); h.tag.remove(); if(h.bub)h.bub.remove(); heroes.splice(heroes.indexOf(h),1); h.u.hero=null; }
+function heroAct(u,n,type){ const h=ensureHero(u); h.pend+=n; if(type){ if(!h.type||TIER[type]>TIER[h.type])h.type=type; h.cool=Math.min(h.cool,.15); } }
+function heroMarch(h){
+  const c=h.u.clan, from=h.at; let to=null, drop=false;
+  if(from.owner!==c){ to=from; drop=true; }
+  else { let bs=1e9; for(const a of from.adj){ if(a.owner===c||a.shield>0)continue; const sc=a.g+Math.random()*3; if(sc<bs){bs=sc;to=a;} }
+    if(!to){ const fr=from.adj.filter(a=>a.owner===c&&a.fd<from.fd); to=fr.length?fr[(Math.random()*fr.length)|0]:null; }
+    if(!to){ from.g+=h.pend; h.pend=0; h.type=null; return; } }
+  const type=h.type||(h.u.rank>=3?'sipahi':'piyade');
+  h.sq=send(drop?null:from,to,h.pend,type,{clan:c,user:h.u,hero:h}); h.pend=0; h.state='march'; h.mesh.visible=false;
+}
+function addPts(u,k){ u.pts+=k; u.life+=k; const r=rankOf(u.life); if(r<=u.rank)return; u.rank=r;
+  if(u.hero){ heroModel(u.hero); u.hero.tag.lastChild.textContent=RANKS[r]; }
+  feed(u.name+' rütbe atladı: <b>'+RANKS[r]+'</b>',u.clan);
+  if(r>=2){ banner(u.name+' artık '+RANKS[r]+'!',r>=3?'Bey ve üstü rütbeler ata biner':'Rütbe atladı',u.clan); showCard(u,'Yeni rütbe: '+RANKS[r]); thump(120,.15); if(r>=3)say(u.name+' artık '+RANKS[r]); } }
+const BAD=/(amk|aq|orospu|sik|piç|yarra|göt|salak|gerizekal|ibne|kahpe|pezevenk|şerefsiz)/i;
+function bubble(u,txt){ const h=u.hero; if(!h)return; txt=String(txt).replace(/https?:\S+|www\.\S+/g,'').trim().slice(0,42); if(!txt||BAD.test(txt))return;
+  if(h.bub)h.bub.remove(); const el=document.createElement('div'); el.className='bub'; el.textContent=txt; labelsEl.appendChild(el); h.bub=el; h.bubT=4.5; }
+const cardQ=[]; let cardT=0;
+function showCard(u,why){ if(cardQ.length<4&&!cardQ.some(c=>c.u===u))cardQ.push({u,why}); }
+function cardTick(dt){ cardT-=dt; const el=$('#card'); if(cardT>0)return; if(!cardQ.length||galOn){ el.hidden=true; return; }
+  const {u,why}=cardQ.shift(); cardT=3.6; el.textContent=''; el.style.setProperty('--c',cssColor(u.clan||34));
+  const add=(tag,cls,txt)=>{const x=document.createElement(tag); if(cls)x.className=cls; x.textContent=txt; el.appendChild(x); return x;};
+  el.appendChild(avatar(u)); add('h3','',u.name); add('p','r',RANKS[u.rank]+(u.clan?' · '+String(u.clan).padStart(2,'0')+' '+P[u.clan].name:''));
+  add('p','w',why); add('p','st',u.life+' puan · '+u.cq+' fetih'); if(u.won.length)add('p','st','Bu tur: '+u.won.slice(-3).join(', '));
+  const nx=rankOf(u.life)<6?RANKAT[u.rank+1]-u.life:0; if(nx>0)add('p','st',RANKS[u.rank+1]+' için '+nx+' puan');
+  el.hidden=false; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
+
 /* asker gönder: from yoksa birlik şehrin üstüne iner */
 function send(from,to,n,type,o){
-  o=o||{}; if(n<=0)return;
+  o=o||{}; if(n<=0)n=1;
   const clan=o.clan!=null?o.clan:from.owner, cm=clanMatOf(clan), g=new THREE.Group();
   let model, sc;
   if(type==='sipahi'){model=mk('sipahi',cm);sc=.4;}
   else if(type==='top'){model=mk('top',cm);sc=.46;}
   else if(o.user){model=mk('boluk',cm);sc=.36;}
   else {model=mk(n>=25?'p3':n>=10?'p2':'p1',cm);sc=.25+Math.min(.09,n*.004);}
-  g.add(model);
-  g.scale.setScalar(sc); scene.add(g);
+  g.add(model); g.scale.setScalar(sc); scene.add(g);
   const fx0=from?from.x:to.x, fz0=from?from.z:to.z, dist=Math.hypot(to.x-fx0,to.z-fz0);
   const speed=(type==='sipahi'?3:type==='top'?1.2:1.6)*(o.fast?2:1);
-  const s={clan,from,to,n,type,t:0,dur:from?Math.max(.4,dist/speed):.9,mesh:g,model,fx0,fz0,user:o.user||null,ph:Math.random()*6};
+  const s={clan,from,to,n,type,t:0,dur:from?Math.max(.4,dist/speed):.9,mesh:g,model,fx0,fz0,user:o.user||null,hero:o.hero||null,ph:Math.random()*6};
   if(from) g.rotation.y=Math.atan2(to.x-fx0,to.z-fz0);
-  if(o.user){ const t=document.createElement('div'); t.className='tag'; t.style.setProperty('--c',cssColor(clan));
-    const a=document.createElement('s'); if(o.user.pic)a.style.backgroundImage='url("'+o.user.pic.replace(/["\\)]/g,'')+'")'; else a.textContent=(o.user.name||'?').slice(0,1).toLocaleUpperCase('tr');
-    t.appendChild(a); t.appendChild(document.createTextNode(o.user.name)); labelsEl.appendChild(t); s.tag=t; }
   squads.push(s); return s;
 }
 function arrive(s){
-  const p=s.to;
-  if(p.owner===s.clan){ p.g+=s.n; return; }
-  if(p.shield>0){ ringFx(p,0x27c2b3); return; }
-  const dmg=s.n*(s.type==='top'?2:1);
-  if(dmg>p.g){ const old=p.owner; p.g=Math.max(2,Math.round((dmg-p.g)/(s.type==='top'?2:1))); setOwner(p,s.clan);
-    ringFx(p,clanColor(s.clan)); if(s.user||old===p.id)floatText(p,'FETİH '+p.name);
-    if(s.user){ s.user.pts+=15; feed(s.user.name+' <b>'+p.name+'</b> ilini aldı',s.clan); }
-    if(old!=null&&old===p.id) feed('<b>'+p.name+'</b> düştü, '+P[s.clan].name+' klanının oldu',s.clan);
-    thump(90,.12);
-  } else { p.g-=dmg; if(s.type==='top')ringFx(p,0xf2b632); }
+  const p=s.to; let took=false;
+  if(p.owner===s.clan){ p.g+=s.n; took=true; }
+  else if(p.shield>0){ ringFx(p,0x27c2b3); }
+  else { const mul=s.type==='top'?2:1, dmg=s.n*mul;
+    if(dmg>p.g){ const old=p.owner; p.g=Math.max(2,Math.round((dmg-p.g)/mul)); setOwner(p,s.clan); p.by=s.user||null; took=true;
+      ringFx(p,clanColor(s.clan)); if(s.user||old===p.id)floatText(p,s.user?p.name+' artık '+s.user.name+' adına':'FETİH '+p.name);
+      if(s.user){ const u=s.user; u.cq++; u.won.push(p.name); addPts(u,15); feed(u.name+' <b>'+p.name+'</b> ilini fethetti',s.clan); if(u.won.length%3===0)showCard(u,u.won.length+'. ilini fethetti'); }
+      if(old!=null&&old===p.id) feed('<b>'+p.name+'</b> düştü, '+P[s.clan].name+' klanının oldu',s.clan);
+      thump(90,.12);
+    } else { p.g-=dmg; if(s.type==='top')ringFx(p,0xf2b632); } }
+  if(s.hero){ const h=s.hero; if(took)h.at=p; h.state='idle'; h.type=null; h.cool=.5; h.mesh.visible=true; }
 }
 
 /* yapay zekâ: her il cepheye asker yollar */
@@ -478,59 +547,67 @@ function bestLaunch(clanId){ // hediye birliği için en iyi çıkış ve hedef
 }
 
 /* ───────── izleyici olayları ───────── */
-function user(e){ const id=e.uid||e.name||'anon'; const u=users[id]||(users[id]={id,name:e.name||id,clan:null,pts:0,last:0,pic:''}); if(e.name)u.name=e.name; if(e.pic)u.pic=e.pic; return u; }
+function user(e){ const id=String(e.uid||e.name||'anon'); let u=users[id];
+  if(!u){ const st=STORE[id]||{}; u=users[id]={id,name:e.name||id,clan:null,pts:0,life:st.l||0,cq:st.q||0,saved:st.c||0,rank:rankOf(st.l||0),last:0,pic:'',hero:null,act:0,won:[],back:!!st.l}; }
+  if(e.name)u.name=e.name; if(e.pic)u.pic=e.pic; return u; }
 function smallestClan(){ let b=null; for(const c of Object.values(clans)){ if(!c.members)continue; c.n=provs.reduce((k,p)=>k+(p.owner===c.id),0); if(!b||c.n<b.n)b=c; } return b; }
-function ensureClan(u){ if(u.clan!=null)return true; const c=smallestClan(); if(!c)return false; joinClan(u,c.id,true); return true; }
+function ensureClan(u){ if(u.clan!=null)return true; if(u.saved){ joinClan(u,u.saved); return true; } const c=smallestClan(); if(!c)return false; joinClan(u,c.id,true); return true; }
 function joinClan(u,id,auto){
-  if(u.clan===id)return; if(u.clan!=null)clans[u.clan].members--;
+  if(u.clan===id){ ensureHero(u); return; }
+  if(u.clan!=null){ clans[u.clan].members--; if(u.hero)dropHero(u.hero); }
   const c=getClan(id), home=P[id], first=c.members===0; u.clan=id; c.members++;
-  if(first&&home.owner==null){ home.g+=12; setOwner(home,id); ringFx(home,clanColor(id)); }
-  else send(null,home,first?14:3,'piyade',{clan:id});
-  feed(u.name+(auto?' gönüllü: ':' katıldı: ')+'<b>'+String(id).padStart(2,'0')+' '+c.name+'</b>',id);
+  if(first&&home.owner==null){ home.g+=12; setOwner(home,id); home.by=u; ringFx(home,clanColor(id)); }
+  const h=ensureHero(u); h.pend+=first?14:4; h.type='piyade'; h.cool=.4;
+  const who=(u.rank?RANKS[u.rank]+' ':'')+u.name;
+  feed((u.back?'Tekrar hoş geldin '+who+': ':who+(auto?' gönüllü: ':' sahada: '))+'<b>'+String(id).padStart(2,'0')+' '+c.name+'</b>',id);
+  showCard(u,u.back?'Tekrar hoş geldin':'Karakterin '+c.name+' kalesinde doğdu'); u.back=false;
   if(first&&!auto) banner(c.name+' sahada!','Klanı '+u.name+' kurdu',id);
 }
 function parsePlate(txt){
   const m=/(?:^|\D)(0?[1-9]|[1-7]\d|8[01])(?:\D|$)/.exec(txt); if(m)return +m[1];
   for(const w of norm(txt).split(' ')) if(NAMEIDX[w])return NAMEIDX[w]; return 0;
 }
-function troopsHome(u,n){ send(null,P[u.clan],n,'piyade',{clan:u.clan}); }
+let lastHello=0;
 function onEvent(e){
+  if(e.type==='roomUser'){ viewers=e.viewers|0; return; }
   if(phase!=='play'&&e.type!=='chat')return;
   const u=user(e), now=performance.now();
   switch(e.type){
-    case 'chat':{ const id=parsePlate(e.comment||''); if(id){ if(phase==='play')joinClan(u,id); else u.wish=id; }
-      else if(phase==='play'&&u.clan!=null&&now-u.last>2000){u.last=now;u.pts+=1;P[u.clan].owner===u.clan?P[u.clan].g++:troopsHome(u,1);} break; }
-    case 'like':{ if(!ensureClan(u))break; const k=Math.max(1,e.count|0), c=clans[u.clan]; u.pts+=k;
-      const n=Math.min(k,15); if(P[u.clan].owner===u.clan)P[u.clan].g+=n; else troopsHome(u,n);
+    case 'chat':{ const txt=e.comment||'', id=parsePlate(txt);
+      if(id){ if(phase==='play')joinClan(u,id); else u.wish=id; break; }
+      if(phase!=='play')break;
+      if(/^\s*!?(ben|kart|rütbe|rutbe)\s*$/i.test(txt)){ if(ensureClan(u))showCard(u,'Kartın'); break; }
+      if(u.clan==null)break; ensureHero(u); bubble(u,txt);
+      if(now-u.last>2000){ u.last=now; addPts(u,1); heroAct(u,1); } break; }
+    case 'like':{ if(!ensureClan(u))break; const k=Math.max(1,e.count|0), c=clans[u.clan]; addPts(u,k); heroAct(u,Math.min(k,15));
       c.bar+=k; if(c.bar>=100){ c.bar=0; c.rush=6; banner(c.name+' HÜCUM!','Beğeni barı doldu, tüm birlikler iki kat hızlı',c.id); thump(70,.2); } break; }
     case 'gift':{ if(!ensureClan(u))break; const d=Math.max(1,e.diamonds|0)*Math.max(1,e.repeat|0), c=clans[u.clan];
-      const n=Math.round(4*Math.pow(d,.75)); u.pts+=d*5;
+      const n=Math.round(4*Math.pow(d,.75)); addPts(u,d*5);
       const tier=d>=1000?'mehter':d>=100?'top':d>=10?'sipahi':'piyade';
       const names={piyade:'Piyade bölüğü',sipahi:'Sipahi',top:'Topçu',mehter:'Mehter takımı'};
       feed(u.name+' '+d+' elmas → <b>'+names[tier]+'</b>',c.id);
       if((e.repeat|0)>=5) banner('x'+e.repeat+' KOMBO',u.name+' · '+(e.giftName||'hediye'),c.id);
+      if(d>=10) showCard(u,d+' elmas gönderdi');
       if(tier==='mehter'){ mehter(u,c,n); break; }
-      const home=P[c.id];
-      if(home.owner!==c.id){ send(null,home,n,tier,{clan:c.id,user:u}); }
-      else { const l=bestLaunch(c.id); if(l)send(l.from,l.to,n,tier,{clan:c.id,user:u}); else home.g+=n; }
-      if(tier==='top'){ banner('TOPÇU ATEŞİ',u.name+' · '+c.name,c.id); focus(home,3.5); thump(55,.3); }
+      heroAct(u,n,tier);
+      if(tier==='top'){ banner(u.name+' TOP ATEŞİ',c.name+' topçusu yolda',c.id); focus(u.hero.at,3.5); thump(55,.3); }
       else if(tier==='sipahi') thump(110,.1);
       break; }
-    case 'follow':{ if(!ensureClan(u))break; u.pts+=20; const p=P[u.clan].owner===u.clan?P[u.clan]:provs.filter(x=>x.owner===u.clan).sort((a,b)=>b.g-a.g)[0];
+    case 'follow':{ if(!ensureClan(u))break; addPts(u,20); const h=ensureHero(u);
+      const p=h.at.owner===u.clan?h.at:P[u.clan].owner===u.clan?P[u.clan]:provs.filter(x=>x.owner===u.clan).sort((a,b)=>b.g-a.g)[0];
       if(p){ p.shield=20; if(!p.dome){p.dome=mKalkan();p.dome.position.set(p.x,0,p.z);scene.add(p.dome);} p.dome.visible=true; }
-      feed(u.name+' takip etti → <b>Kalkan</b>',u.clan); break; }
-    case 'share':{ if(!ensureClan(u))break; u.pts+=30; troopsHome(u,10); feed(u.name+' paylaştı → <b>+10 asker</b>',u.clan); break; }
-    case 'member':{ if(now-lastHello>2500){lastHello=now; feed('Hoş geldin '+u.name+', plakanı yaz');} break; }
-    case 'roomUser': viewers=e.viewers|0; break;
+      feed(u.name+' takip etti → <b>'+(p?p.name+' kalkanda':'Kalkan')+'</b>',u.clan); break; }
+    case 'share':{ if(!ensureClan(u))break; addPts(u,30); heroAct(u,10,'piyade'); feed(u.name+' paylaştı → <b>+10 asker</b>',u.clan); break; }
+    case 'member':{ if(u.saved&&u.clan==null){ joinClan(u,u.saved); break; }
+      if(now-lastHello>2500){ lastHello=now; feed('Hoş geldin '+u.name+', plakanı yaz, karakterin doğsun'); } break; }
   }
 }
-let lastHello=0;
 function mehter(u,c,n){
   const home=P[c.id], m=mMehter(clanMatOf(c.id)); m.scale.setScalar(.6); m.position.set(home.x+.35,0,home.z+.3); scene.add(m);
   fx.push({m,t:0,d:14,mehter:true});
-  if(home.owner!==c.id) send(null,home,n,'piyade',{clan:c.id,user:u});
   provs.forEach(p=>{ if(p.owner===c.id){p.g+=8;ringFx(p,0xf2b632);} });
-  const mine=provs.filter(p=>p.owner===c.id); const share=Math.round(n/Math.max(1,mine.length)); mine.forEach(p=>p.g+=share);
+  const mine=provs.filter(p=>p.owner===c.id); const share=Math.round(n/2/Math.max(1,mine.length)); mine.forEach(p=>p.g+=share);
+  heroAct(u,Math.round(n/2),'sipahi');
   c.rush=10; banner('MEHTER MARŞI',u.name+' tüm '+c.name+' klanını hücuma kaldırdı',c.id); focus(home,5); thump(60,.5); say(c.name+' için mehter marşı. Teşekkürler '+u.name);
 }
 
@@ -550,9 +627,11 @@ function hud(){
   $('#clans').innerHTML=list.map(c=>'<div class="clan"><i style="background:'+cssColor(c.id)+'">'+String(c.id).padStart(2,'0')+'</i>'+esc(c.name)+' <em>'+c.n+' il</em><u style="width:'+Math.min(100,c.rush>0?100:c.bar)+'%"></u></div>').join('')
     || '<div class="clan"><i style="background:var(--altın)">?</i>İlk klanı sen kur</div>';
   const top=Object.values(users).filter(u=>u.pts>0).sort((a,b)=>b.pts-a.pts).slice(0,5);
-  $('#lead-list').innerHTML=top.length?top.map((u,i)=>'<li><b>'+(i+1)+'</b><span>'+esc(u.name)+'</span><em>'+u.pts+'</em></li>').join(''):'<li class="empty">Beğen, hediye gönder, listeye gir.</li>';
+  $('#lead-list').innerHTML=top.length?top.map((u,i)=>'<li><b>'+(i+1)+'</b><span>'+(u.rank>=2?'<q>'+RANKS[u.rank]+'</q> ':'')+esc(u.name)+'</span><em>'+u.pts+'</em></li>').join(''):'<li class="empty">Beğen, hediye gönder, listeye gir.</li>';
   const t=Math.max(0,Math.ceil(timeLeft)); $('#timer').textContent=((t/60)|0)+':'+String(t%60).padStart(2,'0');
-  provs.forEach(p=>{ const v=p.owner==null?'':Math.round(p.g); if(p.gv!==v){p.gv=v;p.gi.textContent=v;} });
+  provs.forEach(p=>{ const v=p.owner==null?'':Math.round(p.g); if(p.gv!==v){p.gv=v;p.gi.textContent=v;} const b=p.by&&p.owner!=null?p.by.name.slice(0,10):''; if(p.bv!==b){p.bv=b;p.ub.textContent=b;} });
+  const hs=heroes.slice().sort((a,b)=>b.u.act-a.u.act); hs.forEach((h,i)=>h.tag.classList.toggle('mini',i>=10));
+  const old=hs[hs.length-1]; if(old&&old.state==='idle'&&!old.pend&&time-old.u.act>150)dropHero(old);
   return list;
 }
 function endRound(){
@@ -560,10 +639,11 @@ function endRound(){
   const top=Object.values(users).filter(u=>u.pts>0).sort((a,b)=>b.pts-a.pts).slice(0,3);
   $('#end-w').textContent=w?w.name:'Berabere'; $('#end-w').style.color=w?cssColor(w.id):'';
   $('#end-s').textContent=w?(w.n+' il ile turu kazandı'):'Bu tur kimse klan kurmadı';
-  $('#end-l').innerHTML=top.map((u,i)=>'<li><b>'+['Fatih','Vezir','Paşa'][i]+':</b> '+esc(u.name)+' · '+u.pts+' puan</li>').join('');
+  $('#end-l').innerHTML=top.map((u,i)=>'<li><b>'+(i+1)+'.</b> '+RANKS[u.rank]+' '+esc(u.name)+' · '+u.pts+' puan'+(u.won.length?' · '+u.won.length+' fetih':'')+'</li>').join('');
   $('#end').hidden=false;
   if(w){ try{const k='mf-wins',o=JSON.parse(localStorage.getItem(k)||'{}');o[w.id]=(o[w.id]||0)+1;localStorage.setItem(k,JSON.stringify(o));}catch(_){}
-    say('Turu '+w.name+' kazandı.'+(top[0]?' Fatih '+top[0].name:'')); }
+    say('Turu '+w.name+' kazandı.'+(top[0]?' Turun fatihi '+top[0].name:'')); }
+  saveUsers(); if(top[0]){ cardQ.length=0; cardT=0; showCard(top[0],'Turun fatihi'); }
 }
 
 /* ses: davul vuruşu ve Türkçe anons */
@@ -582,7 +662,7 @@ function botTick(){
   const e={uid:'bot'+i,name:BOT[i]+(i%3?'':'_'+(60+i))}, u=users[e.uid], r=Math.random();
   if(!u||u.clan==null){ e.type='chat'; e.comment=String(BOTIL[(i*7+3)%BOTIL.length]); }
   else if(r<.58){ e.type='like'; e.count=1+(Math.random()*12|0); }
-  else if(r<.74){ e.type='chat'; e.comment='haydi '+P[u.clan].name; }
+  else if(r<.74){ e.type='chat'; const n=P[u.clan].name; e.comment=['haydi '+n,n+' burada','bastır '+n,'selam herkese','geliyoruz','en büyük '+n,'ben','kalkan lazım'][(Math.random()*8)|0]; }
   else if(r<.9){ e.type='gift'; e.diamonds=Math.random()<.7?1:5; e.repeat=Math.random()<.15?5+(Math.random()*10|0):1; e.giftName='Gül'; }
   else if(r<.955){ e.type='gift'; e.diamonds=10+(Math.random()*80|0); }
   else if(r<.972){ e.type='gift'; e.diamonds=100+(Math.random()*300|0); }
@@ -608,7 +688,7 @@ let camD=40, focusP=null, focusT=0, zoom=0;
 let CAMDIR=new THREE.Vector3(0,.82,.62).normalize(); const LOOK=new THREE.Vector3(0,0,.15);
 function fit(){
   const w=stage.clientWidth, h=stage.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
-  const portrait=h>w; CAMDIR.set(0,portrait?.93:.82,portrait?.37:.62).normalize(); const yTop=portrait?.3:.62, yBot=portrait?-.3:-.72, v=new THREE.Vector3();
+  const portrait=h>w; CAMDIR.set(0,portrait?.93:.82,portrait?.37:.62).normalize(); LOOK.z=portrait?2.2:.15; const yTop=portrait?.5:.62, yBot=portrait?-.3:-.72, v=new THREE.Vector3();
   for(camD=12;camD<160;camD+=1){ camera.position.copy(CAMDIR).multiplyScalar(camD).add(LOOK); camera.lookAt(LOOK); camera.updateMatrixWorld();
     let ok=true; for(const [x,z] of [[-PW/2,-PH/2],[PW/2,-PH/2],[-PW/2,PH/2],[PW/2,PH/2]]){ v.set(x,.5,z).project(camera); if(Math.abs(v.x)>.99||v.y>yTop||v.y<yBot){ok=false;break;} }
     if(ok)break; }
@@ -632,10 +712,10 @@ galScene.add(new THREE.HemisphereLight(0xfff3d6,0x0b2230,1)); const gl2=new THRE
 const ped=new THREE.Mesh(cyl(1.15,1.25,.12,32),new THREE.MeshPhongMaterial({color:0x123748})); ped.position.y=-.06; galScene.add(ped);
 function galShow(i){ galI=(i+GAL.length)%GAL.length; if(galObj)galScene.remove(galObj); const it=GAL[galI]; galObj=it[3](); galObj.scale.setScalar(it[4]); galScene.add(galObj);
   $('#gal-name').textContent=it[0]; $('#gal-trig').textContent='Tetikleyici: '+it[1]; $('#gal-desc').textContent=it[2]; }
-function galToggle(on){ galOn=on; $('#gal').hidden=!on; $('#top').hidden=on; $('#bottom').hidden=on; feedEl.hidden=on; bannerEl.hidden=on; labelsEl.hidden=on; floatsEl.hidden=on; if(on)galShow(galI); }
+function galToggle(on){ galOn=on; $('#gal').hidden=!on; $('#top').hidden=on; $('#bottom').hidden=on; feedEl.hidden=on; bannerEl.hidden=on; labelsEl.hidden=on; floatsEl.hidden=on; if(on)$('#card').hidden=true; if(on)galShow(galI); }
 
 /* ───────── döngü ───────── */
-let last=performance.now(), acc1=0, accAI=0, accHud=0, time=0;
+let saveT=0, last=performance.now(), acc1=0, accAI=0, accHud=0, time=0;
 function step(dt){
   time+=dt;
   if(phase==='play'){
@@ -653,8 +733,14 @@ function step(dt){
     else { g.position.set(s.to.x,(1-k)*(1-k)*3,s.to.z); g.rotation.y=time*3; }
     if(s.type==='sipahi'){ const q=time*14+s.ph; s.model.rotation.x=Math.sin(q)*.1; s.model.position.y=Math.abs(Math.sin(q))*.14; }
     else if(s.type==='piyade') s.model.rotation.z=Math.sin(time*10+s.ph)*.07;
-    if(s.tag) place(s.tag,g.position.x,g.position.y+.85,g.position.z);
     if(k>=1){ if(phase==='play')arrive(s); killSquad(s); squads.splice(i,1); } }
+  for(const h of heroes){
+    if(h.state==='march'&&h.sq){ const g=h.sq.mesh.position; h.px=g.x; h.py=g.y; h.pz=g.z; }
+    else { const p=h.at; h.px=p.x+Math.cos(h.slot)*.38; h.pz=p.z+Math.sin(h.slot)*.3; h.py=Math.abs(Math.sin(time*3+h.slot))*.02;
+      h.mesh.position.set(h.px,h.py,h.pz); h.mesh.rotation.y=Math.sin(time*.7+h.slot)*.6;
+      if(phase==='play'){ h.cool-=dt; if(h.cool<=0&&(h.pend>=6||(h.type&&h.pend>0)))heroMarch(h); } }
+    if(h.bub){ h.bubT-=dt; if(h.bubT<=0){h.bub.remove();h.bub=null;} } }
+  cardTick(dt); saveT+=dt; if(saveT>20){saveT=0;saveUsers();}
   for(let i=fx.length-1;i>=0;i--){ const f=fx[i]; f.t+=dt; const k=f.t/f.d;
     if(f.mehter){ f.m.userData.sticks.forEach((s,j)=>s.rotation.x=1+Math.max(0,Math.sin(time*10+j*Math.PI))*.7); f.m.position.y=Math.abs(Math.sin(time*5))*.03; if(k>.9)f.m.scale.setScalar(.6*(1-k)*10); }
     else if(f.m){ f.m.scale.setScalar(.2+k*1.1); f.m.material.opacity=1-k; }
@@ -673,6 +759,7 @@ function frame(now){
   camera.position.copy(CAMDIR).multiplyScalar(camD*(1-zoom*.42)).add(LOOK); camera.position.x+=tx+sway; camera.position.z+=tz;
   camera.lookAt(LOOK.x+tx,0,LOOK.z+tz); camera.updateMatrixWorld();
   provs.forEach(p=>place(p.el,p.x,p.tower.scale.y*2.6,p.z));
+  for(const h of heroes){ const top=h.state==='march'||h.u.rank>=3?.85:.6; place(h.tag,h.px,h.py+top,h.pz); if(h.bub)place(h.bub,h.px,h.py+top,h.pz); }
   if(mapDirty)paintMap();
   accHud+=dt; if(accHud>.3){accHud=0; if(phase==='play')hud();}
   renderer.render(scene,camera);
