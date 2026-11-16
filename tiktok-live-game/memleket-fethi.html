@@ -32,7 +32,7 @@
 }
 html,body{height:100%}
 body{margin:0;background:var(--deniz);color:var(--kağıt);font-family:var(--body);overflow:hidden}
-#stage{position:fixed;inset:0;background:linear-gradient(#9fc0cc,#6f9a5a 70%);overflow:hidden}
+#stage{position:fixed;inset:0;background:linear-gradient(#1d3238,#3a5256 60%,#2f4b2d);overflow:hidden}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block}
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #hud{position:absolute;inset:0;box-sizing:border-box;pointer-events:none;
@@ -82,35 +82,30 @@ body{margin:0;background:var(--deniz);color:var(--kağıt);font-family:var(--bod
 #que{color:var(--soluk)}
 #que b{color:var(--çini);font-weight:800}
 
-/* ── destekçiler: kalenin yanında, sol kenar ── */
-.sup{position:absolute;left:0;width:calc(var(--u)*29);background:var(--panel);border-radius:calc(var(--u)*1.2);border-left:calc(var(--u)*.7) solid var(--sc);padding:calc(var(--u)*.6) calc(var(--u)*1) calc(var(--u)*.7)}
-#sup0{top:25.6%}
-#sup1{top:47%}
-.sup h4{margin:0 0 calc(var(--u)*.3);font:400 calc(var(--u)*2.8)/1.15 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--sc)}
-.sr{display:grid;grid-template-columns:calc(var(--u)*4.2) 1fr auto;gap:calc(var(--u)*.8);align-items:center;height:calc(var(--u)*4.7)}
-.sr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:calc(var(--u)*2.7)}
-.sr em{font-style:normal;color:var(--altın);font-weight:800;font-size:calc(var(--u)*2.6);font-variant-numeric:tabular-nums}
-.sr.e{opacity:.4}
-.av{width:calc(var(--u)*4.2);height:calc(var(--u)*4.2);border-radius:50%;display:grid;place-items:center;font:400 calc(var(--u)*2.5)/1 var(--display);color:var(--mürekkep);
-  background:var(--c,var(--al)) center/cover no-repeat;border:calc(var(--u)*.3) solid var(--kağıt);box-sizing:border-box;flex:none;text-decoration:none}
+/* ── destekçiler: başlık kutusunun altında ── */
+.t3{display:flex;gap:calc(var(--u)*.7);height:calc(var(--u)*3.8);overflow:hidden;align-items:center}
+.ch{display:flex;align-items:center;gap:calc(var(--u)*.3);min-width:0;font-size:calc(var(--u)*2.4);font-weight:700;white-space:nowrap}
+.ch b{max-width:calc(var(--u)*5.5);overflow:hidden;text-overflow:ellipsis;font-weight:700}
+.ch em{font-style:normal;color:var(--altın);font-weight:800;font-variant-numeric:tabular-nums}
+.av{width:calc(var(--u)*3.6);height:calc(var(--u)*3.6);border-radius:50%;display:grid;place-items:center;font:400 calc(var(--u)*2.1)/1 var(--display);color:var(--mürekkep);
+  background:var(--c,var(--al)) center/cover no-repeat;border:calc(var(--u)*.25) solid var(--kağıt);box-sizing:border-box;flex:none;text-decoration:none}
+.map{display:block;width:calc(var(--u)*46);max-width:100%;height:auto;margin:calc(var(--u)*1) auto 0;background:rgba(10,30,42,.6);border-radius:calc(var(--u)*1)}
+#tip.fd{color:var(--kağıt);box-shadow:inset calc(var(--u)*.6) 0 0 var(--c,var(--altın))}
 
-/* ── akış (sol, yolun kenarı, en çok 3 satır) ── */
-#feed{position:absolute;left:0;top:36.2%;width:calc(var(--u)*39);height:calc(var(--u)*19);display:flex;flex-direction:column;justify-content:flex-end;gap:calc(var(--u)*.4);overflow:hidden}
-.fi{background:var(--panel);border-left:calc(var(--u)*.6) solid var(--c,var(--çini));border-radius:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1);
-  font-size:calc(var(--u)*2.5);line-height:1.25;font-weight:500;animation:fin .25s ease-out;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;flex:none;transition:opacity .6s}
-.fi.out{opacity:0}
-@keyframes fin{from{transform:translateX(calc(var(--u)*-3));opacity:0}to{transform:none;opacity:1}}
-
-/* ── fetih haritası: sağ üst, güvenli bantta ── */
-#map{position:absolute;right:max(0px,calc(var(--safe-right) - var(--gutr)));top:25.4%;width:calc(var(--u)*26);background:var(--panel);border-radius:calc(var(--u)*1);padding:calc(var(--u)*.6);border:1px solid var(--çizgi)}
-#map canvas{display:block;width:100%;height:auto}
-#map small{display:block;font-weight:800;font-size:calc(var(--u)*2.4);color:var(--çini);letter-spacing:.04em;margin-bottom:calc(var(--u)*.3);text-align:center}
+/* ── rütbe kartı: tek satırlık hap, solda ── */
+#card{position:absolute;left:0;top:58%;max-width:56%;display:flex;align-items:center;gap:calc(var(--u)*1);background:var(--panel);border-radius:calc(var(--u)*3);
+  padding:calc(var(--u)*.5) calc(var(--u)*1.6) calc(var(--u)*.5) calc(var(--u)*.5);border:calc(var(--u)*.3) solid var(--c,var(--altın));font-size:calc(var(--u)*2.6);white-space:nowrap;animation:cardin .3s ease-out}
+#card .av{width:calc(var(--u)*5);height:calc(var(--u)*5);font-size:calc(var(--u)*2.6)}
+#card b{font-family:var(--display);font-weight:400;font-size:1.15em;flex:none;max-width:calc(var(--u)*15);overflow:hidden;text-overflow:ellipsis}
+#card i{font-style:normal;color:var(--altın);font-weight:800;flex:none}
+#card span{overflow:hidden;text-overflow:ellipsis;color:var(--çini);font-weight:700}
+@keyframes cardin{from{transform:translateX(calc(var(--u)*-4));opacity:0}to{transform:none;opacity:1}}
 
 /* ── afiş ── */
-#banner{position:absolute;left:50%;top:33%;transform:translate(-50%,-50%);text-align:center;width:min(100%,calc(var(--u)*96))}
-#banner div{display:inline-block;font-family:var(--display);font-size:calc(var(--u)*6.4);line-height:1.04;color:var(--kağıt);padding:0 calc(var(--u)*1);
+#banner{position:absolute;left:50%;top:28.5%;transform:translateX(-50%);text-align:center;width:min(100%,calc(var(--u)*94))}
+#banner div{display:inline-block;font-family:var(--display);font-size:calc(var(--u)*6);line-height:1.04;color:var(--kağıt);padding:calc(var(--u)*.6) calc(var(--u)*2);background:rgba(6,20,28,.78);border-radius:calc(var(--u)*1.4);border-bottom:calc(var(--u)*.5) solid var(--c,var(--al));
   text-shadow:0 calc(var(--u)*.5) 0 var(--mürekkep),0 0 calc(var(--u)*2) var(--c,var(--al)),0 0 calc(var(--u)*.6) #000;animation:pop 2.7s ease-out forwards;text-wrap:balance}
-#banner small{display:block;font-family:var(--body);font-weight:800;font-size:calc(var(--u)*3);color:var(--altın);margin-top:calc(var(--u)*.4)}
+#banner small{display:block;font-family:var(--body);font-weight:800;font-size:calc(var(--u)*3);color:var(--altın);margin-top:calc(var(--u)*.3)}
 @keyframes pop{0%{transform:scale(.4);opacity:0}9%{transform:scale(1.12);opacity:1}16%{transform:scale(1)}86%{opacity:1}100%{opacity:0}}
 
 /* ── dünya içi etiketler ── */
@@ -125,18 +120,8 @@ body{margin:0;background:var(--deniz);color:var(--kağıt);font-family:var(--bod
 .bub{margin-top:calc(var(--u)*-4.6);background:#fff;color:var(--mürekkep);font-weight:500;font-size:calc(var(--u)*2.6);line-height:1.2;
   padding:calc(var(--u)*.5) calc(var(--u)*1.3);border-radius:calc(var(--u)*1.6) calc(var(--u)*1.6) calc(var(--u)*1.6) calc(var(--u)*.3);max-width:calc(var(--u)*34);overflow:hidden;text-overflow:ellipsis;box-shadow:0 calc(var(--u)*.3) calc(var(--u)*1) rgba(0,0,0,.5);z-index:2}
 
-/* ── rütbe kartı: %45-64 bandında, sağ güvenli şeridin solunda ── */
-#card{position:absolute;right:max(0px,calc(var(--safe-right) - var(--gutr) + 1%));top:50.5%;width:calc(var(--u)*41);background:var(--panel);border:1px solid var(--çizgi);border-top:calc(var(--u)*.7) solid var(--c,var(--altın));
-  border-radius:calc(var(--u)*1.4);padding:calc(var(--u)*1) calc(var(--u)*1.3);display:grid;grid-template-columns:auto 1fr;column-gap:calc(var(--u)*1.2);align-items:center;animation:cardin .35s ease-out}
-@keyframes cardin{from{transform:translateX(calc(var(--u)*4));opacity:0}to{transform:none;opacity:1}}
-#card .av{width:calc(var(--u)*9);height:calc(var(--u)*9);grid-row:span 2;font-size:calc(var(--u)*4.4);border-width:calc(var(--u)*.4)}
-#card h3{margin:0;font:400 calc(var(--u)*3.7)/1.1 var(--display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#card .r{color:var(--altın);font-weight:800;font-size:calc(var(--u)*2.7)}
-#card p{margin:calc(var(--u)*.4) 0 0;font-size:calc(var(--u)*2.5);color:var(--soluk);grid-column:1/-1;line-height:1.25}
-#card p.w{color:var(--çini);font-weight:800}
-
 /* ── giriş ve tören ── */
-.ov{position:absolute;left:50%;top:34.5%;transform:translateX(-50%);width:min(100%,calc(var(--u)*94));text-align:center;background:rgba(6,20,28,.93);border:1px solid var(--çizgi);
+.ov{position:absolute;left:50%;top:31%;transform:translateX(-50%);width:min(100%,calc(var(--u)*94));text-align:center;background:rgba(6,20,28,.93);border:1px solid var(--çizgi);
   border-radius:calc(var(--u)*2);padding:calc(var(--u)*1.4) calc(var(--u)*2);box-sizing:border-box;box-shadow:0 0 calc(var(--u)*4) rgba(0,0,0,.5)}
 .ov h2{margin:0;font:400 calc(var(--u)*4)/1 var(--display);color:var(--çini);letter-spacing:.08em}
 .ov .vs{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*2);margin:calc(var(--u)*1.4) 0}
@@ -174,12 +159,12 @@ button[aria-pressed="true"]{background:var(--çini);color:var(--mürekkep);borde
 #gal p{margin:0;line-height:1.35}
 #gal .trig{font-weight:800;color:var(--çini)}
 #gal nav{display:flex;gap:8px;justify-content:center;margin-top:4px}
-.ph-intro .sup,.ph-intro #feed,.ph-intro #card,.ph-end .sup,.ph-intro #labels,.ph-end #labels,.ph-end #feed,.ph-end #banner,.ph-end #card{display:none!important}
-.ph-intro #banner{top:29.5%}
-.gal #hudtop,.gal .sup,.gal #feed,.gal #map,.gal #banner,.gal #card,.gal .ov,.gal #labels{display:none!important}
+.ph-intro #card,.ph-intro #labels,.ph-end #labels,.ph-end #banner,.ph-end #card{display:none!important}
+.ph-intro #banner{display:none}
+.gal #hudtop,.gal #banner,.gal #card,.gal .ov,.gal #labels{display:none!important}
 
 @media (min-aspect-ratio:1/1){
-  #sup0{top:18%} #sup1{top:50%} #feed{top:33%} #map{top:18%} #card{top:50%} .ov{top:22%} #banner{top:34%}
+  .ov{top:22%} #banner{top:26%} #card{top:60%}
 }
 @media (prefers-reduced-motion:reduce){ .fi,#banner div,#card,#tip.sw{animation-duration:.01s} #timer.hot,#x2{animation:none} }
 </style>
@@ -190,27 +175,25 @@ button[aria-pressed="true"]{background:var(--çini);color:var(--mürekkep);borde
   <div id="hud"><div class="hin">
     <div id="hudtop">
       <div class="tb">
-        <div class="sd" id="s0"><div class="nm"><i></i><b></b></div><div class="hp"><strong>0</strong><div class="bar"><i></i></div></div><div class="bdg"></div></div>
+        <div class="sd" id="s0"><div class="nm"><i></i><b></b></div><div class="hp"><strong>0</strong><div class="bar"><i></i></div></div><div class="bdg"></div><div class="t3"></div></div>
         <div class="mid"><div id="timer">3:00</div><div id="x2" hidden>×2 HASAR</div></div>
-        <div class="sd" id="s1"><div class="nm"><i></i><b></b></div><div class="hp"><strong>0</strong><div class="bar"><i></i></div></div><div class="bdg"></div></div>
+        <div class="sd" id="s1"><div class="nm"><i></i><b></b></div><div class="hp"><strong>0</strong><div class="bar"><i></i></div></div><div class="bdg"></div><div class="t3"></div></div>
       </div>
       <div id="tug"><i style="width:50%"></i><i></i></div>
       <div class="line" id="tip"></div>
       <div class="line" id="que"></div>
     </div>
-    <div class="sup" id="sup0"></div>
-    <div class="sup" id="sup1"></div>
-    <div id="feed"></div>
-    <div id="map"><small>FETİH HARİTASI</small><canvas id="mapcv" width="330" height="150"></canvas></div>
     <div id="banner"></div>
     <aside id="card" hidden></aside>
     <div class="ov" id="intro" hidden>
       <h2>SIRADAKİ KUŞATMA</h2>
       <div class="vs"><div id="i0"></div><b>⚔</b><div id="i1"></div></div>
       <div class="cd" id="icd">6</div>
+      <canvas class="map mapcv" id="mapintro" width="330" height="150"></canvas>
       <p>Yoruma plakanı yaz, kendi ilinin tarafında savaş!</p>
     </div>
     <div class="ov" id="endc" hidden></div>
+    <canvas class="map mapcv" id="mapend" width="330" height="150"></canvas>
     <div id="gal" hidden>
       <h3 id="gal-name"></h3>
       <p class="trig" id="gal-trig"></p>

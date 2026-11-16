@@ -38,16 +38,16 @@ try {
 } catch (err){ if (statusEl) statusEl.textContent = 'WebGL başlatılamadı.'; return; }
 var PR = CFG.low ? 1 : Math.min(window.devicePixelRatio || 1, 2);
 renderer.setPixelRatio(PR);
-var FOG = 0xa9c7cf;
+var FOG = 0x3a5256;
 renderer.setClearColor(FOG, 1);
 var scene = new THREE.Scene();
-scene.fog = new THREE.Fog(FOG, 70, 190);
+scene.fog = new THREE.Fog(FOG, 60, 170);
 var camera = new THREE.PerspectiveCamera(40, 9 / 16, 1, 320);
 var world = new THREE.Group(); scene.add(world);
 var galGroup = new THREE.Group(); galGroup.visible = false; scene.add(galGroup);
 
-scene.add(new THREE.HemisphereLight(0xe6f0f6, 0x56683a, .95));
-var sun = new THREE.DirectionalLight(0xfff0d0, .85); sun.position.set(-9, 18, 15); scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xc4d4dc, 0x3c4a34, .85));
+var sun = new THREE.DirectionalLight(0xffdca8, 1.05); sun.position.set(-10, 20, 14); scene.add(sun);
 
 /* birlestirici: ayri geometrileri tek koseli-renkli geometriye indirir */
 function Merger(){ this.p = []; this.n = []; this.c = []; }
@@ -73,52 +73,55 @@ function mat(x, y, z, sx, sy, sz, ry){ _e.set(0, ry || 0, 0); _q.setFromEuler(_e
 var seed = 20240611;
 function rnd(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
 
-var CZ = 7.2;            // kale merkezleri z = -CZ (uzak) ve +CZ (yakin)
+var CZ = 6.4;            // kale merkezleri z = -CZ (uzak) ve +CZ (yakin)
 var WALL = 3.2, GATEZ = 4.45, LANEZ = CZ - WALL - .3;
 (function buildGround(){
-  var gr = new THREE.Mesh(new THREE.PlaneGeometry(700, 700), new THREE.MeshLambertMaterial({ color: 0x5f9340 }));
+  var gr = new THREE.Mesh(new THREE.PlaneGeometry(700, 700), new THREE.MeshLambertMaterial({ color: 0x2f4b2d }));
   gr.rotation.x = -Math.PI / 2; world.add(gr);
   var M = new Merger();
   var flat = new THREE.BoxGeometry(1, 1, 1);
   // yol ve kenarlari
-  M.add(flat, mat(0, .03, 0, 5.8, .05, 13.6), 0x9b7b50, .1);
-  M.add(flat, mat(-3.05, .035, 0, .6, .05, 13.6), 0x7d6140, .15);
-  M.add(flat, mat(3.05, .035, 0, .6, .05, 13.6), 0x7d6140, .15);
-  M.add(flat, mat(-1.2, .06, 0, .22, .04, 13), 0x846747, .1);
-  M.add(flat, mat(1.2, .06, 0, .22, .04, 13), 0x846747, .1);
-  for (var i = 0; i < 14; i++) M.add(flat, mat((rnd() - .5) * 4.6, .07, (rnd() - .5) * 11, .5 + rnd() * .5, .03, .3 + rnd() * .4, rnd() * 3), 0xb39366, .2);
+  M.add(flat, mat(0, .03, 0, 5.8, .05, 13.6), 0x7f6845, .1);
+  M.add(flat, mat(-3.05, .035, 0, .6, .05, 13.6), 0x5e4a33, .15);
+  M.add(flat, mat(3.05, .035, 0, .6, .05, 13.6), 0x5e4a33, .15);
+  M.add(flat, mat(-1.2, .06, 0, .22, .04, 13), 0x6a5438, .1);
+  M.add(flat, mat(1.2, .06, 0, .22, .04, 13), 0x6a5438, .1);
+  for (var i = 0; i < 14; i++) M.add(flat, mat((rnd() - .5) * 4.6, .07, (rnd() - .5) * 11, .5 + rnd() * .5, .03, .3 + rnd() * .4, rnd() * 3), 0x93794f, .2);
   // kale tabanlari (koyu cim)
-  [-CZ, CZ].forEach(function(z){ M.add(flat, mat(0, .025, z, 10.6, .05, 8.8), 0x58853b, .08); });
+  [-CZ, CZ].forEach(function(z){ M.add(flat, mat(0, .025, z, 10.6, .05, 8.8), 0x2a4328, .08); });
+  // kale arkasindan kameraya inen patika
+  M.add(flat, mat(0, .03, CZ + 14, 3.2, .05, 20), 0x6d5a3d, .12);
+  M.add(flat, mat(0, .03, -CZ - 14, 3.2, .05, 20), 0x6d5a3d, .12);
   // cim yamalari
   var disc = new THREE.CylinderGeometry(1, 1, .02, 9);
-  for (var k = 0; k < (CFG.low ? 8 : 16); k++) M.add(disc, mat((rnd() - .5) * 70, .02, (rnd() - .5) * 60, 1.5 + rnd() * 2.5, 1, 1.2 + rnd() * 2, rnd() * 3), rnd() < .6 ? 0x558a38 : 0x679748, .06);
+  for (var k = 0; k < (CFG.low ? 14 : 34); k++) M.add(disc, mat((rnd() - .5) * 80, .02, (rnd() - .5) * 90 + 6, 1.5 + rnd() * 3, 1, 1.2 + rnd() * 2, rnd() * 3), rnd() < .6 ? 0x24402a : 0x3b5a35, .1);
   // agac ve kaya obekleri
   var trunk = new THREE.CylinderGeometry(.13, .18, 1, 5), cone = new THREE.ConeGeometry(1, 1, 7), ball = new THREE.IcosahedronGeometry(1, 0), rock = new THREE.IcosahedronGeometry(1, 0);
-  function ok(x, z){ return Math.abs(x) > 7.2 && z < 8.5; }
+  function ok(x, z){ return Math.abs(x) > 7.2 && z < 30; }
   function tree(x, z, s){
     if (rnd() < .6){
-      M.add(trunk, mat(x, .5 * s, z, s, s, s), 0x6b4a2a, .2);
-      M.add(cone, mat(x, 1.55 * s, z, 1.0 * s, 1.9 * s, 1.0 * s, rnd() * 3), 0x2f6a35, .25);
-      M.add(cone, mat(x, 2.45 * s, z, .75 * s, 1.5 * s, .75 * s, rnd() * 3), 0x387a3d, .25);
+      M.add(trunk, mat(x, .5 * s, z, s, s, s), 0x4a3320, .2);
+      M.add(cone, mat(x, 1.55 * s, z, 1.0 * s, 1.9 * s, 1.0 * s, rnd() * 3), 0x1c4332, .25);
+      M.add(cone, mat(x, 2.45 * s, z, .75 * s, 1.5 * s, .75 * s, rnd() * 3), 0x24523a, .25);
     } else {
-      M.add(trunk, mat(x, .55 * s, z, s, 1.1 * s, s), 0x6b4a2a, .2);
-      M.add(ball, mat(x, 1.7 * s, z, .95 * s, .85 * s, .95 * s, rnd() * 3), rnd() < .5 ? 0x5c9a3a : 0x6aa845, .25);
+      M.add(trunk, mat(x, .55 * s, z, s, 1.1 * s, s), 0x4a3320, .2);
+      M.add(ball, mat(x, 1.7 * s, z, .95 * s, .85 * s, .95 * s, rnd() * 3), rnd() < .5 ? 0x3b6a35 : 0x477a3c, .25);
     }
   }
   var nCl = CFG.low ? 9 : 20, tries = 0;
   while (nCl > 0 && tries++ < 200){
-    var cx = (rnd() - .5) * 60, cz = (rnd() - .5) * 44 - 12;
-    if (Math.abs(cx) < 9.5 || cz > 6) continue;
+    var cx = (rnd() - .5) * 64, cz = (rnd() - .5) * 70 - 2;
+    if (Math.abs(cx) < 8 || Math.abs(cz) < 5 || (cz > 0 && cz < 14 && Math.abs(cx) < 9.5)) continue;
     nCl--;
     var nt = 3 + ((rnd() * (CFG.low ? 3 : 5)) | 0);
-    for (var t = 0; t < nt; t++){ var x = cx + (rnd() - .5) * 6, z = cz + (rnd() - .5) * 6; if (ok(x, z)) tree(x, z, .9 + rnd() * .7); }
-    if (rnd() < .6){ var rx = cx + (rnd() - .5) * 5, rz = cz + (rnd() - .5) * 5; if (ok(rx, rz)) M.add(rock, mat(rx, .3, rz, .5 + rnd() * .5, .35 + rnd() * .3, .5 + rnd() * .5, rnd() * 3), 0x8a8b86, .2); }
+    for (var t = 0; t < nt; t++){ var x = cx + (rnd() - .5) * 6, z = cz + (rnd() - .5) * 6; if (ok(x, z)) tree(x, z, (.8 + rnd() * .6) * (z > 12 ? .8 : 1)); }
+    if (rnd() < .6){ var rx = cx + (rnd() - .5) * 5, rz = cz + (rnd() - .5) * 5; if (ok(rx, rz)) M.add(rock, mat(rx, .3, rz, .5 + rnd() * .5, .35 + rnd() * .3, .5 + rnd() * .5, rnd() * 3), 0x70726e, .2); }
   }
   // yolun iki yaninda birkac kaya ve cali
   for (var q = 0; q < (CFG.low ? 6 : 14); q++){
     var sgn = rnd() < .5 ? -1 : 1, rx2 = sgn * (3.6 + rnd() * 1.6), rz2 = (rnd() - .5) * 10;
-    M.add(rock, mat(rx2, .15, rz2, .22 + rnd() * .22, .16 + rnd() * .12, .22 + rnd() * .2, rnd() * 3), 0x8d8e88, .2);
-    if (rnd() < .5) M.add(ball, mat(rx2 + sgn * .8, .3, rz2 + .5, .45, .3, .45, rnd() * 3), 0x4f8a38, .2);
+    M.add(rock, mat(rx2, .15, rz2, .22 + rnd() * .22, .16 + rnd() * .12, .22 + rnd() * .2, rnd() * 3), 0x74766f, .2);
+    if (rnd() < .5) M.add(ball, mat(rx2 + sgn * .8, .3, rz2 + .5, .45, .3, .45, rnd() * 3), 0x35603a, .2);
   }
   world.add(M.mesh());
 })();
@@ -198,35 +201,46 @@ function fit(){
   W = stage.clientWidth || 1; H = stage.clientHeight || 1;
   renderer.setSize(W, H, false);
   var aspect = W / H; portrait = aspect < 1;
-  var safeBottom = cssPct('--safe-bottom', .36);
-  var bandTop, bandBottom, sideM;
-  var hb = hudTop.getBoundingClientRect().bottom;
-  if (portrait){ bandTop = Math.max(.24 * H, hb + .004 * H); bandBottom = (1 - safeBottom) * H - .008 * H; sideM = .05; CAM.yaw = Q.get('yaw') != null ? +Q.get('yaw') : .1; CAM.elev = 33 * Math.PI / 180; CAM.D = 42; }
-  else { bandTop = Math.max(hb + .015 * H, .2 * H); bandBottom = (1 - safeBottom) * H + .01 * H; sideM = .1; CAM.yaw = .62; CAM.elev = 29 * Math.PI / 180; CAM.D = 46; }
-  if (bandBottom - bandTop < .2 * H){ bandTop = .24 * H; bandBottom = .64 * H; }
+  var v = new THREE.Vector3();
   camera.clearViewOffset(); camera.fov = 40; camera.aspect = aspect; camera.updateProjectionMatrix();
-  camPose(CAM.yaw, CAM.D, 0, 0, 0); camera.updateMatrixWorld(true);
-  camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
-  var mnx = 1e9, mxx = -1e9, mny = 1e9, mxy = -1e9, v = new THREE.Vector3();
-  CORN.forEach(function(c){ v.copy(c).applyMatrix4(camera.matrixWorldInverse); var tx = v.x / -v.z, ty = v.y / -v.z; mnx = Math.min(mnx, tx); mxx = Math.max(mxx, tx); mny = Math.min(mny, ty); mxy = Math.max(mxy, ty); });
-  var bandN = (bandBottom - bandTop) / H * 2, availW = 2 * (1 - 2 * sideM);
-  var t = Math.max((mxy - mny) / bandN, (mxx - mnx) / (aspect * availW));
-  camera.fov = 2 * Math.atan(t) * 180 / Math.PI; camera.updateProjectionMatrix();
-  var cy = (mxy + mny) / 2 / t, cx = (mxx + mnx) / 2 / (t * aspect);
-  var wantY = 1 - (bandTop + bandBottom) / H, wantX = 0;
-  var syPx = (wantY - cy) * H / 2, sxPx = (wantX - cx) * W / 2;      // icerigi kaydirilacak piksel (yukari / saga +)
-  camera.setViewOffset(W, H, -sxPx, syPx, W, H);
-  bandTopPx = bandTop;
-  CAM.dbg = { fov: camera.fov, D: CAM.D, bandTop: bandTop / H, bandBottom: bandBottom / H, aspect: aspect };
-  // uzak/yakin kale genislik orani
+  if (portrait){
+    // dikey: sahne ekrani doldurur. Yakin kale ~%82 genislik, merkezi ~%64 yukseklikte. Yazilar guvenli alanlarda kalir, sahne tasabilir.
+    CAM.yaw = Q.get('yaw') != null ? +Q.get('yaw') : .05; CAM.elev = (Q.get('el') != null ? +Q.get('el') : 44) * Math.PI / 180; CAM.D = 50;
+    camPose(CAM.yaw, CAM.D, 0, 0, 0); camera.updateMatrixWorld(true); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+    var pt = function(x, y, z){ v.set(x, y, z).applyMatrix4(camera.matrixWorldInverse); return [v.x / -v.z, v.y / -v.z]; };
+    var a = pt(-4.3, 2.5, CZ), b = pt(4.3, 2.5, CZ);
+    var t = Math.abs(b[0] - a[0]) / (aspect * 2 * .8);
+    camera.fov = 2 * Math.atan(t) * 180 / Math.PI; camera.updateProjectionMatrix();
+    var c = pt(0, 2.2, CZ), cx = (a[0] + b[0]) / 2 / (t * aspect), cy = c[1] / t;
+    var wantY = 1 - 2 * .66;
+    camera.setViewOffset(W, H, -(0 - cx) * W / 2, (wantY - cy) * H / 2, W, H);
+    bandTopPx = .27 * H;
+  } else {
+    var safeBottom = cssPct('--safe-bottom', .36), hb = hudTop.getBoundingClientRect().bottom;
+    var bandTop = Math.max(hb + .015 * H, .2 * H), bandBottom = (1 - safeBottom) * H + .01 * H, sideM = .1;
+    CAM.yaw = .62; CAM.elev = 29 * Math.PI / 180; CAM.D = 46;
+    camPose(CAM.yaw, CAM.D, 0, 0, 0); camera.updateMatrixWorld(true); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+    var mnx = 1e9, mxx = -1e9, mny = 1e9, mxy = -1e9;
+    CORN.forEach(function(c2){ v.copy(c2).applyMatrix4(camera.matrixWorldInverse); var tx = v.x / -v.z, ty = v.y / -v.z; mnx = Math.min(mnx, tx); mxx = Math.max(mxx, tx); mny = Math.min(mny, ty); mxy = Math.max(mxy, ty); });
+    var bandN = (bandBottom - bandTop) / H * 2, availW = 2 * (1 - 2 * sideM);
+    var t2 = Math.max((mxy - mny) / bandN, (mxx - mnx) / (aspect * availW));
+    camera.fov = 2 * Math.atan(t2) * 180 / Math.PI; camera.updateProjectionMatrix();
+    var cy2 = (mxy + mny) / 2 / t2, cx2 = (mxx + mnx) / 2 / (t2 * aspect), wy = 1 - (bandTop + bandBottom) / H;
+    camera.setViewOffset(W, H, cx2 * W / 2, (wy - cy2) * H / 2, W, H);
+    bandTopPx = bandTop;
+  }
   camera.updateMatrixWorld(true);
-  var pr = function(x, y, z){ v.set(x, y, z).project(camera); return v.x; };
-  var fw = Math.abs(pr(4.3, 0, -CZ + 2) - pr(-4.3, 0, -CZ + 2)), nw = Math.abs(pr(4.3, 0, CZ - 2) - pr(-4.3, 0, CZ - 2));
-  CAM.dbg.ratio = fw / nw;
+  var pr = function(x, y, z){ v.set(x, y, z).project(camera); return [v.x, v.y]; };
+  var fa = pr(-4.3, 2.5, -CZ), fb = pr(4.3, 2.5, -CZ), na = pr(-4.3, 2.5, CZ), nb = pr(4.3, 2.5, CZ);
+  CAM.dbg = { fov: camera.fov, D: CAM.D, aspect: aspect,
+    farW: Math.abs(fb[0] - fa[0]) / 2, nearW: Math.abs(nb[0] - na[0]) / 2,
+    farY: (1 - (fa[1] + pr(0, 2.5, -CZ)[1] - fa[1])) / 2, nearY: (1 - pr(0, 2.5, CZ)[1]) / 2 };
+  CAM.dbg.farY = (1 - pr(0, 2.5, -CZ)[1]) / 2;
+  CAM.dbg.ratio = CAM.dbg.farW / CAM.dbg.nearW;
 }
 
 /* ───────────── birlikler ───────────── */
-var UNITSCALE = { piyade: 2.0, milis: 1.9, suvari: 1.8, mancinik: 1.5, mehter: 1.7 };
+var UNITSCALE = { piyade: 1.9, milis: 1.8, suvari: 1.7, mancinik: 1.5, mehter: 1.6 };
 var PRIO = { mehter: 5, mancinik: 4, suvari: 3, piyade: 2, milis: 0 };
 var ents = {}, entList = [];
 function measure(obj){
@@ -325,10 +339,9 @@ g.on('stage', function(side, st){
 });
 
 /* ───────────── HUD ───────────── */
-var elTip = $('#tip'), elQue = $('#que'), elTimer = $('#timer'), elX2 = $('#x2'), elTug = $('#tug').firstChild, elFeed = $('#feed'), elBanner = $('#banner'), elCard = $('#card');
+var elTip = $('#tip'), elQue = $('#que'), elTimer = $('#timer'), elX2 = $('#x2'), elTug = $('#tug').firstChild, elBanner = $('#banner'), elCard = $('#card');
 var sd = [$('#s0'), $('#s1')];
-var sdE = sd.map(function(n){ return { chip: n.querySelector('.nm i'), name: n.querySelector('.nm b'), hp: n.querySelector('.hp strong'), bar: n.querySelector('.bar i'), bdg: n.querySelector('.bdg') }; });
-var sup = [$('#sup0'), $('#sup1')];
+var sdE = sd.map(function(n){ return { chip: n.querySelector('.nm i'), name: n.querySelector('.nm b'), hp: n.querySelector('.hp strong'), bar: n.querySelector('.bar i'), bdg: n.querySelector('.bdg'), t3: n.querySelector('.t3') }; });
 var cache = {};
 function setT(node, v, key){ key = key || node; if (node._v !== v){ node._v = v; node.textContent = v; } }
 function pad2(n){ return (n < 10 ? '0' : '') + n; }
@@ -367,15 +380,14 @@ function showTip(){
 
 var supKey = ['', ''];
 function renderSup(i){
-  var s = S.sides[i], key = s.id + '|' + s.top.map(function(t){ return t.user.id + ':' + t.pts + ':' + (t.user.pic ? 1 : 0); }).join(',');
+  var sdI = S.sides[i], key = sdI.id + '|' + sdI.top.map(function(t){ return t.user.id + ':' + t.pts + ':' + (t.user.pic ? 1 : 0); }).join(',');
   if (key === supKey[i]) return; supKey[i] = key;
-  var box = sup[i]; box.textContent = '';
-  var h = el('h4', '', plate(s.id)); box.appendChild(h);
+  var box = sdE[i].t3; box.textContent = '';
   for (var r = 0; r < 3; r++){
-    var t = s.top[r], row = el('div', 'sr' + (t ? '' : ' e'));
-    if (t){ row.appendChild(avatar(t.user)); row.appendChild(el('span', '', t.user.name)); row.appendChild(el('em', '', String(t.pts))); }
-    else { row.appendChild(el('span', 'av')); row.lastChild.style.opacity = .35; row.appendChild(el('span', '', 'boş')); row.appendChild(el('em', '', '')); }
-    box.appendChild(row);
+    var t = sdI.top[r], ch = el('span', 'ch' + (t ? '' : ' e'));
+    if (t){ ch.appendChild(avatar(t.user)); if (r === 0) ch.appendChild(el('b', '', t.user.name)); ch.appendChild(el('em', '', String(t.pts))); }
+    else { ch.appendChild(el('span', 'av')); ch.lastChild.style.opacity = .35; }
+    box.appendChild(ch);
   }
 }
 
@@ -397,7 +409,7 @@ function updateHud(dt){
   var s0 = S.sides[0], s1 = S.sides[1], i;
   for (i = 0; i < 2; i++){
     var s = S.sides[i], e = sdE[i], col = D.css(s.id);
-    if (sd[i]._col !== col){ sd[i]._col = col; sd[i].style.setProperty('--sc', col); sup[i].style.setProperty('--sc', col); stage.style.setProperty('--c' + i, col); }
+    if (sd[i]._col !== col){ sd[i]._col = col; sd[i].style.setProperty('--sc', col); stage.style.setProperty('--c' + i, col); }
     setT(e.chip, pad2(s.id)); setT(e.name, upper(s.name)); e.name.className = s.name.length > 9 ? 'long' : '';
     setT(e.hp, fmtN(s.hp));
     var pct = s.maxHp > 0 ? Math.max(0, s.hp) / s.maxHp : 0; var tr = 'scaleX(' + pct.toFixed(3) + ')'; if (e.bar._v !== tr){ e.bar._v = tr; e.bar.style.transform = tr; }
@@ -410,7 +422,8 @@ function updateHud(dt){
   elTimer.classList.toggle('ot', ot);
   var x2 = S.phase === 'play' && (S.doubleDmg || ot); setT(elX2, ot ? 'UZATMA' : '×2 HASAR'); if (elX2.hidden === x2) elX2.hidden = !x2;
   // ipucu + sirada
-  tipT += dt; if (tipT >= 4 || !elTip._i){ tipT = 0; elTip._i = 1; tipI++; showTip(); }
+  if (feedHold > 0){ feedHold -= dt; if (feedHold <= 0){ elTip.classList.remove('fd'); tipT = 4; } }
+  else { tipT += dt; if (tipT >= 4 || !elTip._i){ tipT = 0; elTip._i = 1; tipI++; showTip(); } }
   var q = S.queue[0], qk = q ? q.id + ':' + q.votes : '';
   if (elQue._k !== qk){
     elQue._k = qk; elQue.textContent = '';
@@ -448,13 +461,12 @@ g.on('banner', function(b){
   bq.push(b); if (bq.length > 3) bq.shift(); pump();
 });
 
-/* akis: en cok 3 satir */
+/* akis: tek satirlik ipucu seridine karisir (3 sn) */
+var feedHold = 0;
 g.on('feed', function(f){
-  var d = el('div', 'fi', f.text);
-  if (f.side != null && S.sides[f.side]) d.style.setProperty('--c', D.css(S.sides[f.side].id));
-  elFeed.appendChild(d);
-  while (elFeed.children.length > 3) elFeed.removeChild(elFeed.firstChild);
-  setTimeout(function(){ d.classList.add('out'); setTimeout(function(){ if (d.parentNode) d.parentNode.removeChild(d); }, 650); }, 8000);
+  if (S.phase === 'end') return;
+  feedHold = 3; elTip.textContent = f.text; elTip.classList.remove('sw'); void elTip.offsetWidth; elTip.classList.add('sw');
+  elTip.style.setProperty('--c', f.side != null && S.sides[f.side] ? D.css(S.sides[f.side].id) : 'var(--altın)'); elTip.classList.add('fd');
 });
 
 /* rutbe karti */
@@ -465,17 +477,16 @@ function cardPump(){
   elCard.textContent = '';
   elCard.style.setProperty('--c', D.css(u.home || (u.side != null ? S.sides[u.side].id : 34)));
   elCard.appendChild(avatar(u));
-  elCard.appendChild(el('h3', '', u.name));
-  elCard.appendChild(el('div', 'r', RANKS[u.rank || 0] || ''));
-  elCard.appendChild(el('p', '', (u.home && P[u.home] ? plate(u.home) : 'plakanı yaz') + ' · ' + (u.life || 0) + ' puan'));
-  elCard.appendChild(el('p', 'w', c.why || ''));
+  elCard.appendChild(el('b', '', u.name));
+  elCard.appendChild(el('i', '', RANKS[u.rank || 0] || ''));
+  elCard.appendChild(el('span', '', (c.why || '')));
   elCard.hidden = false; elCard.style.animation = 'none'; void elCard.offsetWidth; elCard.style.animation = '';
-  setTimeout(function(){ elCard.hidden = true; cBusy = false; cardPump(); }, 3500);
+  setTimeout(function(){ elCard.hidden = true; cBusy = false; cardPump(); }, 3000);
 }
 g.on('card', function(c){ cq.push(c); if (cq.length > 3) cq.shift(); cardPump(); });
 
 /* tören */
-var endBuilt = false;
+var endBuilt = false, endMap = $('#mapend'); endMap.parentNode.removeChild(endMap);
 g.on('matchEnd', function(r){
   var w = r.winner, s = S.sides[w], box = $('#endc'); box.textContent = ''; box.style.setProperty('--sc', D.css(s.id));
   box.appendChild(el('h2', '', 'KUŞATMAYI KAZANAN'));
@@ -489,6 +500,7 @@ g.on('matchEnd', function(r){
   box.appendChild(ol);
   var c = S.champion;
   box.appendChild(el('p', '', c.id === s.id && c.streak >= 2 ? '★ ' + s.name + ' ' + c.streak + ' maçtır yenilmiyor' : (c.streak === 1 ? s.name + ' şampiyonu devirdi!' : s.name + ' şampiyon')));
+  box.appendChild(endMap);
   box.appendChild(el('p', 's', 'Sıradaki kuşatma birazdan: yoruma plaka yaz, rakibe oy ver'));
   endBuilt = true; paintMap();
 });
@@ -579,24 +591,26 @@ function updateLabels(dt){
 }
 
 /* fetih haritasi */
-var mapCv = $('#mapcv'), mapCtx = mapCv.getContext('2d'), mapImg = mapCtx.createImageData(330, 150);
+var mapCvs = Array.prototype.slice.call(document.querySelectorAll('.mapcv')), mapImgs = {}; mapCvs.push(endMap);
 function paintMap(){
-  var gr = D.grid, cell = gr.cell, px = mapImg.data, ow = S.owners, i;
-  var colCache = {};
-  for (i = 0; i < cell.length; i++){
-    var c = cell[i], o = i * 4;
-    if (c < 0){ px[o] = 10; px[o + 1] = 30; px[o + 2] = 42; px[o + 3] = 120; continue; }
-    var id = D.IL[c].id, own = ow[id], hex = own ? D.colorHex(own) : 0x56666b;
-    var cc = colCache[hex] || (colCache[hex] = [(hex >> 16) & 255, (hex >> 8) & 255, hex & 255]);
-    px[o] = cc[0]; px[o + 1] = cc[1]; px[o + 2] = cc[2]; px[o + 3] = 255;
-  }
-  mapCtx.putImageData(mapImg, 0, 0);
-  for (var s = 0; s < 2; s++){
-    var p = P[S.sides[s].id]; if (!p) continue;
-    var x = (p.x + gr.pw / 2) / gr.pw * gr.W, y = (p.z + gr.ph / 2) / gr.ph * gr.H;
-    mapCtx.beginPath(); mapCtx.arc(x, y, 8, 0, 6.2832); mapCtx.fillStyle = '#fff'; mapCtx.fill();
-    mapCtx.beginPath(); mapCtx.arc(x, y, 5, 0, 6.2832); mapCtx.fillStyle = D.css(S.sides[s].id); mapCtx.fill();
-  }
+  var gr = D.grid, cell = gr.cell, ow = S.owners, i, colCache = {};
+  mapCvs.forEach(function(cv){
+    var ctx = cv.getContext('2d'), img = mapImgs[cv.id] || (mapImgs[cv.id] = ctx.createImageData(330, 150)), px = img.data;
+    for (i = 0; i < cell.length; i++){
+      var c = cell[i], o = i * 4;
+      if (c < 0){ px[o] = 10; px[o + 1] = 30; px[o + 2] = 42; px[o + 3] = 120; continue; }
+      var id = D.IL[c].id, own = ow[id], hex = own ? D.colorHex(own) : 0x56666b;
+      var cc = colCache[hex] || (colCache[hex] = [(hex >> 16) & 255, (hex >> 8) & 255, hex & 255]);
+      px[o] = cc[0]; px[o + 1] = cc[1]; px[o + 2] = cc[2]; px[o + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    for (var s2 = 0; s2 < 2; s2++){
+      var p = P[S.sides[s2].id]; if (!p) continue;
+      var x = (p.x + gr.pw / 2) / gr.pw * gr.W, y = (p.z + gr.ph / 2) / gr.ph * gr.H;
+      ctx.beginPath(); ctx.arc(x, y, 8, 0, 6.2832); ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, 5, 0, 6.2832); ctx.fillStyle = D.css(S.sides[s2].id); ctx.fill();
+    }
+  });
 }
 
 /* ───────────── ses ───────────── */
