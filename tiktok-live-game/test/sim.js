@@ -58,7 +58,7 @@ var evenGame;
   ok(st.dblBad===0, 'son 30 sn kurali (doubleDmg) tutarsiz');
   ok(even.rev>0, 'intikam hic devreye girmedi');
   ok((st.counts.stage||0)>0, 'sur asamasi olayi hic gelmedi');
-  ok((st.counts.shot||0)>0, 'mancinik atisi hic olmadi');
+  ok((st.counts.shot||0)>0, 'topcu atisi hic olmadi');
   ok(st.banners.some(function(b){ return /SURLARI YARILDI/.test(b); }), 'sur yarildi afisi yok');
   ok(even.queued>0, 'oy sirasi hic dolmadi');
   var full = even.lens.filter(function(l){ return l >= 170; }).length / even.lens.length;
@@ -288,7 +288,7 @@ function pc(x){ return (x*100).toFixed(0)+'%'; }
 console.log('\n--- denge tablosu (dengeli botlar, 20 mac) ---');
 console.log('kazanma  side0: '+even.w[0]+' ('+pc(even.w[0]/20)+')  side1: '+even.w[1]+' ('+pc(even.w[1]/20)+')');
 console.log('ort. mac suresi: '+mean(even.lens).toFixed(0)+' sn   min/max: '+Math.min.apply(null,even.lens).toFixed(0)+'/'+Math.max.apply(null,even.lens).toFixed(0)+'   tam sure(>=170): '+pc(even.full)+'   >=120 sn: '+pc(even.late));
-console.log('en cok es zamanli birim: '+even.maxU+'   intikam tetik: '+even.rev+'   sur asamasi: '+even.stages+'   mancinik atisi: '+even.shots);
+console.log('en cok es zamanli birim: '+even.maxU+'   intikam tetik: '+even.rev+'   sur asamasi: '+even.stages+'   topcu atisi: '+even.shots);
 console.log('yalniz milis ort. sure: '+even.milisLen.toFixed(0)+' sn');
 console.log('hediye ustun taraf kazanma: side0 '+pc(gift[0])+'  side1 '+pc(gift[1]));
 console.log('1000 elmas: kazanma '+even.whaleWins+'  ilk 15 sn can kaybi en fazla '+pc(even.whaleEarly)+'  ort. sure '+even.whaleLen.toFixed(0)+' sn');

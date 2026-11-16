@@ -199,7 +199,7 @@ function create(cfg){
   }
   function newUnit(side, type, n, user){
     var hpMul = type==='suvari' ? K.cavHp : 1, hp;
-    if (type==='mancinik') hp = K.catHp + n*K.catHpPerN; else if (type==='mehter') hp = 1e6; else hp = K.hpPerN*hpMul*n;
+    if (type==='topcu') hp = K.catHp + n*K.catHpPerN; else if (type==='mehter') hp = 1e6; else hp = K.hpPerN*hpMul*n;
     return { id:++uidSeq, side:side, type:type, n:n, hp:hp, maxHp:hp, pos: type==='mehter'?0.03:0, lane: rnd()*2-1,
              state: type==='mehter'?'idle':'walk', user:user||null, shotT:K.catEvery*(0.4+rnd()*0.6), wacc:0, wt:0, din:0, target:null, born:T };
   }
@@ -207,7 +207,7 @@ function create(cfg){
     if (units.length >= K.cap){
       if (type==='mehter' || type==='milis') return null;
       var best = null;
-      for (var i=0;i<units.length;i++){ var c = units[i]; if (c.side!==side || c.type==='mancinik' || c.type==='mehter') continue; if (!best || c.pos<best.pos) best = c; }
+      for (var i=0;i<units.length;i++){ var c = units[i]; if (c.side!==side || c.type==='topcu' || c.type==='mehter') continue; if (!best || c.pos<best.pos) best = c; }
       if (!best) return null;
       var per = K.hpPerN*(best.type==='suvari'?K.cavHp:1);
       best.hp += per*n; best.maxHp += per*n; best.n = nOfHp(best); if (user && !best.user) best.user = user;
@@ -287,8 +287,8 @@ function create(cfg){
         var rep = Math.max(1, e.repeat|0), d = Math.max(1, e.diamonds|0) * rep;
         var n = Math.round(K.giftPow * Math.pow(d, K.giftExp));
         addPts(u, d*5);
-        var tier = d>=K.tierMehter ? 'mehter' : d>=K.tierCat ? 'mancinik' : d>=K.tierCav ? 'suvari' : 'piyade';
-        var names = {piyade:'Piyade bölüğü', suvari:'Şövalye süvarisi', mancinik:'Mancınık', mehter:'Mehter'};
+        var tier = d>=K.tierMehter ? 'mehter' : d>=K.tierCat ? 'topcu' : d>=K.tierCav ? 'suvari' : 'piyade';
+        var names = {piyade:'Piyade bölüğü', suvari:'Şövalye süvarisi', topcu:'Topçu', mehter:'Mehter'};
         if (d>=K.tierCat || rate('giftfeed', d>=K.tierCav ? 1.5 : 4)) feed(u.name+' '+d+' elmas → '+names[tier], side);
         if (rep>=5 && rate('combo', 1)){ banner('x'+rep+' KOMBO', u.name+' · '+(e.giftName||'hediye'), side); sfx('combo'); }
         if (d>=K.tierCav && rate('giftcard', 2)) card(u, d+' elmas gönderdi');
@@ -296,7 +296,7 @@ function create(cfg){
           if (ph==='play') mehterEffect(u, side, n);
           else bank.push({fx:function(){ mehterEffect(u, side, n); }});
         } else {
-          if (tier==='mancinik'){ banner(u.name+' MANCINIK GÖNDERDİ', S[side].name+' taş yağdıracak', side); sfx('cannon'); }
+          if (tier==='topcu'){ banner(u.name+' TOPÇU GÖNDERDİ', S[side].name+' taş yağdıracak', side); sfx('cannon'); }
           else if (tier==='suvari') sfx('horse');
           deploy(side, tier, n, u);
         }
@@ -459,7 +459,7 @@ function create(cfg){
     for (var s=0;s<2;s++){
       var mine = A[s], foes = A[1-s];
       for (i=0;i<mine.length;i++){
-        u = mine[i]; if (u.type==='mancinik') continue;
+        u = mine[i]; if (u.type==='topcu') continue;
         var best = null, bd = K.contact;
         for (j=0;j<foes.length;j++){ var d = 1 - u.pos - foes[j].pos; if (d < bd){ bd = d; best = foes[j]; } }
         if (best){
@@ -472,7 +472,7 @@ function create(cfg){
     for (s=0;s<2;s++){
       for (i=0;i<A[s].length;i++){
         u = A[s][i];
-        if (u.type==='mancinik'){
+        if (u.type==='topcu'){
           if (u.pos < K.catPos){ u.pos = Math.min(K.catPos, u.pos + K.speed*dt); u.state = 'walk'; }
           else {
             u.state = 'fight'; u.shotT -= dt;
@@ -490,7 +490,7 @@ function create(cfg){
     for (i=units.length-1;i>=0;i--){
       u = units[i]; if (u.type==='mehter' || u.din<=0) continue;
       u.hp -= u.din; u.din = 0;
-      if (u.hp <= 0) removeUnit(u, 'dead'); else if (u.type!=='mancinik') u.n = nOfHp(u);
+      if (u.hp <= 0) removeUnit(u, 'dead'); else if (u.type!=='topcu') u.n = nOfHp(u);
     }
     // intikam
     for (i=0;i<2;i++){

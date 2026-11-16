@@ -10,7 +10,7 @@ TikTok LIVE için tarayıcı oyunu. Ekranda her an yalnızca iki şehir var: uza
 | Beğeni | Her beğeni 1 güç; 6 güçte kendi adını taşıyan piyade bölüğü kapıdan çıkar |
 | 1-9 elmas | Hemen piyade bölüğü |
 | 10-99 elmas | Şövalye süvarisi (iki kat hızlı, güçlü) |
-| 100-999 elmas | Mancınık: sura menzilden taş atar |
+| 100-999 elmas | Topçu: sura menzilden taş atar |
 | 1000+ elmas | Mehter: 12 sn tüm hasar +%50, 5 dalga piyade, sura onarım |
 | Takip | Kendi surlarına 8 sn kalkan ve onarım |
 | Paylaşım | +10 güç |
@@ -53,6 +53,8 @@ Sayfa 1080×1920 dikey yayına göre yerleşir; TikTok arayüzünün bindiği b�
 | `--safe-top` | `11%` | Üstte boş bırakılır (yayıncı bilgisi, izleyici sayısı) |
 | `--safe-bottom` | `36%` | Altta sohbet akışı ve yorum çubuğu; sahne bu çizginin üstünde biter |
 | `--safe-right` | `12%` | Sağ kenar, %45-78 yükseklik: hediye animasyonları; kart ve harita bu şeridin soluna konur |
+
+Sahne: kale merkezleri z=±15, savaş alanı 14 birim genişliğinde. Savaş kamerası alanı ekran genişliğine sığdırır (~52° eğim) ve cephe hattını yumuşakça izler; maç başında iki kaleyi gösteren süzülme, sur aşamasında 2 sn hasarlı kaleye geçiş ve törende kazanan kale çekimi vardır (`prefers-reduced-motion`: kesme, sallanma yok).
 
 Yerleşim: %11-19 can/sayaç/çekişme çubuğu, %19-24 ipucu ve sıradaki rakip, %24-64 sahne (iki kale bu bantta tam görünür; kamera `fit()` ile hesaplar). Yazı boyları `--u` (ekran genişliğinin %1'i) ile verilir; 1080 px'te en küçük yazı 26 px'in üstündedir. Yatay ekranda (16:9) güvenli değerler otomatik küçülür ve kamera yandan bakar.
 

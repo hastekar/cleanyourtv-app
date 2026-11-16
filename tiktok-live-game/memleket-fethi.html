@@ -121,13 +121,15 @@ body{margin:0;background:var(--deniz);color:var(--kağıt);font-family:var(--bod
   padding:calc(var(--u)*.5) calc(var(--u)*1.3);border-radius:calc(var(--u)*1.6) calc(var(--u)*1.6) calc(var(--u)*1.6) calc(var(--u)*.3);max-width:calc(var(--u)*34);overflow:hidden;text-overflow:ellipsis;box-shadow:0 calc(var(--u)*.3) calc(var(--u)*1) rgba(0,0,0,.5);z-index:2}
 
 /* ── giriş ve tören ── */
-.ov{position:absolute;left:50%;top:31%;transform:translateX(-50%);width:min(100%,calc(var(--u)*94));text-align:center;background:rgba(6,20,28,.93);border:1px solid var(--çizgi);
+.ov{position:absolute;left:50%;top:28%;transform:translateX(-50%);width:min(100%,calc(var(--u)*94));text-align:center;background:rgba(6,20,28,.8);border:1px solid var(--çizgi);
   border-radius:calc(var(--u)*2);padding:calc(var(--u)*1.4) calc(var(--u)*2);box-sizing:border-box;box-shadow:0 0 calc(var(--u)*4) rgba(0,0,0,.5)}
 .ov h2{margin:0;font:400 calc(var(--u)*4)/1 var(--display);color:var(--çini);letter-spacing:.08em}
 .ov .vs{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*2);margin:calc(var(--u)*1.4) 0}
 .ov .vs div{font:400 calc(var(--u)*5)/1.05 var(--display);text-shadow:0 calc(var(--u)*.4) 0 var(--mürekkep);flex:1;min-width:0;overflow-wrap:anywhere}
 .ov .vs div i{display:block;font-style:normal;font-size:.7em;color:var(--sc)}
 .ov .vs b{font:400 calc(var(--u)*6)/1 var(--display);color:var(--altın)}
+.ov .row{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*4)}
+.ov .row .map{width:calc(var(--u)*34);margin:0}
 .ov .cd{font:400 calc(var(--u)*9)/1 var(--display);color:var(--altın);text-shadow:0 calc(var(--u)*.5) 0 #8a5a00}
 .ov p{margin:calc(var(--u)*.8) 0 0;font-size:calc(var(--u)*2.9);font-weight:700;color:var(--kağıt)}
 .ov p.s{color:var(--soluk);font-weight:500}
@@ -188,8 +190,7 @@ button[aria-pressed="true"]{background:var(--çini);color:var(--mürekkep);borde
     <div class="ov" id="intro" hidden>
       <h2>SIRADAKİ KUŞATMA</h2>
       <div class="vs"><div id="i0"></div><b>⚔</b><div id="i1"></div></div>
-      <div class="cd" id="icd">6</div>
-      <canvas class="map mapcv" id="mapintro" width="330" height="150"></canvas>
+      <div class="row"><div class="cd" id="icd">6</div><canvas class="map mapcv" id="mapintro" width="330" height="150"></canvas></div>
       <p>Yoruma plakanı yaz, kendi ilinin tarafında savaş!</p>
     </div>
     <div class="ov" id="endc" hidden></div>
