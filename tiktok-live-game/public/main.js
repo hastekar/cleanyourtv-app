@@ -3,7 +3,7 @@ import { loadCharacters } from './characters.js';
 
 const CFG = window.GAME_CONFIG;
 const W = 1080, H = 1920, TAU = Math.PI * 2;
-const R_IN = 9.8, R_MID = 14.5, R_OUT = 20;       // yürüyüş halkaları (birim ≈ metre)
+const R_IN = 10.6, R_OUT = 19, R_MID = (R_IN + R_OUT) / 2;       // yürüyüş halkaları (birim ≈ metre)
 const START_A = Math.PI * 0.25;                    // şavt başlangıç çizgisi
 const KAABA = { w: 9, h: 11 };                    // insanlara göre gerçek oranında
 const params = new URLSearchParams(location.search);
@@ -33,7 +33,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x060a14);
 scene.fog = new THREE.Fog(0x060a14, 90, 210);
-const camera = new THREE.PerspectiveCamera(88, W / H, 0.3, 400);   // geniş açı: ekranın orta bandı (TikTok arayüzünün dışında kalan kısım) dolsun
+const camera = new THREE.PerspectiveCamera(80, W / H, 0.3, 400);   // geniş açı: Kâbe ve kalabalık ekranın orta bandına (TikTok arayüzünün dışında kalan kısım) sığsın
 
 scene.add(new THREE.HemisphereLight(0xcfdcff, 0x4a3c28, 1.0));
 scene.add(new THREE.AmbientLight(0xffffff, 0.25));
@@ -51,19 +51,19 @@ scene.add(nurLight);
 function canvasTex(w, h, paint) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   paint(c.getContext('2d'), w, h);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
   return t;
 }
 
 // --- zemin (mermer mataf) ---
-const floorTex = canvasTex(1024, 1024, (g, w) => {
+const floorTex = canvasTex(2048, 2048, (g, w) => {
   const c = w / 2, grd = g.createRadialGradient(c, c, 60, c, c, c);
-  grd.addColorStop(0, '#fbf8f0'); grd.addColorStop(1, '#e6dfd0');
+  grd.addColorStop(0, '#eee8da'); grd.addColorStop(1, '#cfc7b2');
   g.fillStyle = grd; g.fillRect(0, 0, w, w);
-  g.strokeStyle = 'rgba(140,125,95,0.35)'; g.lineWidth = 2;
-  for (let r = 70; r < c; r += 30) { g.beginPath(); g.arc(c, c, r, 0, TAU); g.stroke(); }
-  g.strokeStyle = 'rgba(140,125,95,0.16)';
-  for (let i = 0; i < 64; i++) { const a = i / 64 * TAU; g.beginPath(); g.moveTo(c + Math.cos(a) * 70, c + Math.sin(a) * 70); g.lineTo(c + Math.cos(a) * c, c + Math.sin(a) * c); g.stroke(); }
+  g.strokeStyle = 'rgba(150,132,96,0.30)'; g.lineWidth = 4;     // geniş ve yumuşak çizgiler: yatık bakışta tırtıklanmasın
+  for (let r = 80; r < c; r += 52) { g.beginPath(); g.arc(c, c, r, 0, TAU); g.stroke(); }
+  g.strokeStyle = 'rgba(150,132,96,0.12)'; g.lineWidth = 3;
+  for (let i = 0; i < 48; i++) { const a = i / 48 * TAU; g.beginPath(); g.moveTo(c + Math.cos(a) * 80, c + Math.sin(a) * 80); g.lineTo(c + Math.cos(a) * c, c + Math.sin(a) * c); g.stroke(); }
 });
 const floor = new THREE.Mesh(new THREE.CircleGeometry(26.5, 96), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.5, metalness: 0.05 }));
 floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
@@ -132,17 +132,27 @@ const door = new THREE.Mesh(new THREE.BoxGeometry(2.0, 3.3, 0.16), goldMat);
 door.position.set(HW * 0.42, BASE + 2.2 + 1.65, HW + 0.05); scene.add(door);
 const doorIn = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.9, 0.2), new THREE.MeshStandardMaterial({ color: 0xb8902e, roughness: 0.35, metalness: 0.8, emissive: 0x5a4210, emissiveIntensity: 0.5 }));
 doorIn.position.copy(door.position); scene.add(doorIn);
-// Hacerülesved: köşede gümüş çerçeve
-const stone = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 12), new THREE.MeshStandardMaterial({ color: 0xdfe3e8, roughness: 0.25, metalness: 0.9 }));
-stone.scale.set(1, 1.25, 1); stone.position.set(HW, BASE + 1.5, HW); scene.add(stone);
-const stoneIn = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 8), new THREE.MeshStandardMaterial({ color: 0x120c0a, roughness: 0.6 }));
-stoneIn.position.set(HW + 0.24, BASE + 1.5, HW + 0.24); scene.add(stoneIn);
+// Hacerülesved: köşede gümüş çerçeve içinde kara taş (köşe çaprazına bakar)
+{
+  const silver = new THREE.MeshStandardMaterial({ color: 0xdfe3e8, roughness: 0.25, metalness: 0.9 });
+  const g = new THREE.Group();
+  const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.14, 24), silver); plate.rotation.x = Math.PI / 2;
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.09, 8, 28), silver); rim.position.z = 0.05;
+  const rock = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 12), new THREE.MeshStandardMaterial({ color: 0x1a1210, roughness: 0.55 }));
+  rock.scale.set(0.9, 1.15, 0.5); rock.position.z = 0.08;
+  g.add(plate, rim, rock);
+  g.rotation.y = Math.PI / 4; g.position.set(HW + 0.1, BASE + 1.5, HW + 0.1); scene.add(g);
+}
 // altın oluk (mizab) ve Hatim (yarım daire duvar)
-const mizab = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.3, 1.5), goldMat);
-mizab.position.set(0, BASE + KAABA.h - 0.1, -HW - 0.6); scene.add(mizab);
-const hatim = new THREE.Mesh(new THREE.TorusGeometry(4.3, 0.42, 10, 40, Math.PI), marble);
-hatim.rotation.x = Math.PI / 2; hatim.scale.z = 1.7; hatim.position.set(0, 0.7, -HW - 0.3);
-hatim.castShadow = true; hatim.receiveShadow = true; scene.add(hatim);
+const mizab = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.22, 2.4), goldMat);   // çatı kenarından Hatim'e doğru hafif eğimli oluk
+mizab.position.set(0, BASE + KAABA.h + 0.02, -HW - 1.0); mizab.rotation.x = -0.14; scene.add(mizab);
+{
+  const sh = new THREE.Shape();                           // yarım halka duvar, Kâbe'nin kapı karşısındaki (−z) yüzünde
+  sh.absarc(0, 0, 4.7, 0, Math.PI, false); sh.absarc(0, 0, 4.0, Math.PI, 0, true);
+  const hatim = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 1.3, bevelEnabled: false, curveSegments: 40 }), marble);
+  hatim.rotation.x = -Math.PI / 2; hatim.position.set(0, 0, -HW - 0.2);
+  hatim.castShadow = true; hatim.receiveShadow = true; scene.add(hatim);
+}
 // Makam-ı İbrahim
 {
   const m = new THREE.Group();
@@ -201,10 +211,11 @@ scene.add(pointsCloud(700, (p, i) => {
   const a = rand(0, TAU), e = rand(0.08, 1.5);
   p[i] = Math.cos(a) * Math.cos(e) * 190; p[i + 1] = Math.sin(e) * 190; p[i + 2] = Math.sin(a) * Math.cos(e) * 190;
 }, new THREE.PointsMaterial({ color: 0xffffff, size: 1.3, sizeAttenuation: false, fog: false, transparent: true, opacity: 0.8 })));
+const dotTex = canvasTex(64, 64, (g) => { const r = g.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.4, 'rgba(255,255,255,0.7)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 64, 64); });
 const nurPts = pointsCloud(900, (p, i) => {
   const a = rand(0, TAU), r = Math.sqrt(Math.random()) * 26;
   p[i] = Math.cos(a) * r; p[i + 1] = rand(0, 26); p[i + 2] = Math.sin(a) * r;
-}, new THREE.PointsMaterial({ color: 0xffe08a, size: 0.32, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+}, new THREE.PointsMaterial({ color: 0xffe08a, map: dotTex, alphaTest: 0.01, size: 0.5, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
 nurPts.visible = false; scene.add(nurPts);
 
 // --- figürler (erkek/kadın 3B modeller: characters.js) ---
@@ -268,7 +279,7 @@ function ensure(user, t, canJoin) {
   const h = hashStr(user.id);
   p = makeWalker({
     id: user.id, name: user.name || user.id, npc: false,
-    a: START_A + rand(0.05, 0.4), lane: rand(R_IN + 3, R_OUT - 0.5), r: R_OUT + 4,
+    a: START_A + rand(0.05, 0.4), lane: rand(R_IN + 3, R_OUT - 0.5), r: R_OUT + 2,
     color: RING_COLORS[h % RING_COLORS.length], female: (h >> 3) % 100 < 45,   // TikTok cinsiyet bilgisi vermez: kullanıcıya göre sabit, rastgele
 
     laps: 0, tawafs: 0, lastActive: t, goldUntil: 0, speedUntil: 0, innerUntil: 0, groupUntil: 0, innerLane: 0, group: [], img: null,
@@ -401,15 +412,15 @@ function update(dt, t) {
 
 // ---------- kamera ----------
 // Kamera kalabalığın hemen dışında, baş hizasının biraz üstünde döner; aralıklarla bir oyuncuyu yakından takip eder.
-const CAM_R = 22.5, CAM_H = 4.6;
+const CAM_R = 24.6, CAM_H = 2.3, LOOK_Y = 6.0, CULL = 6;   // yürüyüş halkasının hemen dışı; CULL: kameraya bu kadar yakın figürler gizlenir (gövde ekranı kaplamasın)
 const shot = { id: null, until: 0, next: now() + (CFG.closeShotEvery || 1e9), near: 1 };
 const camPos = new THREE.Vector3(0, CAM_H, CAM_R), camLook = new THREE.Vector3(0, 1.6, 0);
 const wantPos = new THREE.Vector3(), wantLook = new THREE.Vector3();
-let orbit = Math.PI / 2 - 0.5, snapCam = true, shotKey = 'orbit', cutAt = -9;
+let orbitHold = false, orbit = Math.PI / 2 - 0.5, snapCam = true, shotKey = 'orbit', cutAt = -9;
 function focusOn(p, t, secs) { shot.near = 1; shot.id = p.id; shot.until = t + secs; shot.next = shot.until + (CFG.closeShotEvery || 1e9); }
 
 function updateCamera(dt, t) {
-  orbit += dt * 0.05;                                 // yürüyüşün tersine: yüzler kameraya doğru gelir
+  if (!orbitHold) orbit += dt * 0.04;                                 // yürüyüşün tersine: yüzler kameraya doğru gelir
   if (CFG.closeShotEvery && t > shot.next && players.size && t > nurUntil) {
     const list = [...players.values()].sort((a, b) => b.lastActive - a.lastActive).slice(0, 8);
     focusOn(list[Math.floor(Math.random() * list.length)], t, 9);
@@ -420,16 +431,22 @@ function updateCamera(dt, t) {
   if (target) {
     const ca = Math.cos(target.a), sa = Math.sin(target.a), r = target.r, n = shot.near || 1;
     // oyuncunun önünde ve dışında: yüzü kameraya dönük, arkada Kâbe
-    wantPos.set(ca * (r + 2.4 * n) + sa * 3.6 * n, 1.7 + 0.9 * n, sa * (r + 2.4 * n) - ca * 3.6 * n);
-    wantLook.set(ca * (r - 0.5), 1.35, sa * (r - 0.5));
+    // dışarıda ve hafif önde (yürüyüş yönünde), göz hizasında; oyuncu bandın ortasında ~400 px boyunda, arkada Kâbe
+    const out = r + 4.0 * n, ahead = 2.4 * n;
+    wantPos.set(ca * out + sa * ahead, 1.35 + 0.3 * n, sa * out - ca * ahead);
+    wantLook.set(ca * r, 1.1, sa * r);
   } else {
     wantPos.set(Math.cos(orbit) * CAM_R, CAM_H, Math.sin(orbit) * CAM_R);
-    wantLook.set(0, 1.6, 0);
+    wantLook.set(0, LOOK_Y, 0);
   }
   const k = snapCam ? 1 : 1 - Math.exp(-dt * 2.2); snapCam = false;
   camPos.lerp(wantPos, k); camLook.lerp(wantLook, k);
   camera.position.copy(camPos); camera.lookAt(camLook);
   camera.updateMatrixWorld();
+  // kameraya çok yakın figürleri gizle (odaktaki oyuncu hariç)
+  const cull = (w) => { const f = w.fig, dx = f.position.x - camera.position.x, dz = f.position.z - camera.position.z; const c = target ? 4.5 : CULL; f.visible = w === target || dx * dx + dz * dz > c * c; };
+  for (const w of crowd) cull(w);
+  for (const p of players.values()) { cull(p); for (const g of p.group) cull(g); }
 }
 
 // ====================== HUD (2B katman) ======================
@@ -437,42 +454,59 @@ const hud = document.getElementById('hud').getContext('2d');
 const rrect = (x, y, w, h, r) => { hud.beginPath(); hud.roundRect(x, y, w, h, r); };
 const ray = new THREE.Ray(), _hit = new THREE.Vector3(), _head = new THREE.Vector3();
 
+const BAND_TOP = 612, BAND_BOT = 1340;                 // TikTok arayüzünün dışında kalan güvenli bant
+const placed = [];                                       // bu karede dolu dikdörtgenler (etiket çakışma önleme)
+const overlaps = (r) => placed.some((q) => r.x < q.x + q.w && r.x + r.w > q.x && r.y < q.y + q.h && r.y + r.h > q.y);
+
 function drawTags(t) {
   const tags = [];
   for (const p of players.values()) {
     _head.set(p.fig.position.x, 2.1, p.fig.position.z);
     const dist = _head.distanceTo(camera.position);
     const s = screenOf(_head.x, _head.y, _head.z);
-    if (dist < 1.5 || !s.ok || s.x < 30 || s.x > W - 30 || s.y < 640 || s.y > 1400) continue;
+    if (!p.fig.visible || !s.ok || s.x < -20 || s.x > W + 20 || s.y < BAND_TOP + 80 || s.y > 1400) continue;
     ray.origin.copy(camera.position); ray.direction.copy(_head).sub(camera.position).normalize();
     if (ray.intersectBox(kaabaBox, _hit) && _hit.distanceTo(camera.position) < dist) continue;   // Kâbe'nin arkasında
     tags.push({ p, s, dist, gold: t < p.goldUntil });
   }
-  // telefonda okunaklı kalsın: en yakın birkaç kişi büyük etiketle, altın isimliler öncelikli
-  tags.sort((a, b) => (b.gold - a.gold) * 6 + (a.dist - b.dist));
-  const shown = tags.slice(0, 10).sort((a, b) => b.dist - a.dist);
+  // telefonda okunaklı kalsın: altın isimliler öncelikli, sonra kameraya en yakınlar; üst üste binenler elenir
+  const foc = (x) => (x.p.id === shot.id && t < shot.until ? 1 : 0);
+  tags.sort((a, b) => (foc(b) - foc(a)) * 1e3 + (b.gold - a.gold) * 60 + (a.dist - b.dist));
   hud.textAlign = 'center'; hud.lineJoin = 'round';
-  for (const { p, s, dist, gold } of shown) {
-    const hr = clamp(640 / dist, 26, 62), y = s.y - hr;
-    if (gold) { hud.beginPath(); hud.arc(s.x, y, hr + 8 + Math.sin(t * 5) * 2, 0, TAU); hud.fillStyle = 'rgba(255,205,80,0.45)'; hud.fill(); }
-    hud.save(); hud.beginPath(); hud.arc(s.x, y, hr, 0, TAU); hud.clip();
-    if (p.img) hud.drawImage(p.img, s.x - hr, y - hr, hr * 2, hr * 2);
+  const shown = [];
+  for (const tg of tags) {
+    if (shown.length >= 8) break;
+    const { p, s, dist } = tg;
+    const hr = clamp(600 / dist, 30, 48), fs = Math.round(clamp(hr * 0.95, 36, 44));
+    const name = p.name.length > 12 ? p.name.slice(0, 11) + '…' : p.name;
+    tg.txt = `${name} · ${p.laps % CFG.lapsPerTawaf}/${CFG.lapsPerTawaf}`;
+    hud.font = `800 ${fs}px ${FONT}`;
+    const tw = hud.measureText(tg.txt).width + 14, bw = Math.max(tw, hr * 2 + 14);
+    tg.hr = hr; tg.fs = fs;
+    tg.x = clamp(s.x, bw / 2 + 8, W - bw / 2 - 8);
+    tg.y = s.y - 6 - hr;                                  // avatar merkezi: başın hemen üstü
+    const rect = { x: tg.x - bw / 2, y: tg.y - hr - fs - 14, w: bw, h: hr * 2 + fs + 20 };
+    const dy = Math.max(0, BAND_TOP - rect.y);            // üst panele değiyorsa biraz aşağı it (kafaya hafif biner)
+    if (dy <= 70) { rect.y += dy; tg.y += dy; }
+    if (rect.y < BAND_TOP || rect.y + rect.h > BAND_BOT + 60 || overlaps(rect)) continue;
+    placed.push(rect); shown.push(tg);
+  }
+  shown.sort((a, b) => b.dist - a.dist);
+  for (const { p, x, y, hr, fs, txt, gold } of shown) {
+    if (gold) { hud.beginPath(); hud.arc(x, y, hr + 8 + Math.sin(t * 5) * 2, 0, TAU); hud.fillStyle = 'rgba(255,205,80,0.45)'; hud.fill(); }
+    hud.save(); hud.beginPath(); hud.arc(x, y, hr, 0, TAU); hud.clip();
+    if (p.img) hud.drawImage(p.img, x - hr, y - hr, hr * 2, hr * 2);
     else {
-      hud.fillStyle = p.color; hud.fillRect(s.x - hr, y - hr, hr * 2, hr * 2);
+      hud.fillStyle = p.color; hud.fillRect(x - hr, y - hr, hr * 2, hr * 2);
       hud.fillStyle = '#fff'; hud.font = `700 ${Math.round(hr * 1.15)}px ${FONT}`; hud.textBaseline = 'middle';
-      hud.fillText((p.name[0] || '?').toLocaleUpperCase('tr'), s.x, y + 1);
+      hud.fillText((p.name[0] || '?').toLocaleUpperCase('tr'), x, y + 1);
     }
     hud.restore();
-    hud.beginPath(); hud.arc(s.x, y, hr, 0, TAU); hud.strokeStyle = gold ? '#ffcf4d' : '#fff'; hud.lineWidth = 4; hud.stroke();
-    const name = p.name.length > 12 ? p.name.slice(0, 11) + '…' : p.name;
-    const txt = `${name} · ${p.laps % CFG.lapsPerTawaf}/${CFG.lapsPerTawaf}`;
-    hud.font = `800 ${Math.round(clamp(hr * 0.9, 30, 46))}px ${FONT}`; hud.textBaseline = 'bottom';
-    hud.lineWidth = 7; hud.strokeStyle = 'rgba(8,12,16,0.9)'; hud.strokeText(txt, s.x, y - hr - 6);
-    hud.fillStyle = gold ? '#ffd766' : '#fff'; hud.fillText(txt, s.x, y - hr - 6);
+    hud.beginPath(); hud.arc(x, y, hr, 0, TAU); hud.strokeStyle = gold ? '#ffcf4d' : '#fff'; hud.lineWidth = 4; hud.stroke();
+    hud.font = `800 ${fs}px ${FONT}`; hud.textBaseline = 'bottom';
+    hud.lineWidth = 7; hud.strokeStyle = 'rgba(8,12,16,0.9)'; hud.strokeText(txt, x, y - hr - 6);
+    hud.fillStyle = gold ? '#ffd766' : '#fff'; hud.fillText(txt, x, y - hr - 6);
   }
-  // çekim değişiminde kısa kararma
-  const fade = 1 - (t - cutAt) / 0.45;
-  if (fade > 0) { hud.fillStyle = `rgba(5,8,13,${fade})`; hud.fillRect(0, 0, W, H); }
 }
 
 function panel(x, y, w, h) {
@@ -482,6 +516,11 @@ function panel(x, y, w, h) {
 
 function drawHud(t) {
   hud.clearRect(0, 0, W, H);
+  placed.length = 0;
+  const bannerOn = banner && t - banner.t < banner.life;
+  const live = toasts.filter((m) => t - m.t < 6).slice(-2);
+  if (bannerOn) placed.push({ x: 90, y: 636, w: 900, h: 130 });
+  live.forEach((m, i) => placed.push({ x: 140, y: 1330 - (live.length - 1 - i) * 60 - 52, w: 800, h: 56 }));
   drawTags(t);
   for (let i = sparks.length - 1; i >= 0; i--) {
     const s = sparks[i], age = t - s.t;
@@ -532,25 +571,29 @@ function drawHud(t) {
   hud.font = `600 27px ${FONT}`; hud.fillStyle = '#b9c6cb';
   hud.fillText('❤️ Beğen: hızlan  ·  ➕ Takip et: altın isim', 540, hy + 76);
 
-  let ty = 644;
-  for (const m of toasts) {
-    const age = t - m.t; if (age > 6) continue;
+  live.forEach((m, i) => {                              // bildirimler: bandın alt kenarında, en yenisi en altta
+    const age = t - m.t, ty = 1330 - (live.length - 1 - i) * 60 - 26;
+    hud.textAlign = 'center'; hud.textBaseline = 'middle';
     hud.globalAlpha = Math.min(1, age * 4) * Math.min(1, (6 - age) * 2); hud.font = `700 31px ${FONT}`;
-    const tw = hud.measureText(m.text).width + 44;
-    rrect(540 - tw / 2, ty - 26, tw, 52, 26); hud.fillStyle = 'rgba(10,18,24,0.85)'; hud.fill();
-    hud.fillStyle = m.color; hud.fillText(m.text, 540, ty + 1);
-    hud.globalAlpha = 1; ty += 60;
-  }
+    const txt = m.text.length > 34 ? m.text.slice(0, 33) + '…' : m.text;
+    const tw = Math.min(980, hud.measureText(txt).width + 44);
+    rrect(540 - tw / 2, ty - 26, tw, 52, 26); hud.fillStyle = 'rgba(10,18,24,0.88)'; hud.fill();
+    hud.fillStyle = m.color; hud.fillText(txt, 540, ty + 1);
+    hud.globalAlpha = 1;
+  });
 
-  if (banner && t - banner.t < banner.life) {
+  if (bannerOn) {
     const age = t - banner.t;
     hud.globalAlpha = Math.min(1, age * 3) * Math.min(1, (banner.life - age) * 2);
-    rrect(90, 1220, 900, 120, 26); hud.fillStyle = 'rgba(14,60,44,0.94)'; hud.fill();
+    rrect(90, 640, 900, 120, 26); hud.fillStyle = 'rgba(14,60,44,0.94)'; hud.fill();
     hud.strokeStyle = '#e9c96a'; hud.lineWidth = 3; hud.stroke();
-    hud.font = `800 42px ${FONT}`; hud.fillStyle = '#ffd766'; hud.fillText(banner.title.slice(0, 24), 540, 1260);
-    hud.font = `600 27px ${FONT}`; hud.fillStyle = '#fff'; hud.fillText(banner.sub, 540, 1306);
+    hud.textAlign = 'center'; hud.textBaseline = 'middle';
+    hud.font = `800 42px ${FONT}`; hud.fillStyle = '#ffd766'; hud.fillText(banner.title.slice(0, 22), 540, 680);
+    hud.font = `600 28px ${FONT}`; hud.fillStyle = '#fff'; hud.fillText(banner.sub.length > 44 ? banner.sub.slice(0, 43) + '…' : banner.sub, 540, 730);
     hud.globalAlpha = 1;
   }
+  const fade = 1 - (t - cutAt) / 0.45;                   // çekim değişiminde kısa kararma
+  if (fade > 0) { hud.fillStyle = `rgba(5,8,13,${fade})`; hud.fillRect(0, 0, W, H); }
   if (!status.connected && !DEMO) {
     hud.font = `600 22px ${FONT}`; hud.fillStyle = '#ff9a8a';
     hud.fillText(`● ${status.text}`, 540, 1530);
@@ -607,4 +650,4 @@ addEventListener('keydown', (e) => {
   const i = '12345'.indexOf(e.key);
   if (i >= 0 && tiers[i]) fakeGift(tiers[i].min);
 });
-window.__game = { onEvent, players, closeUp(i = 0, secs = 600, near = 1) { const p = [...players.values()][i]; if (p) { focusOn(p, now(), secs); snapCam = true; shot.near = near; } return p && p.female; } };
+window.__game = { onEvent, players, setOrbit(a, hold = true) { orbit = a; orbitHold = hold; snapCam = true; shot.until = 0; cutAt = -9; }, setCfg(k, v) { CFG[k] = v; }, closeUp(i = 0, secs = 600, near = 1) { const p = [...players.values()][i]; if (p) { focusOn(p, now(), secs); snapCam = true; shot.near = near; } return p && p.female; } };
