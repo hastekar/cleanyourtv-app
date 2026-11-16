@@ -151,12 +151,13 @@ button{font:700 1em var(--body);color:var(--kağıt);background:rgba(6,20,28,.88
 button:hover{border-color:var(--altın)}
 button:focus-visible,input:focus-visible{outline:2px solid var(--altın);outline-offset:2px}
 button[aria-pressed="true"]{background:var(--çini);color:var(--mürekkep);border-color:transparent}
+#bar input[type=range]{width:5.5em;accent-color:var(--çini)}
 #test-plate{width:3.6em;font:700 1em var(--body);color:var(--kağıt);background:var(--mürekkep);border:1px solid var(--çizgi);border-radius:8px;padding:.4em}
 #status{color:var(--soluk);font-weight:500;background:rgba(6,20,28,.7);border-radius:6px;padding:.2em .5em}
 .obs #bar{display:none}
 
 /* ── model galerisi ── */
-#gal{position:absolute;left:50%;bottom:max(64px,9%);transform:translateX(-50%);width:min(94%,30em);text-align:center;background:var(--panel);border:1px solid var(--çizgi);border-radius:12px;padding:12px 14px;display:grid;gap:6px;font-size:max(14px,calc(var(--u)*2.8))}
+#gal{position:absolute;left:50%;bottom:max(120px,15%);transform:translateX(-50%);width:min(94%,30em);text-align:center;background:var(--panel);border:1px solid var(--çizgi);border-radius:12px;padding:12px 14px;display:grid;gap:6px;font-size:max(14px,calc(var(--u)*2.8))}
 #gal h3{font:400 1.7em/1.1 var(--display);margin:0;color:var(--altın)}
 #gal p{margin:0;line-height:1.35}
 #gal .trig{font-weight:800;color:var(--çini)}
@@ -212,6 +213,8 @@ button[aria-pressed="true"]{background:var(--çini);color:var(--mürekkep);borde
       <button data-t="follow" type="button">Takip</button>
       <button id="b-gal" type="button">Modeller</button>
       <button id="b-snd" type="button" aria-pressed="false">Ses</button>
+      <label for="vol-m">Müzik</label><input id="vol-m" type="range" min="0" max="100" value="80" aria-label="Müzik sesi">
+      <label for="vol-s">Efekt</label><input id="vol-s" type="range" min="0" max="100" value="90" aria-label="Efekt sesi">
       <span id="status">Demo modu</span>
     </div>
   </div></div>
@@ -220,5 +223,7 @@ button[aria-pressed="true"]{background:var(--çini);color:var(--mürekkep);borde
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/models.js"></script>
+<script src="js/units.js"></script>
 <script src="js/game.js"></script>
+<script src="js/audio.js"></script>
 <script src="js/view.js"></script>

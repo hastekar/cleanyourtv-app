@@ -56,6 +56,8 @@ Sayfa 1080×1920 dikey yayına göre yerleşir; TikTok arayüzünün bindiği b�
 
 Sahne: kale merkezleri z=±15, savaş alanı 14 birim genişliğinde. Savaş kamerası alanı ekran genişliğine sığdırır (~52° eğim) ve cephe hattını yumuşakça izler; maç başında iki kaleyi gösteren süzülme, sur aşamasında 2 sn hasarlı kaleye geçiş ve törende kazanan kale çekimi vardır (`prefers-reduced-motion`: kesme, sallanma yok).
 
+Ordu: her mantık birliği `js/units.js` ile tek tek askerlere açılır (komutan, piyade, milis, süvari, topçu + 2 er, mehter), örneklemeli çizilir; en fazla 200 asker (`kalite=dusuk`: 100). Ses: `js/audio.js` (üretilen müzik ve efektler, Türkçe konuşma); araç çubuğundaki "Ses" düğmesiyle açılır, müzik/efekt kaydırıcıları yanındadır. Türkçe ses yoksa konuşma susar ve durum satırında yazar.
+
 Yerleşim: %11-19 can/sayaç/çekişme çubuğu, %19-24 ipucu ve sıradaki rakip, %24-64 sahne (iki kale bu bantta tam görünür; kamera `fit()` ile hesaplar). Yazı boyları `--u` (ekran genişliğinin %1'i) ile verilir; 1080 px'te en küçük yazı 26 px'in üstündedir. Yatay ekranda (16:9) güvenli değerler otomatik küçülür ve kamera yandan bakar.
 
 ## Denge ayarı

@@ -46,8 +46,8 @@ var camera = new THREE.PerspectiveCamera(40, 9 / 16, 1, 320);
 var world = new THREE.Group(); scene.add(world);
 var galGroup = new THREE.Group(); galGroup.visible = false; scene.add(galGroup);
 
-scene.add(new THREE.HemisphereLight(0xc4d4dc, 0x3c4a34, .85));
-var sun = new THREE.DirectionalLight(0xffdca8, 1.05); sun.position.set(-10, 20, 14); scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xc4d4dc, 0x3c4a34, .7));
+var sun = new THREE.DirectionalLight(0xffdca8, .9); sun.position.set(-10, 20, 14); scene.add(sun);
 
 /* birlestirici: ayri geometrileri tek koseli-renkli geometriye indirir */
 function Merger(){ this.p = []; this.n = []; this.c = []; }
@@ -74,7 +74,7 @@ var seed = 20240611;
 function rnd(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
 
 var CZ = 15;             // kale merkezleri z = -CZ (uzak) ve +CZ (yakin)
-var WALL = 3.2, GATEZ = 4.45, ARMY = 10.2, LANEX = 5.5;   // ordu z = -ARMY..+ARMY (iki ordu ayni dunya noktasinda bulusur)
+var WALL = 3.2, GATEZ = 4.45, ARMY = 10.2, LANEX = 4.7;   // ordu z = -ARMY..+ARMY (iki ordu ayni dunya noktasinda bulusur)
 (function buildGround(){
   var gr = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.MeshLambertMaterial({ color: 0x2f4b2d }));
   gr.rotation.x = -Math.PI / 2; world.add(gr);
@@ -314,101 +314,147 @@ function camDbg(){
 }
 
 /* ───────────── birlikler ───────────── */
-var UNITSCALE = { piyade: 1.9, milis: 1.8, suvari: 1.8, topcu: 1.6, mehter: 1.7 };
-var PRIO = { mehter: 5, topcu: 4, suvari: 3, piyade: 2, milis: 0 };
-var ents = {}, entList = [];
-function measure(obj){
-  var calls = 0, tris = 0;
-  obj.traverse(function(o){
-    if (!o.isMesh) return;
-    var ge = o.geometry, n = (ge.index ? ge.index.count : ge.attributes.position.count) / 3; tris += n;
-    calls += Array.isArray(o.material) ? Math.max(1, ge.groups.length) : 1;
-  });
-  return { calls: calls, tris: tris };
-}
+var SC = 1.3;                       // asker olcegi (ayakta asker ~%4 ekran yuksekligi)
+var army = null;
+try { army = MF.units.createArmy({ max: CFG.low ? 100 : 200, quality: CFG.low ? 'dusuk' : 'yuksek' }); world.add(army.object); } catch (err){ army = null; if (statusEl) statusEl.textContent = 'Asker modeli yüklenemedi'; }
+var ents = {}, entList = [], dyingN = 0, armyCap = CFG.low ? 100 : 200;
+function hash(n){ n = Math.sin(n * 127.1 + 311.7) * 43758.5453; return n - Math.floor(n); }
 g.on('spawn', function(u){
-  var obj;
-  try { obj = MF.models.unit(u.type === 'topcu' ? 'mancinik' : u.type, D.colorHex(S.sides[u.side].id)); } catch (err){ return; }
-  var sc = UNITSCALE[u.type] || 1.5; obj.scale.setScalar(sc);
-  var m = measure(obj);
-  var e = { u: u, obj: obj, calls: m.calls, tris: m.tris, sc: sc, sink: -1, vis: true, born: T };
-  ents[u.id] = e; entList.push(e); world.add(obj);
-  placeUnit(e, 0);
+  var e = { u: u, slots: [], gone: false, born: T, lx: 0, lz: 0, tx: 0, ty: 2, tz: 0, ok: false, fireT: -9, nAlive: 0 };
+  ents[u.id] = e; entList.push(e); leaderPos(e);
+  if (u.type === 'suvari') sfxA('horse');
 });
 g.on('remove', function(u, reason){
   var e = ents[u.id]; if (!e) return;
-  if (reason === 'dead' || reason === 'defeat') { e.sink = 0; e.sinkDelay = reason === 'defeat' ? Math.random() * .8 : 0; }
+  if (reason === 'dead' || reason === 'defeat'){ e.gone = true; e.slots.forEach(function(sl){ if (sl.alive && !sl.dying) startDie(sl, reason === 'defeat' ? Math.random() * .6 : 0); }); }
   else dropEnt(e);
 });
 function dropEnt(e){
+  e.slots.forEach(function(sl){ if (sl.dying) dyingN--; });
   delete ents[e.u.id]; var i = entList.indexOf(e); if (i >= 0) entList.splice(i, 1);
-  world.remove(e.obj);
-  e.obj.traverse(function(o){ if (o.isMesh && o.userData && o.userData.own) o.geometry.dispose(); });
 }
-function placeUnit(e, t){
-  var u = e.u, s = u.side;
-  var z = s === 0 ? -ARMY + 2 * ARMY * u.pos : ARMY - 2 * ARMY * u.pos;
-  e.obj.position.x = u.lane * LANEX; e.obj.position.z = z;
-  e.obj.rotation.y = s === 0 ? 0 : Math.PI;
-  e.obj.userData.animate(t + u.id * .37, u.state);
+function startDie(sl, delay){
+  if (dyingN >= 40){ sl.alive = false; return; }
+  sl.dying = true; sl.dieT = -(delay || 0); dyingN++;
 }
+function leaderPos(e){
+  var u = e.u;
+  e.lz = u.side === 0 ? -ARMY + 2 * ARMY * u.pos : ARMY - 2 * ARMY * u.pos;
+  e.lx = u.lane * LANEX;
+}
+function wantCount(u){
+  var n = Math.max(1, u.n | 0);
+  switch (u.type){
+    case 'piyade': return Math.max(1, Math.min(10, Math.round(n / 3)));
+    case 'milis': return Math.max(1, Math.min(3, Math.round(n / 3)));
+    case 'suvari': return Math.max(1, Math.min(5, Math.round(n / 8)));
+    case 'topcu': return 3;
+    case 'mehter': return 2;
+  }
+  return 1;
+}
+function kindAt(u, i){
+  switch (u.type){
+    case 'piyade': return u.user && i === 0 ? 'komutan' : 'piyade';
+    case 'topcu': return i === 0 ? 'topcu' : 'topcuEr';
+    case 'mehter': return i === 0 ? 'davulcu' : 'sancaktar';
+  }
+  return u.type;
+}
+function slotTarget(u, i, total, fight, ph, out){
+  var dir = u.side === 0 ? 1 : -1, x = 0, z = 0;
+  if (u.type === 'topcu'){ if (i > 0){ x = (i === 1 ? -1 : 1) * 1.0; z = -dir * .9; } }
+  else if (u.type === 'mehter'){ if (i > 0){ x = .9; z = -dir * .9; } }
+  else if (i > 0){
+    var cav = u.type === 'suvari', per = cav ? 3 : 5, sx = cav ? 1.4 : .7, rz = cav ? 2.0 : .8, j = i - 1, row = (j / per) | 0, col = j % per, cnt = Math.min(per, total - 1 - row * per);
+    x = (col - (cnt - 1) / 2) * sx; z = -dir * (row + 1) * rz;
+    if (fight){ x *= 1.35; z = z * .55 + dir * (.5 + ph * 1.3); }
+  }
+  out[0] = x * SC; out[1] = z * SC;
+}
+var _tg = [0, 0];
+function updateArmy(dt){
+  if (!army) return;
+  var i, e, sl, n = entList.length, want = [], sum = 0, fixed = 0, f;
+  for (i = 0; i < n; i++){ e = entList[i]; if (e.gone){ want.push(0); continue; } leaderPos(e); var c = wantCount(e.u); want.push(c); sum += c; if (e.u.type === 'topcu' || e.u.type === 'mehter') fixed += c; }
+  // kapasite: komutan/lider her zaman cizilir, kalan asker orantili azalir
+  var room = armyCap - dyingN - 8;
+  if (sum > room){
+    var leaders = 0; for (i = 0; i < n; i++) if (want[i] > 0) leaders++;
+    f = Math.max(0, (room - fixed - leaders) / Math.max(1, sum - fixed - leaders));
+    for (i = 0; i < n; i++){ e = entList[i]; if (!want[i] || e.u.type === 'topcu' || e.u.type === 'mehter') continue; want[i] = 1 + Math.floor((want[i] - 1) * Math.min(1, f)); }
+  }
+  army.begin(T);
+  var a = 1 - Math.exp(-dt * 5), fightN = 0, alive = 0;
+  for (i = n - 1; i >= 0; i--){
+    e = entList[i]; var u = e.u, hex = D.colorHex(S.sides[u.side].id), c2 = want[i], dir = u.side === 0 ? 1 : -1, fight = u.state === 'fight' && u.type !== 'topcu' && u.type !== 'mehter';
+    if (!e.gone){
+      // sayiya gore canlandir / dusur
+      for (var q = 0; q < c2; q++){
+        sl = e.slots[q];
+        if (!sl){ sl = e.slots[q] = { jx: (hash(u.id * 7 + q) - .5) * .36 * SC, jz: (hash(u.id * 13 + q) - .5) * .36 * SC, ph: hash(u.id * 3 + q) * 6.283, pr: hash(u.id + q * 5), cx: 0, cz: 0, alive: false, dying: false, dieT: 0, fresh: true }; }
+        if (!sl.alive){ sl.alive = true; sl.dying = false; sl.fresh = true; }
+      }
+      for (q = c2; q < e.slots.length; q++){ sl = e.slots[q]; if (sl.alive && !sl.dying) startDie(sl, q * .05); }
+    }
+    var firing = u.type === 'topcu' || u.type === 'mehter' ? (T - e.fireT) / .8 : 2, anyAlive = false;
+    for (q = 0; q < e.slots.length; q++){
+      sl = e.slots[q]; if (!sl.alive) continue;
+      slotTarget(u, q, Math.max(c2, 1), fight, sl.pr, _tg);
+      if (sl.fresh){ sl.cx = _tg[0]; sl.cz = _tg[1]; sl.fresh = false; } else { sl.cx += (_tg[0] - sl.cx) * a; sl.cz += (_tg[1] - sl.cz) * a; }
+      var x = e.lx + sl.cx + sl.jx, z = e.lz + sl.cz + sl.jz + (fight && !sl.dying ? dir * Math.sin(T * 4 + sl.ph) * .18 * SC : 0);
+      x = Math.max(-7.3, Math.min(7.3, x));
+      var kind = kindAt(u, q), st, k = 0;
+      if (sl.dying){ sl.dieT += dt; if (sl.dieT < 0){ st = u.state === 'fight' ? 'fight' : 'walk'; } else { k = sl.dieT / .6; st = 'die'; if (k >= 1){ sl.alive = false; sl.dying = false; dyingN--; continue; } } }
+      else if (u.type === 'topcu'){ if (firing >= 0 && firing < 1){ st = 'fire'; k = firing; } else st = u.state === 'walk' ? 'walk' : 'idle'; }
+      else if (u.type === 'mehter') st = 'idle';
+      else st = u.state === 'fight' ? 'fight' : u.state === 'walk' ? 'walk' : 'idle';
+      var yaw = (dir > 0 ? 0 : Math.PI) + (fight && !sl.dying ? (sl.pr - .5) * .5 : 0);
+      army.add(kind, hex, x, z, yaw, SC, st, sl.ph, k);
+      anyAlive = true; alive++;
+      if (q === 0){ e.tx = x; e.tz = z; e.ty = army.headHeight(kind) * SC + .15; }
+    }
+    e.ok = anyAlive; if (u.state === 'fight') fightN++;
+    if (e.gone && !anyAlive){ dropEnt(e); }
+  }
+  army.end();
+  armyFightShare = n ? fightN / n : 0;
+}
+var armyFightShare = 0;
 
-var CALL_BUDGET = CFG.low ? 60 : 96, TRI_BUDGET = CFG.low ? 40000 : 62000;
 var emRot = 0;
 function emitters(dt){
-  var n = entList.length, sparks = 0, fs = 0, fn = 0, i, e, u, o;
+  var n = entList.length, sparks = 0, fs = 0, fn = 0, i, e, u;
   for (i = 0; i < n; i++){
-    e = entList[(i + emRot) % n]; u = e.u; o = e.obj; if (e.sink >= 0 || !o.visible) continue;
+    e = entList[(i + emRot) % n]; u = e.u; if (e.gone || !e.ok) continue;
     if (u.state === 'fight' && u.type !== 'topcu' && u.type !== 'mehter'){
-      fs += o.position.z; fn++;
+      fs += e.lz; fn++;
       if (u.pos < 1){
-        if (sparks < 6 && Math.random() < dt * 2.2){ sparks++; spark(o.position.x + ru(-.4, .4), ru(.8, 1.8), o.position.z + (u.side === 0 ? .6 : -.6)); }
-        if (Math.random() < dt * 1.1) dust(o.position.x, .15, o.position.z, 1.4, .8);
+        if (sparks < 6 && Math.random() < dt * 2.2){ sparks++; spark(e.lx + ru(-1.2, 1.2), ru(.8, 1.8), e.lz + (u.side === 0 ? 1.2 : -1.2)); }
+        if (Math.random() < dt * 1.1) dust(e.lx + ru(-1, 1), .15, e.lz, 1.6, .8);
       }
     } else if (u.state === 'walk' && (u.type === 'suvari' || u.type === 'topcu') && Math.random() < dt * 9){
-      dust(o.position.x, .1, o.position.z + (u.side === 0 ? -1 : 1) * .9, u.type === 'suvari' ? 1.3 : 1.0, .6);
+      dust(e.lx, .1, e.lz + (u.side === 0 ? -1 : 1) * 1.2, u.type === 'suvari' ? 1.5 : 1.2, .6);
     }
   }
   emRot++;
   flTarget = fn ? Math.max(-5, Math.min(5, fs / fn)) : 0;
+  clashN = fn;
   // mehter etkisi: ayaklarda parlayan halka
   var gi = 0, gn = pGlow.n, glowSide = [S.sides[0].buff > 0, S.sides[1].buff > 0];
   if ((glowSide[0] || glowSide[1]) && S.phase === 'play'){
-    for (i = 0; i < n && gi < gn; i++){ e = entList[i]; if (e.sink >= 0 || !e.obj.visible || !glowSide[e.u.side]) continue;
-      var k3 = gi * 3; pGlow.pos[k3] = e.obj.position.x; pGlow.pos[k3 + 1] = .08; pGlow.pos[k3 + 2] = e.obj.position.z;
-      pGlow.col[k3] = 1; pGlow.col[k3 + 1] = .72; pGlow.col[k3 + 2] = .2; pGlow.sa[gi * 2] = 2.6 + Math.sin(T * 5 + i) * .3; pGlow.sa[gi * 2 + 1] = .5 + .2 * Math.sin(T * 6 + i); gi++; }
+    for (i = 0; i < n && gi < gn; i++){ e = entList[i]; if (e.gone || !e.ok || !glowSide[e.u.side]) continue;
+      for (var q = 0; q < e.slots.length && gi < gn; q++){ var sl = e.slots[q]; if (!sl.alive || sl.dying) continue;
+        var k3 = gi * 3; pGlow.pos[k3] = e.lx + sl.cx + sl.jx; pGlow.pos[k3 + 1] = .08; pGlow.pos[k3 + 2] = e.lz + sl.cz + sl.jz;
+        pGlow.col[k3] = 1; pGlow.col[k3 + 1] = .72; pGlow.col[k3 + 2] = .2; pGlow.sa[gi * 2] = 2.6 + Math.sin(T * 5 + gi) * .3; pGlow.sa[gi * 2 + 1] = .5 + .2 * Math.sin(T * 6 + gi); gi++; } }
   }
   for (; gi < gn; gi++) pGlow.sa[gi * 2 + 1] = 0;
   pGlow.aP.needsUpdate = pGlow.aS.needsUpdate = pGlow.aC.needsUpdate = true;
   // ok yagmuru
   if (S.phase === 'play' && fn > 3){ volleyT -= dt; if (volleyT <= 0){ volleyT = ru(5, 8); volley(Math.random() < .5 ? 0 : 1, flAvg); } }
 }
-function updateUnits(dt){
-  var i, e, list = entList;
-  for (i = list.length - 1; i >= 0; i--){
-    e = list[i];
-    if (e.sink >= 0){
-      if (e.sinkDelay > 0){ e.sinkDelay -= dt; continue; }
-      e.sink += dt; var k = e.sink / .7; e.obj.position.y = -k * 1.2; e.obj.rotation.x = k * .9;
-      if (k >= 1) dropEnt(e);
-      continue;
-    }
-    placeUnit(e, T);
-  }
-  emitters(dt);
-  // cizim butcesi: onemli birlikler once
-  var arr = entList.slice().sort(function(a, b){
-    var pa = (PRIO[a.u.type] || 0) * 10 + (a.u.user ? 6 : 0) + (a.sink >= 0 ? -20 : 0) + (a.u.id % 7) * .01;
-    var pb = (PRIO[b.u.type] || 0) * 10 + (b.u.user ? 6 : 0) + (b.sink >= 0 ? -20 : 0) + (b.u.id % 7) * .01;
-    return pb - pa;
-  });
-  var calls = 0, tris = 0;
-  for (i = 0; i < arr.length; i++){
-    e = arr[i];
-    var fits = calls + e.calls <= CALL_BUDGET && tris + e.tris <= TRI_BUDGET;
-    e.obj.visible = fits; if (fits){ calls += e.calls; tris += e.tris; }
-  }
-}
+var clashN = 0;
+function updateUnits(dt){ updateArmy(dt); emitters(dt); }
 
 /* ───────────── olaylar: sahne tarafi ───────────── */
 g.on('wallHit', function(side, dmg, by){
@@ -420,12 +466,12 @@ g.on('wallHit', function(side, dmg, by){
 g.on('shot', function(u, side){
   var e = ents[u.id]; if (!e) return;
   var st = MF.models.stone(); st.scale.setScalar(2.4); world.add(st);
-  var from = new THREE.Vector3(e.obj.position.x, 2.6, e.obj.position.z);
-  var tx = Math.max(-4, Math.min(4, e.obj.position.x * .7 + (Math.random() - .5) * 2));
+  e.fireT = T; var from = new THREE.Vector3(e.lx, 2.2, e.lz);
+  var tx = Math.max(-4, Math.min(4, e.lx * .7 + (Math.random() - .5) * 2));
   var to = new THREE.Vector3(tx, 1.4, wallPoint(side) + (side === 0 ? .15 : -.15));
   var s = { m: st, from: from, to: to, t: 0, dur: 1.15, side: side, u: u, dmg: 18 };
   if (stones.length > 6){ var o = stones.shift(); world.remove(o.m); }
-  stones.push(s); pendingShot = s; sound('cannonShot');
+  stones.push(s); pendingShot = s; sfxA('cannon');
   // namlu alevi + duman
   var dz = u.side === 0 ? 1 : -1;
   pAdd.emit(from.x, 2.2, from.z + dz * 1.2, 0, 0, 0, .18, 1.2, 3.2, 1, 0xffd890, 0);
@@ -437,7 +483,7 @@ function updateStones(dt){
     var s = stones[i]; s.t += dt; var k = Math.min(1, s.t / s.dur);
     s.m.position.set(s.from.x + (s.to.x - s.from.x) * k, s.from.y + (s.to.y - s.from.y) * k + Math.sin(k * Math.PI) * 5, s.from.z + (s.to.z - s.from.z) * k);
     s.m.rotation.x += dt * 9; s.m.rotation.z += dt * 6;
-    if (k >= 1){ impact(s.side, s.to.x, s.dmg || 18, true); sound('thudHit'); world.remove(s.m); stones.splice(i, 1); }
+    if (k >= 1){ impact(s.side, s.to.x, s.dmg || 18, true); sfxA('wall'); world.remove(s.m); stones.splice(i, 1); }
   }
 }
 g.on('stage', function(side, st){
@@ -642,7 +688,7 @@ function buildTag(e){
 }
 function syncTags(){
   var cand = [], seenU = {};
-  for (var i = 0; i < entList.length; i++){ var e = entList[i]; if (e.u.user && e.sink < 0 && e.obj.visible) cand.push(e); }
+  for (var i = 0; i < entList.length; i++){ var e = entList[i]; if (e.u.user && !e.gone && e.ok) cand.push(e); }
   cand.sort(function(a, b){ return b.u.born - a.u.born; });
   var keep = {}, n = 0;
   for (var c = 0; c < cand.length && n < TAGMAX; c++){ var uid = cand[c].u.user.id; if (seenU[uid]) continue; seenU[uid] = 1; keep[cand[c].u.id] = cand[c]; cand[c].full = n < FULLTAGS; n++; }
@@ -681,19 +727,19 @@ function updateLabels(dt){
   placed.length = 0;
   var order = [];
   for (var id in tagMap){ var e = ents[id]; if (e) order.push(e); }
-  order.sort(function(a, b){ return b.obj.position.z * (b.u.side ? 1 : 1) - a.obj.position.z; });
+  order.sort(function(a, b){ return b.tz - a.tz; });
   // ekranda alttakiler (kameraya yakin, buyuk z) once yerlesir
   for (var k = 0; k < order.length; k++){
-    var en = order[k], o = en.obj;
-    putTag(tagMap[en.u.id], projXY(o.position.x, o.position.y + (o.userData.height || 1.3) * en.sc + .15, o.position.z), true);
+    var en = order[k];
+    putTag(tagMap[en.u.id], projXY(en.tx, en.ty, en.tz), true);
   }
   for (var i = bubs.length - 1; i >= 0; i--){
     var b = bubs[i]; b.t += dt;
     if (b.t > 3.6){ if (b.el.parentNode) b.el.parentNode.removeChild(b.el); bubs.splice(i, 1); continue; }
     var tgt = null;
-    for (var j = entList.length - 1; j >= 0; j--) if (entList[j].u.user === b.user && entList[j].sink < 0){ tgt = entList[j]; break; }
+    for (var j = entList.length - 1; j >= 0; j--) if (entList[j].u.user === b.user && !entList[j].gone && entList[j].ok){ tgt = entList[j]; break; }
     var xy;
-    if (tgt) xy = projXY(tgt.obj.position.x, (tgt.obj.userData.height || 1.3) * tgt.sc + .9, tgt.obj.position.z);
+    if (tgt) xy = projXY(tgt.tx, tgt.ty + .9, tgt.tz);
     else { var sd2 = b.user.side == null ? 1 : b.user.side; xy = projXY(0, 3.2, sd2 === 0 ? -(CZ - GATEZ) : (CZ - GATEZ)); }
     putTag(b.el, xy, false);
   }
@@ -722,40 +768,54 @@ function paintMap(){
   });
 }
 
-/* ───────────── ses ───────────── */
-var soundOn = false, actx = null;
-function thump(f, len, vol, delay){
-  if (!soundOn) return;
-  try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    var o = actx.createOscillator(), gn = actx.createGain(), t = actx.currentTime + (delay || 0);
-    o.frequency.setValueAtTime(f * 2, t); o.frequency.exponentialRampToValueAtTime(f, t + len);
-    gn.gain.setValueAtTime(vol || .5, t); gn.gain.exponentialRampToValueAtTime(.001, t + len + .15);
-    o.connect(gn); gn.connect(actx.destination); o.start(t); o.stop(t + len + .2);
-  } catch (_) {}
+/* ───────────── ses: MF.audio (js/audio.js); yoksa ya da hata verirse sayfa sessiz calisir ───────────── */
+var soundOn = false, AU = null, lastTrack = null, intens = 0, clashT = 0, tickN = -1, sayAt = 0;
+try { if (MF.audio) AU = MF.audio.create(); } catch (_) { AU = null; }
+function au(fn){ try { if (AU) return fn(AU); } catch (_) {} }
+var sfxLast = {};
+function sfxA(name, o){ if (!soundOn) return; var now = T, last = sfxLast[name] || -9; if (now - last < .12) return; sfxLast[name] = now; au(function(a){ a.sfx(name, o); }); }
+var SFXMAP = { start: 'horn', victory: 'cheer', rankup: 'rankup', combo: 'combo', shield: 'shield', stage: 'stage', last30: 'horn', revenge: 'horn', mehter: 'horn' };
+g.on('sfx', function(n){ var m = SFXMAP[n]; if (m) sfxA(m); });
+g.on('say', function(t){ if (soundOn) au(function(a){ a.say(t); }); });
+function wantTrack(){
+  if (S.phase === 'intro') return 'intro';
+  if (S.phase === 'end') return 'victory';
+  if (S.sides[0].buff > 0 || S.sides[1].buff > 0) return 'mehter';
+  if (S.timeLeft <= 30) return 'last30';
+  var f0 = S.sides[0].hp / Math.max(1, S.sides[0].maxHp), f1 = S.sides[1].hp / Math.max(1, S.sides[1].maxHp);
+  return Math.min(f0, f1) < .33 ? 'tense' : 'battle';
 }
-function say(txt){ if (!soundOn || !window.speechSynthesis) return; try { var u = new SpeechSynthesisUtterance(txt); u.lang = 'tr-TR'; speechSynthesis.speak(u); } catch (_) {} }
-var SFX = {
-  intro: [[90, .25, .5, 0], [90, .25, .5, .35]], start: [[80, .2, .6, 0], [80, .2, .6, .25], [60, .4, .7, .5]],
-  victory: [[220, .25, .5, 0], [330, .25, .5, .2], [440, .4, .5, .4]], rankup: [[440, .1, .3, 0], [660, .15, .3, .12]],
-  combo: [[160, .08, .4, 0], [200, .08, .4, .1]], cannon: [[55, .4, .7, 0]], cannonShot: [[70, .25, .5, 0]], thudHit: [[45, .3, .6, 0]],
-  horse: [[140, .06, .35, 0], [140, .06, .35, .15]], shield: [[500, .15, .3, 0], [700, .2, .3, .1]],
-  mehter: [[60, .3, .7, 0], [90, .15, .5, .3], [90, .15, .5, .45], [60, .3, .7, .6]],
-  stage: [[50, .5, .8, 0]], last30: [[100, .15, .5, 0], [100, .15, .5, .3], [100, .15, .5, .6]], revenge: [[75, .3, .6, 0], [55, .4, .6, .25]]
-};
-function sound(n){ var a = SFX[n]; if (!a) return; for (var i = 0; i < a.length; i++) thump(a[i][0], a[i][1], a[i][2], a[i][3]); }
-g.on('sfx', sound);
-g.on('say', say);
+function audioTick(dt){
+  if (!soundOn || !AU) return;
+  var tr = wantTrack(); if (tr !== lastTrack){ lastTrack = tr; au(function(a){ a.music(tr); }); }
+  intens += (Math.min(1, armyFightShare * 1.6) - intens) * (1 - Math.exp(-dt * .8)); au(function(a){ a.intensity(intens); });
+  if (S.phase === 'play'){
+    clashT -= dt; if (clashT <= 0 && clashN > 0){ clashT = ru(.3, .6) / Math.min(3, 1 + clashN / 6); sfxA(Math.random() < .6 ? 'sword' : 'hit', { gain: .5 }); }
+    var tk = Math.ceil(S.timeLeft); if (tk <= 10 && tk > 0 && tk !== tickN){ tickN = tk; sfxA('tick'); }
+  }
+}
+function audioStatus(){ au(function(a){ var st = a.status(); statusEl.textContent = st.voice ? 'Ses: ' + st.voice : 'Türkçe ses bulunamadı'; }); }
+g.on('wallHit', function(side, dmg){ if (dmg > 6) sfxA('wall', { gain: Math.min(1, .3 + dmg / 40) }); });
 
 /* ───────────── galeri ───────────── */
 var galOn = false, galI = 0, galObj = null;
+var GALCAT = (function(){
+  var arr = [];
+  MF.models.catalog.forEach(function(c){ if (c.id === 'kale' || c.id === 'kalkan') arr.push(c); });
+  if (MF.units) ['milis', 'piyade', 'komutan', 'suvari', 'topcu', 'mehter'].forEach(function(t){
+    var inf = MF.units.info[t] || {};
+    arr.push({ id: t, name: inf.name || t, trigger: inf.trigger || '', desc: inf.desc || '', unit: t, make: function(){ return MF.units.preview(t, 0xe8553a); } });
+  });
+  return arr;
+})();
 function galShow(i){
-  var cat = MF.models.catalog; galI = (i + cat.length) % cat.length;
+  var cat = GALCAT; galI = (i + cat.length) % cat.length;
   if (galObj){ galGroup.remove(galObj); if (galObj.userData.dispose) galObj.userData.dispose(); galObj = null; }
-  var e = cat[galI]; galObj = e.make(); galGroup.add(galObj);
+  var e = cat[galI]; galObj = e.make(); galObj._unit = e.unit; galGroup.add(galObj);
   var bb = new THREE.Box3().setFromObject(galObj), sp = bb.getBoundingSphere(new THREE.Sphere());
+  if (!isFinite(sp.radius) || sp.radius < .3) sp.radius = e.unit ? 2.2 : 8;
   galObj.position.sub(new THREE.Vector3(sp.center.x, 0, sp.center.z)); sp.center.x = 0; sp.center.z = 0;
-  var vf = 36 * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect), dist = sp.radius / Math.sin(Math.min(vf, hf) / 2) * 1.05;
+  var vf = 36 * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect), dist = sp.radius / Math.sin(Math.min(vf, hf) / 2) * 1.1;
   camera.fov = 36; camera.updateProjectionMatrix();
   camera.position.set(dist * .45, sp.center.y + dist * .38, dist * .8); camera.lookAt(0, sp.center.y, 0);
   $('#gal-name').textContent = e.name; $('#gal-trig').textContent = e.trigger; $('#gal-desc').textContent = e.desc;
@@ -779,7 +839,13 @@ function testEvent(k){
 Array.prototype.forEach.call(document.querySelectorAll('[data-t]'), function(b){ b.onclick = function(){ testEvent(b.getAttribute('data-t')); }; });
 var bSim = $('#b-sim'); bSim.setAttribute('aria-pressed', String(simOn));
 bSim.onclick = function(){ simOn = !simOn; bSim.setAttribute('aria-pressed', String(simOn)); statusEl.textContent = simOn ? 'Demo modu' : (wsOk ? 'Canlı yayına bağlı' : 'Demo kapalı'); };
-$('#b-snd').onclick = function(e){ soundOn = !soundOn; e.currentTarget.setAttribute('aria-pressed', String(soundOn)); if (soundOn) thump(80, .15, .5); };
+$('#b-snd').onclick = function(e){
+  soundOn = !soundOn; e.currentTarget.setAttribute('aria-pressed', String(soundOn));
+  au(function(a){ if (soundOn){ a.enable(); a.setMuted(false); } else { a.setMuted(true); } });
+  lastTrack = null; if (soundOn) setTimeout(audioStatus, 600);
+};
+function vols(){ au(function(a){ a.setVolume({ music: $('#vol-m').value / 100, sfx: $('#vol-s').value / 100 }); }); }
+$('#vol-m').oninput = vols; $('#vol-s').oninput = vols;
 $('#b-gal').onclick = function(){ galToggle(!galOn); };
 $('#gal-close').onclick = function(){ galToggle(false); };
 $('#gal-prev').onclick = function(){ galShow(galI - 1); };
@@ -814,7 +880,7 @@ function frame(now){
   var left = dt; while (left > 0){ var sdt = Math.min(.05, left); g.step(sdt); left -= sdt; }
   if (simOn){ botAcc += dt; var n = 0; while (botAcc >= .2 && n++ < 6){ botAcc -= .2; g.botTick(); } if (botAcc > 1) botAcc = 0; }
   if (!galOn){
-    updateUnits(dt); updateStones(dt); updateFx(dt); 
+    updateUnits(dt); updateStones(dt); updateFx(dt); audioTick(dt); 
     // kale: hasar, kalkan, bayrak
     for (var i = 0; i < 2; i++){
       var s = S.sides[i], c = castles[i];
@@ -826,7 +892,7 @@ function frame(now){
     updateCamera(dt); updateArrows(dt);
     updateLabels(dt);
   } else {
-    if (galObj){ galObj.rotation.y += dt * .6; if (galObj.userData.tick) galObj.userData.tick(T); if (galObj.userData.animate) galObj.userData.animate(T, 'walk'); }
+    if (galObj){ galObj.rotation.y += dt * .6; if (galObj.userData.tick) galObj.userData.tick(T); if (galObj.userData.animate){ var cy = T % 9, gs = cy < 3 ? 'walk' : cy < 6 ? 'fight' : 'idle', gk = 0; if (galObj._unit === 'topcu'){ gs = 'fire'; gk = (T % 2) / 2; } try { galObj.userData.animate(T, gs, gk); } catch (_) {} } }
   }
   hudAcc += dt; if (hudAcc >= .05){ updateHud(hudAcc); hudAcc = 0; }
   if (fitDone < 3 && T > .3 + fitDone * .8){ fitDone++; if (!galOn) fit(); }
@@ -843,6 +909,6 @@ window.MemleketFethi = {
   state: function(){ return g.state; },
   info: function(){ return renderer.info.render; },
   game: g,
-  debug: function(){ return { cam: camDbg(), units: entList.length, visible: entList.filter(function(e){ return e.obj.visible; }).length, tags: Object.keys(tagMap).length }; }
+  debug: function(){ return { cam: camDbg(), units: entList.length, army: army ? army.stats() : null, tags: Object.keys(tagMap).length }; }
 };
 })();
