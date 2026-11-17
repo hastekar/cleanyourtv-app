@@ -16,6 +16,7 @@ var CFG = {
   sim: Q.get('sim') !== '0',
   obs: Q.get('obs') === '1' || location.hash === '#obs',
   low: Q.get('kalite') === 'dusuk',
+  cavus: (function(){ var n = parseInt(Q.get('cavus'), 10); return n >= 1 && n <= 6 ? n : 0; })(),   // OBS adresinde ses telaffuzu: &cavus=N
   ses: Q.get('ses') === '1' || (Q.get('ses') !== '0' && (Q.get('obs') === '1' || location.hash === '#obs'))   // OBS'te arac cubugu gizli oldugundan ses kendiliginden acilir
 };
 var REDUCED = false; try { REDUCED = matchMedia('(prefers-reduced-motion:reduce)').matches; } catch (_) {}
@@ -771,7 +772,10 @@ function paintMap(){
 
 /* ───────────── ses: MF.audio (js/audio.js); yoksa ya da hata verirse sayfa sessiz calisir ───────────── */
 var soundOn = false, AU = null, lastTrack = null, intens = 0, clashT = 0, tickN = -1, sayAt = 0;
-try { if (MF.audio) AU = MF.audio.create(); } catch (_) { AU = null; }
+var pronN = 1;   // cavus varyanti (1..6): adres > kayit > 1
+try { var sv = parseInt(storage.get('mf2-pron'), 10); if (sv >= 1 && sv <= 6) pronN = sv; } catch (_) {}
+if (CFG.cavus) pronN = CFG.cavus;
+try { if (MF.audio) AU = MF.audio.create({ pron: { cavus: pronN } }); } catch (_) { AU = null; }
 function au(fn){ try { if (AU) return fn(AU); } catch (_) {} }
 var sfxLast = {};
 function sfxA(name, o){ if (!soundOn) return; var now = T, last = sfxLast[name] || -9; if (now - last < .12) return; sfxLast[name] = now; au(function(a){ a.sfx(name, o); }); }
@@ -849,6 +853,16 @@ $('#b-snd').onclick = function(e){
   soundOn = !soundOn; e.currentTarget.setAttribute('aria-pressed', String(soundOn));
   au(function(a){ if (soundOn){ a.enable(); a.setMuted(false); } else { a.setMuted(true); } });
   lastTrack = null; if (soundOn) setTimeout(audioStatus, 600);
+};
+var bPron = $('#b-pron');
+function pronLabel(){ bPron.textContent = 'Çavuş sesi ' + pronN + '/6'; }
+pronLabel();
+bPron.onclick = function(){
+  pronN = pronN % 6 + 1;
+  try { storage.set('mf2-pron', String(pronN)); } catch (_) {}
+  if (!soundOn){ soundOn = true; $('#b-snd').setAttribute('aria-pressed', 'true'); au(function(a){ a.enable(); a.setMuted(false); }); lastTrack = null; setTimeout(audioStatus, 600); }
+  au(function(a){ a.setPron('cavus', pronN); a.sayTest(pronN); });
+  pronLabel();
 };
 if (CFG.ses){
   soundOn = true; $('#b-snd').setAttribute('aria-pressed', 'true');

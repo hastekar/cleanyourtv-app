@@ -39,7 +39,7 @@ function eq(a, b, msg){ ok(a === b, msg + '  (beklenen ' + JSON.stringify(b) + '
   eq(A.cleanText('30 sn kaldı'), 'Otuz saniye kaldı', 'sn');
   eq(A.cleanText('Son 30 SN'), 'Son otuz saniye', 'SN');
   eq(A.cleanText('Ayşe_60 İstanbul fethetti!!!!'), 'Ayşe İstanbul fethetti!', 'ad + tekrarli ünlem');
-  eq(A.cleanText('Çavuş Paşa'), 'Çavuş Paşa', 'Çavuş Paşa bozulmaz');
+  eq(A.cleanText('Çavuş Paşa'), 'Çavuş paşa', 'sozluk: cumle basi buyuk, ortadaki kucuk');
   eq(A.cleanText('Merhabaaaaaaaaaa 😀 millet'), 'Merhabaaa millet', 'emoji + uzun tekrar');
   eq(A.cleanText('xX_KRAL.34_Xx çavuş geldi'), 'Kral çavuş geldi', 'ham ad metin icinde');
   eq(A.cleanText('😀🔥'), '', 'yalniz emoji metin');
@@ -47,6 +47,43 @@ function eq(a, b, msg){ ok(a === b, msg + '  (beklenen ' + JSON.stringify(b) + '
   eq(A.trNum(1000), 'bin', 'bin');
   eq(A.trNum(21), 'yirmi bir', '21');
   eq(A.trNum(2005000), 'iki milyon beş bin', 'milyon');
+})();
+
+/* ---------------------------------------------------------------- (a) telaffuz */
+(function pronTests(){
+  console.log('[a] telaffuz sozlugu');
+  eq(A.cleanText('Ali Çavuş oldu', {cavus: 1}), 'Ali çavuş oldu', 'sozluk: ortadaki kucuk harf');
+  eq(A.cleanText('Çavuş oldu Ali', {cavus: 1}), 'Çavuş oldu Ali', 'cumle basi buyuk harf korunur');
+  eq(A.cleanText('Ali kazandı. çavuş geldi'), 'Ali kazandı. Çavuş geldi', 'nokta sonrasi buyuk');
+  eq(A.cleanText('Ali ÇAVUŞ oldu', {cavus: 1}), 'Ali çavuş oldu', 'BUYUK HARF de tanir');
+  eq(A.cleanText('Çavuşoğlu geldi'), 'Çavuşoğlu geldi', 'Çavuşoğlu degismez');
+  eq(A.cleanText('Ali Çavuşoğlu çavuş oldu', {cavus: 2}), 'Ali Çavuşoğlu ça vuş oldu', 'yalniz tam sozcuk');
+  eq(A.cleanText('ekçavuş çavuşlar', {cavus: 2}), 'Ekçavuş çavuşlar', 'sozcuk ici/ek almis bicim degismez');
+  eq(A.cleanText("Ali Paşa'nın Sultan Bey", {cavus: 1}), "Ali paşa'nın sultan bey", 'kesme isaretli ek, birden cok sozcuk');
+  eq(A.cleanText('Ali Onbaşı Vezir Fatih mehter kuşatma kale sur topçu süvari derbi intikam hücum'), 'Ali onbaşı vezir fatih mehter kuşatma kale sur topçu süvari derbi intikam hücum', 'sozluk kapsami');
+  var v = A.pronVariants('çavuş');
+  eq(v.length, 6, 'alti varyant'); eq(v[0], 'çavuş', '1. duz'); eq(new Set(v).size, 6, 'hepsi farkli');
+  eq(JSON.stringify(A.pronVariants('Çavuş')), JSON.stringify(v), 'buyuk harfli anahtar da calisir'); eq(A.pronVariants('xyz').length, 0, 'bilinmeyen sozcuk bos');
+  var outs = [1, 2, 3, 4, 5, 6].map(function(n){ return A.cleanText('Ali çavuş oldu', {cavus: n}); });
+  eq(new Set(outs).size, 6, 'varyant secimi ciktiyi degistirir'); eq(outs[1], 'Ali ça vuş oldu', '2. varyant ciktisi');
+  eq(A.cleanText('Ali çavuş oldu', {cavus: 99}), outs[0], 'gecersiz numara varsayilana doner');
+  eq(A.getPronunciation('çavuş'), 1, 'varsayilan 1'); A.setPronunciation('çavuş', 3);
+  eq(A.getPronunciation('çavuş'), 3, 'set/get'); eq(A.cleanText('Ali çavuş oldu'), 'Ali çavvuş oldu', 'modul varsayilani uygulanir'); A.setPronunciation('çavuş', 1);
+
+  var tr = V('Google Türkçe', 'tr-TR', false), en = V('US', 'en-US', false);
+  var s = fakeSynth([tr]), a = A.create({AudioContext: null, speechSynthesis: s, SpeechSynthesisUtterance: FakeUtt, pron: {cavus: 4}});
+  eq(a.getPron('çavuş'), 4, 'create({pron}) okunur');
+  eq(a.sayTest(2), true, 'sayTest Turkce ses varken true (enable() olmadan da)');
+  eq(s.spoken.length, 1, 'tek utterance'); eq(s.spoken[0].text, 'Ça vuş. Ali ça vuş oldu.', 'sayTest(2) metni');
+  eq(s.spoken[0].lang, 'tr-TR', 'sayTest lang'); eq(s.spoken[0].rate, 1, 'rate 1'); eq(s.spoken[0].pitch, 1, 'pitch 1');
+  a.sayTest(6); eq(s.spoken[s.spoken.length - 1].text, 'Chavush. Ali chavush oldu.', 'sayTest(6) onceki konusmayi keser');
+  eq(s.cancelled > 0, true, 'sayTest eskisini iptal eder');
+  var s3 = fakeSynth([tr]), a3 = A.create({AudioContext: null, speechSynthesis: s3, SpeechSynthesisUtterance: FakeUtt});
+  a3.enable(); a3.setPron('cavus', 3); a3.say('Ali Çavuş oldu.');
+  eq(s3.spoken.length && s3.spoken[0].text, 'Ali çavvuş oldu.', 'say() setPron ile secilen varyanti kullanir');
+  var s2 = fakeSynth([en]), a2 = A.create({AudioContext: null, speechSynthesis: s2, SpeechSynthesisUtterance: FakeUtt});
+  eq(a2.sayTest(1), false, 'Turkce ses yokken sayTest false'); eq(s2.spoken.length, 0, 'hic konusma yok');
+  eq(A.create({AudioContext: null, speechSynthesis: null}).sayTest(1), false, 'speechSynthesis yokken false, atmaz');
 })();
 
 /* ---------------------------------------------------------------- (a) ses secimi */

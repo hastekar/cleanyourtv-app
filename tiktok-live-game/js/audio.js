@@ -75,7 +75,44 @@ function plateStrip(s){
   });
 }
 
-function cleanText(s){
+/* ---- telaffuz sozlugu: tam sozcuk, buyuk/kucuk harf duyarsiz, Turkce harf siniri (\p{L}); "Çavuşoğlu" gibi adlara dokunmaz.
+   Yerine konan bicim kucuk harflidir; cumle basi buyuk harfi sonraki adimda (cleanText sonu) geri gelir.
+   Ozel olarak yazilmamis sozcukler kendi kucuk harfli bicimine doner: buyuk harfle baslayan yalin sozcuklerden motorlar sasabiliyor. */
+var LEX = {
+  'çavuş': null,   // PRON_VARIANTS.cavus'tan secilir
+  'onbaşı': 'onbaşı', 'paşa': 'paşa', 'vezir': 'vezir', 'sultan': 'sultan', 'bey': 'bey', 'fatih': 'fatih',
+  'mehter': 'mehter', 'kuşatma': 'kuşatma', 'kale': 'kale', 'sur': 'sur', 'topçu': 'topçu', 'süvari': 'süvari',
+  'derbi': 'derbi', 'intikam': 'intikam', 'hücum': 'hücum'
+};
+/* "çavuş" icin motora verilecek 6 yazi bicimi (SSML yok: Chrome/Edge/OBS Web Speech SSML'i yok sayar). Numara 1 tabanli, 1 varsayilan.
+   Olasi nedenler: "avu" kumesinde v'nin yari-unlu (w/ğ benzeri) okunup uzamasi, bas harfi buyuk yalin sozcugun ad gibi okunmasi, sondaki ş. */
+var PRON_VARIANTS = {
+  cavus: [
+    'çavuş',     // 1 duz kucuk harf: buyuk harfli yalin sozcuk sorunuysa bu yeter (varsayilan)
+    'ça vuş',    // 2 hece bolme + bosluk: "avu" kumesini keser, v hecenin basinda net sessiz harf olur
+    'çavvuş',    // 3 cift v: uzun/sert sessiz harfe zorlar, v'nin ğ/w gibi akmasini engeller
+    'ça-vuş',    // 4 tireli bolme: cogu motor bosluk kadar duraksamadan hece siniri koyar
+    'çavoş',     // 5 u yerine o: "avu" kumesini hic uretmez; sesi yakin, ses uyumu bozulmaz
+    'chavush'    // 6 Latin-fonetik yedek: ç/ş'yi hic okumayan ya da yanlis okuyan motorlar icin
+  ]
+};
+var PRON = {cavus: 1};
+function pronKey(w){ var f = fold(w); return f === 'cavus' ? 'cavus' : null; }
+function pronVariants(w){ var k = pronKey(w); return k ? PRON_VARIANTS[k].slice() : []; }
+function clampVar(n, len){ n = Math.round(+n); return n >= 1 && n <= len ? n : 1; }
+function setPronunciation(w, n){ var k = pronKey(w); if (!k) return false; PRON[k] = clampVar(n, PRON_VARIANTS[k].length); return true; }
+function getPronunciation(w){ var k = pronKey(w); return k ? PRON[k] : 0; }
+var LEX_RE = new RegExp('(?<![\\p{L}])(' + Object.keys(LEX).sort(function(a, b){ return b.length - a.length; }).join('|') + ')(?![\\p{L}])', 'giu');
+function applyLexicon(s, pron){
+  pron = pron || PRON;
+  return s.replace(LEX_RE, function(w){
+    var k = lowTR(w);
+    if (k === 'çavuş') return PRON_VARIANTS.cavus[clampVar(pron.cavus == null ? PRON.cavus : pron.cavus, 6) - 1];
+    return LEX[k] != null ? LEX[k] : k;
+  });
+}
+
+function cleanText(s, pron){
   s = String(s == null ? '' : s).normalize('NFKC');
   // x10 / ×1.5
   s = s.replace(/(^|[^\p{L}\p{N}])[x×]\s?(\d+)(?:[.,](\d+))?/giu, function(a, pre, i, f){ return pre + numWords(i, f) + ' kat'; });
@@ -100,6 +137,7 @@ function cleanText(s){
   s = s.replace(/[^\p{Script=Latin}\s.,!?:;'’"()\-]/gu, ' ');
   s = s.replace(/(\p{L})\1{3,}/giu, '$1$1$1').replace(/([!?.,])\1{1,}/g, '$1');
   s = s.replace(/\p{L}+/gu, function(w){ return (w.length > 1 && w === upTR(w) && w !== lowTR(w)) ? lowTR(w) : w; });
+  s = applyLexicon(s, pron);
   s = s.replace(/\s+/g, ' ').replace(/\s+([.,!?:;])/g, '$1').trim();
   s = s.replace(/(^|[.!?]\s+)(\p{L})/gu, function(a, p, c){ return p + upTR(c); });
   if (s.length > 160){ s = s.slice(0, 160); var k = s.lastIndexOf(' '); if (k > 80) s = s.slice(0, k); }
@@ -947,8 +985,21 @@ function create(opts){
     try { synth.speak(u); } catch (e) { end(); return false; }
     return true;
   }
+  var pron = {cavus: opts.pron && opts.pron.cavus != null ? clampVar(opts.pron.cavus, 6) : 1};
+  function setPron(w, n){ var k = pronKey(w) || (w === 'cavus' ? 'cavus' : null); if (!k) return false; pron[k] = clampVar(n, PRON_VARIANTS[k].length); return true; }
+  function getPron(w){ var k = pronKey(w) || (w === 'cavus' ? 'cavus' : null); return k ? pron[k] : 0; }
+  /* yayinci denemesi: oyun/ses acik olmasa da calisir; Turkce ses yoksa false */
+  function sayTest(n){
+    var s = cleanText('Çavuş. Ali çavuş oldu.', {cavus: clampVar(n == null ? pron.cavus : n, 6)});
+    if (st.muted) return false;
+    refreshVoices();
+    if (!voice) return false;
+    pending = [];
+    if (speaking){ try { if (synth.cancel) synth.cancel(); } catch (e) {} speaking = null; }
+    return speakNow(s);
+  }
   function say(text){
-    var s = cleanText(text);
+    var s = cleanText(text, pron);
     if (!s || !st.enabled || st.muted) return false;
     refreshVoices();
     if (!voice) return false;                       // Turkce ses yoksa susar
@@ -1095,12 +1146,12 @@ function create(opts){
     try { if (amb) amb.stop(); if (ctx && ctx.close) ctx.close(); } catch (e) {}
     ctx = null; E = null; cur = null; st.enabled = false;
   }
-  return {enable: enable, setMuted: setMuted, setVolume: setVolume, music: music, intensity: intensity, sfx: sfx, say: say, status: status, dispose: dispose,
+  return {enable: enable, setMuted: setMuted, setVolume: setVolume, music: music, intensity: intensity, sfx: sfx, say: say, sayTest: sayTest, setPron: setPron, getPron: getPron, status: status, dispose: dispose,
           tracks: Object.keys(TRACKS), effects: Object.keys(FX)};
 }
 
 MF.audio = {
-  create: create, cleanName: cleanName, cleanText: cleanText, pickVoice: pickVoice, render: render,
+  create: create, cleanName: cleanName, cleanText: cleanText, setPronunciation: setPronunciation, getPronunciation: getPronunciation, pronVariants: pronVariants, pickVoice: pickVoice, render: render,
   tracks: Object.keys(TRACKS), effects: Object.keys(FX), trNum: trNum,
   _meta: {mehterBpm: MEH_BPM, battleBpm: 100, battleBarSeconds: 60/100*4, battleBars: 16, mehterBarSeconds: 60/MEH_BPM*2}
 };

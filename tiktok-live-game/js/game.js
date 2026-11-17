@@ -142,7 +142,7 @@ function create(cfg){
     if (r>=5 || rate('rankfeed', 2.5)) feed(u.name+' rütbe atladı: '+RANKS[r], u.side);
     sfx('rankup');
     if (r>=2 && rate('rankban', 2.5)){ banner(u.name+' artık '+RANKS[r]+'!', r>=3 ? 'Bey ve üstü rütbeler ata biner' : 'Rütbe atladı', u.side); card(u, 'Yeni rütbe: '+RANKS[r]); }
-    if (r>=3) say(u.name+' artık '+RANKS[r]);
+    if (r>=2 && rate('rankspeech', 4)) say(u.name+' '+RANKS[r].toLowerCase()+' oldu.');   // Onbaşı sessiz; ünvan düz cümle içinde, küçük harfle
   }
   function placeUser(u, s, vol){
     var m = meta[u.id];

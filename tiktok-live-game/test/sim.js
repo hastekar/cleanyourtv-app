@@ -272,6 +272,23 @@ console.log('9) kalici kayit');
   ok(st3.g.state.champion.id===w.champion.id && Object.keys(st3.g.state.owners).length===Object.keys(w.owners).length, 'dunya geri okunmali');
 })();
 
+/* ---------------------------------------------------------------- 9b. rutbe konusmasi */
+console.log('9b) rutbe konusmasi');
+(function(){
+  var st = mk(77), g = st.g, said = [];
+  g.on('say', function(t){ said.push(t); });
+  chat(g, 'r1', 'Ali', String(g.state.sides[0].id)); g.step(DT);
+  g.state.phase==='intro' && st.until(function(){ return g.state.phase==='play'; });
+  g.onEvent({type:'gift', uid:'r1', name:'Ali', diamonds:12});            // 60 puan: Onbasi
+  ok(g.state.users.r1.rank===1, 'Onbasi olmali');
+  ok(!said.some(function(t){ return /onbaşı/i.test(t); }), 'Onbasi icin konusma yok: '+said.join('|'));
+  g.onEvent({type:'gift', uid:'r1', name:'Ali', diamonds:30});            // 210 puan: Cavus
+  ok(g.state.users.r1.rank===2, 'Cavus olmali');
+  var c = said.filter(function(t){ return /çavuş oldu/.test(t); });
+  ok(c.length===1 && c[0]==='Ali çavuş oldu.', 'Cavus tam bir kez, dogal cumle: '+said.join('|'));
+  ok(!said.some(function(t){ return /artık/.test(t); }), 'eski "artik" cumlesi yok');
+})();
+
 /* ---------------------------------------------------------------- 10. sayilar */
 console.log('10) olay hacmi');
 (function(){

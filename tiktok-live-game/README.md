@@ -40,6 +40,7 @@ Köprü olmadan denemek için `memleket-fethi.html` dosyasını `server.js` olma
 | `sim=0` | Demo izleyicileri kapat (WebSocket bağlıyken zaten kapalı) |
 | `obs=1` (ya da `#obs`) | Yayıncı araç çubuğunu gizle; `h` tuşu aç/kapa. Araç çubuğu gizli olduğu için **ses kendiliğinden açılır** |
 | `ses=1` / `ses=0` | Sesi açılışta aç / kapat (OBS dışında tarayıcı ilk dokunuşa kadar sesi engelleyebilir) |
+| `cavus=1..6` | "Çavuş" telaffuz varyantı (aşağıda *Telaffuz*); kayıtlı seçimi geçersiz kılar |
 | `tur=60` | Maç süresi (sn), varsayılan 180 |
 | `kalite=dusuk` | Piksel oranı 1, daha az süs ve daha düşük çizim bütçesi (zayıf telefonlar) |
 
@@ -72,6 +73,23 @@ node test/sim.js
 ```
 
 Başsız olarak 20 maç koşturur: her maç biter, iki taraf da kazanabilir, yoğun hediye alan taraf kazanır, intikam/son 30 sn kuralları çalışır, kayıt yazılıp geri okunur, birlik sayısı 120'yi aşmaz. Görünüm için sayfayı açıp `MemleketFethi.info()` ile çizim çağrısı ve üçgen sayısına bakabilirsin (hedef ≤150 çağrı, ≤120 bin üçgen).
+
+## Telaffuz
+
+Rütbe sözcüğü tarayıcının Türkçe sesiyle okunur ve "Çavuş" bazı seslerde yanlış çıkabilir. Oyun artık Çavuş ve üstü rütbe atlamalarını düz cümleyle söyler ("Ali çavuş oldu."; Onbaşı sessiz, en fazla 4 sn'de bir). Ses motoruna giden metinde ayrıca bir sözlük (Çavuş, Onbaşı, Paşa, Vezir, Sultan, Bey, Fatih, mehter, kuşatma, kale, sur, topçu, süvari, derbi, intikam, hücum) sözcükleri küçük harfe çevirir ve "Çavuşoğlu" gibi adlara dokunmaz.
+
+"Çavuş" için 6 yazım biçimi vardır (SSML yok; Chrome/Edge/OBS onu yok sayar):
+
+1. `çavuş` (varsayılan, düz küçük harf)
+2. `ça vuş` (hece bölme, boşluklu)
+3. `çavvuş` (çift v, v'yi net ünsüz yapar)
+4. `ça-vuş` (tireli hece sınırı)
+5. `çavoş` ("avu" kümesini hiç üretmez)
+6. `chavush` (Latin-fonetik yedek)
+
+**Deneme:** araç çubuğundaki "Çavuş sesi N/6" düğmesine her basışta sıradaki biçim seslendirilir ("…, çavuş oldu."), seçim tarayıcıda (`mf2-pron`) saklanır. Ses kapalıysa düğme önce sesi açar. **Kalıcı yapma:** araç çubuğu OBS'te gizli olduğundan, normal tarayıcıda kulağınla doğru gelen numarayı bulup OBS adresine ekle, örneğin `http://localhost:8787/?obs=1&cavus=4`.
+
+Dürüst not: doğru biçim makinendeki Türkçe sese (Google Türkçe, Microsoft vb.) bağlıdır; kodla önceden bilinemez, mutlaka kulakla seç.
 
 ## Dosyalar
 
