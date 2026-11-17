@@ -377,7 +377,7 @@ function buildEngine(ctx, o){
   E.pre = ctx.createGain();
   var comp = ctx.createDynamicsCompressor();
   comp.threshold.value = -20; comp.knee.value = 12; comp.ratio.value = 3.5; comp.attack.value = 0.012; comp.release.value = 0.25;
-  var mk = ctx.createGain(); mk.gain.value = 1.0;
+  var mk = ctx.createGain(); mk.gain.value = 2.0;   // +6 dB: yayinda muzik kisik kaliyordu; sinirlayici tepeleri tutar
   var lim = ctx.createDynamicsCompressor();
   lim.threshold.value = -6; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.002; lim.release.value = 0.1;
   var clip = ctx.createWaveShaper(); clip.curve = softClipCurve();
@@ -671,7 +671,7 @@ var TRACKS = {
   battle:  {trim: 1.0, ambient: true, make: function(E, n, o){ return battleTrack(E, n, {bpm: 100, intensity: o.intensity, name: 'battle'}); }},
   tense:   {trim: 1.0, ambient: true, make: function(E, n, o){ return battleTrack(E, n, {bpm: 104, trans: 1, pulse: true, fixed: true, name: 'tense'}); }},
   last30:  {trim: 1.0, ambient: true, make: function(E, n, o){ return battleTrack(E, n, {bpm: 124, hype: true, fixed: true, name: 'last30'}); }},
-  mehter:  {trim: 1.0, make: function(E, n){ return mehterTrack(E, n, {}); }},
+  mehter:  {trim: 1.4, make: function(E, n){ return mehterTrack(E, n, {}); }},
   victory: {trim: 1.2, make: function(E, n){ return victoryTrack(E, n); }}
 };
 var TRACK_SECONDS = {intro: 7, battle: 40, tense: 20, last30: 16, mehter: 21, victory: 14};
@@ -917,10 +917,14 @@ function create(opts){
       if (pollTimer && pollTimer.unref) pollTimer.unref();
     }
   }
+  function duckLevel(){ return cur && cur.name === 'mehter' ? 0.8 : DUCK; }
+  function applyDuck(){
+    if (E) { E.duck.gain.cancelScheduledValues(ctx.currentTime); E.duck.gain.setTargetAtTime(ducked ? duckLevel() : 1, ctx.currentTime, ducked ? 0.06 : 0.25); }
+  }
   function duck(on){
     if (ducked === on) return;
     ducked = on;
-    if (E) { E.duck.gain.cancelScheduledValues(ctx.currentTime); E.duck.gain.setTargetAtTime(on ? DUCK : 1, ctx.currentTime, on ? 0.06 : 0.25); }
+    applyDuck();
   }
   function speakNext(){
     if (watchdog){ clearTimeout(watchdog); watchdog = null; }
@@ -1003,6 +1007,7 @@ function create(opts){
       tick();
     }
     setAmbient();
+    if (ducked) applyDuck();
   }
   function build(){
     var c = null;

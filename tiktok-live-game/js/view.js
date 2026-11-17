@@ -15,7 +15,8 @@ var CFG = {
   ws: Q.get('ws') || '',
   sim: Q.get('sim') !== '0',
   obs: Q.get('obs') === '1' || location.hash === '#obs',
-  low: Q.get('kalite') === 'dusuk'
+  low: Q.get('kalite') === 'dusuk',
+  ses: Q.get('ses') === '1' || (Q.get('ses') !== '0' && (Q.get('obs') === '1' || location.hash === '#obs'))   // OBS'te arac cubugu gizli oldugundan ses kendiliginden acilir
 };
 var REDUCED = false; try { REDUCED = matchMedia('(prefers-reduced-motion:reduce)').matches; } catch (_) {}
 var stage = $('#stage'), labelsEl = $('#labels'), hudTop = $('#hudtop');
@@ -42,7 +43,7 @@ var FOG = 0x3a5256;
 renderer.setClearColor(FOG, 1);
 var scene = new THREE.Scene();
 scene.fog = new THREE.Fog(FOG, 60, 170);
-var camera = new THREE.PerspectiveCamera(40, 9 / 16, 1, 320);
+var camera = new THREE.PerspectiveCamera(40, 9 / 16, 4, 260);   // yakin duzlem buyuk: derinlik hassasiyeti (titreme/z-fighting) icin
 var world = new THREE.Group(); scene.add(world);
 var galGroup = new THREE.Group(); galGroup.visible = false; scene.add(galGroup);
 
@@ -83,18 +84,18 @@ var WALL = 3.2, GATEZ = 4.45, ARMY = 10.2, LANEX = 4.7;   // ordu z = -ARMY..+AR
   var trunk = new THREE.CylinderGeometry(.13, .18, 1, 5), cone = new THREE.ConeGeometry(1, 1, 7), ball = new THREE.IcosahedronGeometry(1, 0), stake = new THREE.ConeGeometry(.09, 1.5, 4);
   var LOW = CFG.low;
   // cignenmis cimen seridi (alan genisligi 14 + kenar)
-  M.add(flat, mat(0, .015, 0, 16, .03, 36), 0x3a4a2c, .06);
-  for (var k = 0; k < (LOW ? 30 : 70); k++) M.add(disc, mat((rnd() - .5) * 15, .02, (rnd() - .5) * 34, .8 + rnd() * 1.8, 1, .6 + rnd() * 1.4, rnd() * 3), rnd() < .5 ? 0x4b5532 : 0x2f4129, .12);
+  M.add(flat, mat(0, .015, 0, 16, .03, 36), 0x3a4a2c, .06);            // ust .03
+  for (var k = 0; k < (LOW ? 30 : 70); k++) M.add(disc, mat((rnd() - .5) * 15, .05, (rnd() - .5) * 34, .8 + rnd() * 1.8, 1, .6 + rnd() * 1.4, rnd() * 3), rnd() < .5 ? 0x4b5532 : 0x2f4129, .12);
   // genis toprak yol
-  M.add(flat, mat(0, .03, 0, 9.4, .05, 33), 0x7f6845, .08);
-  M.add(flat, mat(-4.9, .035, 0, 1.0, .05, 33), 0x5e4a33, .12);
-  M.add(flat, mat(4.9, .035, 0, 1.0, .05, 33), 0x5e4a33, .12);
-  for (var r = -2; r <= 2; r++) if (r) M.add(flat, mat(r * 1.5, .06, 0, .2, .04, 30), 0x6a5438, .1);
-  for (var i = 0; i < (LOW ? 20 : 46); i++) M.add(flat, mat((rnd() - .5) * 8.6, .07, (rnd() - .5) * 30, .6 + rnd() * .9, .03, .3 + rnd() * .6, rnd() * 3), rnd() < .5 ? 0x93794f : 0x6c5638, .2);
+  M.add(flat, mat(0, .095, 0, 9.4, .05, 33), 0x7f6845, .08);          // yol: ust .12
+  M.add(flat, mat(-4.9, .125, 0, 1.0, .05, 33), 0x5e4a33, .12);     // yol kenari: ust .15
+  M.add(flat, mat(4.9, .125, 0, 1.0, .05, 33), 0x5e4a33, .12);
+  for (var r = -2; r <= 2; r++) if (r) M.add(flat, mat(r * 1.5, .16, 0, .2, .04, 30), 0x6a5438, .1);     // izler: ust .18
+  for (var i = 0; i < (LOW ? 20 : 46); i++) M.add(flat, mat((rnd() - .5) * 8.6, .195, (rnd() - .5) * 30, .6 + rnd() * .9, .03, .3 + rnd() * .6, rnd() * 3), rnd() < .5 ? 0x93794f : 0x6c5638, .2);
   // kale tabanlari, kapi yollari ve arkadan inen patikalar
-  [-CZ, CZ].forEach(function(z){ M.add(flat, mat(0, .025, z, 11, .05, 9), 0x2a4328, .08); M.add(flat, mat(0, .04, z + (z < 0 ? 4.2 : -4.2), 3.2, .05, 5), 0x7f6845, .08); });
-  M.add(flat, mat(0, .03, CZ + 30, 3.2, .05, 50), 0x6d5a3d, .12);
-  M.add(flat, mat(0, .03, -CZ - 30, 3.2, .05, 50), 0x6d5a3d, .12);
+  [-CZ, CZ].forEach(function(z){ M.add(flat, mat(0, .065, z, 11, .05, 9), 0x2a4328, .08); M.add(flat, mat(0, .125, z + (z < 0 ? 4.2 : -4.2), 3.2, .05, 5), 0x7f6845, .08); });
+  M.add(flat, mat(0, .035, CZ + 30, 3.2, .05, 50), 0x6d5a3d, .12);
+  M.add(flat, mat(0, .035, -CZ - 30, 3.2, .05, 50), 0x6d5a3d, .12);
   // kazikli barikatlar (yol kenarlarinda, savasin onunu kapatmadan)
   function barricade(x, z, ry){
     for (var q = 0; q < 5; q++){ var ox = (q - 2) * .55; M.add(stake, mat(x + Math.cos(ry) * ox, .62, z - Math.sin(ry) * ox, 1, 1, 1, ry, -.55), 0x6b4a2a, .25); }
@@ -777,10 +778,15 @@ function sfxA(name, o){ if (!soundOn) return; var now = T, last = sfxLast[name] 
 var SFXMAP = { start: 'horn', victory: 'cheer', rankup: 'rankup', combo: 'combo', shield: 'shield', stage: 'stage', last30: 'horn', revenge: 'horn', mehter: 'horn' };
 g.on('sfx', function(n){ var m = SFXMAP[n]; if (m) sfxA(m); });
 g.on('say', function(t){ if (soundOn) au(function(a){ a.say(t); }); });
+var mehterUntil = 0, prevBuff = 0;
 function wantTrack(){
-  if (S.phase === 'intro') return 'intro';
-  if (S.phase === 'end') return 'victory';
-  if (S.sides[0].buff > 0 || S.sides[1].buff > 0) return 'mehter';
+  if (S.phase === 'intro'){ mehterUntil = 0; prevBuff = 0; return 'intro'; }
+  if (S.phase === 'end'){ mehterUntil = 0; prevBuff = 0; return 'victory'; }
+  // mehter etkisi 12 sn surer ama marsin tamami (16 olcu, ~21 sn) duyulsun diye parca en az 21 sn calar
+  var buff = Math.max(S.sides[0].buff, S.sides[1].buff);
+  if (buff > prevBuff + .5) mehterUntil = T + 21;
+  prevBuff = buff;
+  if (buff > 0 || T < mehterUntil) return 'mehter';
   if (S.timeLeft <= 30) return 'last30';
   var f0 = S.sides[0].hp / Math.max(1, S.sides[0].maxHp), f1 = S.sides[1].hp / Math.max(1, S.sides[1].maxHp);
   return Math.min(f0, f1) < .33 ? 'tense' : 'battle';
@@ -844,6 +850,13 @@ $('#b-snd').onclick = function(e){
   au(function(a){ if (soundOn){ a.enable(); a.setMuted(false); } else { a.setMuted(true); } });
   lastTrack = null; if (soundOn) setTimeout(audioStatus, 600);
 };
+if (CFG.ses){
+  soundOn = true; $('#b-snd').setAttribute('aria-pressed', 'true');
+  au(function(a){ a.enable(); a.setMuted(false); }); setTimeout(audioStatus, 900);
+  // tarayici ses baslatmayi engellediyse ilk dokunus/tus ile yeniden dene
+  var again = function(){ au(function(a){ a.enable(); a.setMuted(false); }); lastTrack = null; document.removeEventListener('pointerdown', again); document.removeEventListener('keydown', again); };
+  document.addEventListener('pointerdown', again); document.addEventListener('keydown', again);
+}
 function vols(){ au(function(a){ a.setVolume({ music: $('#vol-m').value / 100, sfx: $('#vol-s').value / 100 }); }); }
 $('#vol-m').oninput = vols; $('#vol-s').oninput = vols;
 $('#b-gal').onclick = function(){ galToggle(!galOn); };
